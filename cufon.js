@@ -120,8 +120,6 @@ var Cufon = new function() {
 						
 					case 'none':
 					
-						// we're gonna have to loop though all parent nodes
-						
 						decoStyle = getStyle(search);
 					
 						break;
@@ -151,105 +149,59 @@ var Cufon = new function() {
 				var glyph = font.glyphs[char] || font.missingGlyph;
 				if (glyph.d) {
 					var cmds = glyph.cmds || (glyph.cmds = parsePath(glyph.d));
-					var at = { x: 0, y: 0 };
+					var at = { x: 0, y: 0 }, cp = { x: 0, y: 0 };
 					draw: for (var i = 0, l = cmds.length; i < l; ++i) {
-						var cmd = cmds[i];
-						if (cmd.type == 'z' || cmd.type == 'Z') {
+						var cmd = cmds[i].type;
+						if (cmd == 'z' || cmd == 'Z') {
 							g.closePath();
 							continue draw;
 						}
-						var coords = cmd.coords;
-						switch (cmd.type) {
+						var c = cmds[i].coords;
+						switch (cmd) {
 							case 'M':
-								g.moveTo(at.x = coords[0], at.y = coords[1]);
+								g.moveTo(at.x = c[0], at.y = c[1]);
 								break;
 							case 'L':
-								g.lineTo(at.x = coords[0], at.y = coords[1]);
+								g.lineTo(at.x = c[0], at.y = c[1]);
 								break;
 							case 'l':
-								g.lineTo(at.x += coords[0], at.y += coords[1]);
+								g.lineTo(at.x += c[0], at.y += c[1]);
 								break;
 							case 'H':
-								g.lineTo(at.x = coords[0], at.y);
+								g.lineTo(at.x = c[0], at.y);
 								break;
 							case 'h':
-								g.lineTo(at.x += coords[0], at.y);
+								g.lineTo(at.x += c[0], at.y);
 								break;
 							case 'V':
-								g.lineTo(at.x, at.y = coords[0]);
+								g.lineTo(at.x, at.y = c[0]);
 								break;
 							case 'v':
-								g.lineTo(at.x, at.y += coords[0]);
+								g.lineTo(at.x, at.y += c[0]);
 								break;
 							case 'C':
-								g.bezierCurveTo(coords[0], coords[1], coords[2], coords[3], at.x = coords[4], at.y = coords[5]);
+								g.bezierCurveTo(c[0], c[1], cp.x = c[2], cp.y = c[3], at.x = c[4], at.y = c[5]);
 								break;
 							case 'c':
-								g.bezierCurveTo(at.x + coords[0], at.y + coords[1], at.x + coords[2], at.y + coords[3], at.x += coords[4], at.y += coords[5]);
+								g.bezierCurveTo(at.x + c[0], at.y + c[1], cp.x = at.x + c[2], cp.y = at.y + c[3], at.x += c[4], at.y += c[5]);
 								break;
 							case 'S':
+								g.bezierCurveTo(at.x + (at.x - cp.x), at.y + (at.y - cp.y), cp.x = c[0], cp.y = c[1], at.x = c[2], at.y = c[3]);
+								break;
 							case 's':
-								var prev = cmds[i - 1];
-								var cp;
-								switch (prev.type) {
-									case 'C':
-										cp = {
-											x: at.x + (at.x - prev.coords[2]),
-											y: at.y + (at.y - prev.coords[3])
-										};
-										break;
-									case 'c':
-										cp = {
-											x: at.x + (prev.coords[4] - prev.coords[2]),
-											y: at.y + (prev.coords[5] - prev.coords[3])
-										};
-										break;
-									case 'S':
-										cp = {
-											x: at.x + (at.x - prev.coords[0]),
-											y: at.y + (at.y - prev.coords[1])
-										};
-										break;
-									case 's':
-										cp = {
-											x: at.x + (prev.coords[2] - prev.coords[0]),
-											y: at.y + (prev.coords[3] - prev.coords[1])
-										};
-										break;
-									default:
-										cp = at;
-								}
-								if (cmd.type == 'S') {
-									g.bezierCurveTo(cp.x, cp.y, coords[0], coords[1], at.x = coords[2], at.y = coords[3]);
-								}
-								else {
-									g.bezierCurveTo(cp.x, cp.y, at.x + coords[0], at.y + coords[1], at.x += coords[2], at.y += coords[3]);
-								}	
+								g.bezierCurveTo(at.x + (at.x - cp.x), at.y + (at.y - cp.y), cp.x = at.x + c[0], cp.y = at.y + c[1], at.x += c[2], at.y += c[3]);
 								break;
 							case 'Q':
-								g.quadraticCurveTo(coords[0], coords[1], at.x = coords[2], at.y = coords[3]);
+								g.quadraticCurveTo(cp.x = c[0], cp.y = c[1], at.x = c[2], at.y = c[3]);
 								break;
 							case 'q':
-								g.quadraticCurveTo(at.x + coords[0], at.y + coords[1], at.x += coords[2], at.y += coords[3]);
+								g.quadraticCurveTo(cp.x = at.x + c[0], cp.y = at.y + c[1], at.x += c[2], at.y += c[3]);
 								break;
 							case 'T':
+								g.quadraticCurveTo(cp.x = at.x + (at.x - cp.x), cp.y = at.y + (at.y - cp.y), at.x = c[0], at.y = c[1]);
+								break;
 							case 't':
-								var prev = cmds[i - 1];
-								switch (prev.type) {
-									case 'Q':
-									case 'T':
-										g.quadraticCurveTo(at.x + (at.x - prev.coords[2]), at.y + (at.y - prev.coords[3]), at.x = coords[0], at.y = coords[1]);
-										break;
-									case 'q':
-										g.quadraticCurveTo(at.x + (prev.coords[2] - prev.coords[0]), at.y + (prev.coords[3] - prev.coords[1]), at.x += coords[0], at.y += coords[1]);
-										break;
-									case 't': // @fixme t has only 2 coords, loop until a command with useful coords is found
-										var last = prev.coords.length - 1;
-										//g.quadraticCurveTo(at.x + (prev.coords[2] - prev.coords[0]), at.y + (prev.coords[3] - prev.coords[1]), at.x += coords[0], at.y += coords[1]);
-										break;
-									default:
-										g.quadraticCurveTo(at.x, at.y, at.x += coords[0], at.y += coords[1]);
-								}
+								g.quadraticCurveTo(cp.x = at.x + (at.x - cp.x), cp.y = at.y + (at.y - cp.y), at.x += c[0], at.y += c[1]);
 								break;
 							case 'A':
 							case 'a':
