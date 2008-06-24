@@ -186,9 +186,11 @@ var Cufon = new function() {
 								g.bezierCurveTo(at.x + c[0], at.y + c[1], cp.x = at.x + c[2], cp.y = at.y + c[3], at.x += c[4], at.y += c[5]);
 								break;
 							case 'S':
+								if (i == 0 || !/^[CcSs]$/.test(cmds[i - 1].type)) cp.x = at.x, cp.y = at.y;
 								g.bezierCurveTo(at.x + (at.x - cp.x), at.y + (at.y - cp.y), cp.x = c[0], cp.y = c[1], at.x = c[2], at.y = c[3]);
 								break;
 							case 's':
+								if (i == 0 || !/^[CcSs]$/.test(cmds[i - 1].type)) cp.x = at.x, cp.y = at.y;
 								g.bezierCurveTo(at.x + (at.x - cp.x), at.y + (at.y - cp.y), cp.x = at.x + c[0], cp.y = at.y + c[1], at.x += c[2], at.y += c[3]);
 								break;
 							case 'Q':
@@ -198,9 +200,11 @@ var Cufon = new function() {
 								g.quadraticCurveTo(cp.x = at.x + c[0], cp.y = at.y + c[1], at.x += c[2], at.y += c[3]);
 								break;
 							case 'T':
+								if (i == 0 || !/^[QqTt]$/.test(cmds[i - 1].type)) cp.x = at.x, cp.y = at.y;
 								g.quadraticCurveTo(cp.x = at.x + (at.x - cp.x), cp.y = at.y + (at.y - cp.y), at.x = c[0], at.y = c[1]);
 								break;
 							case 't':
+								if (i == 0 || !/^[QqTt]$/.test(cmds[i - 1].type)) cp.x = at.x, cp.y = at.y;
 								g.quadraticCurveTo(cp.x = at.x + (at.x - cp.x), cp.y = at.y + (at.y - cp.y), at.x += c[0], at.y += c[1]);
 								break;
 							case 'A':
@@ -298,9 +302,6 @@ var Cufon = new function() {
 	}
 	
 	var replaceElement = function(el, styles, options) {
-		//console.info('rendering:', el);
-		var id = el.textContent;
-		console.time('time:' + id);
 		var font, style;
 		for (var node = el.firstChild; node; node = nextNode) {
 			var nextNode = node.nextSibling;
@@ -320,7 +321,6 @@ var Cufon = new function() {
 				arguments.callee.call(this, node, styles, options);
 			}
 		}
-		console.timeEnd('time:' + id);
 	}
 	
 	this.loadFont = function(src, onLoad) {
