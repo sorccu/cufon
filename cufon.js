@@ -61,6 +61,8 @@ var Cufon = new function() {
 			
 			width += extraWidth;
 			
+			// @todo fix line-height with negative top/bottom margins
+			
 			canvas.className = 'cufon';
 			canvas.style.marginLeft = CSS.convertSize(viewBox.minX / unit, cssUnit, size);
 			canvas.style.marginRight = CSS.convertSize(-extraWidth / unit, cssUnit, size);
@@ -128,6 +130,7 @@ var Cufon = new function() {
 			}
 			
 			g.fillStyle = g.strokeStyle = style.color;
+			
 			g.beginPath();
 			
 			var parsePath = function(path) {
@@ -230,8 +233,6 @@ var Cufon = new function() {
 		textDecoration: true,
 		engine: !window.opera && window.ActiveXObject ? this.Engines.vml : this.Engines.canvas
 	};
-	
-	this.fonts = fonts; // @todo remove
 	
 	var CSS = {
 		convertSize: function(n, unit, refSize) {
@@ -345,13 +346,9 @@ var Cufon = new function() {
 	
 	this.replace = function(el, styles, options) {
 		options = merge(defaultOptions, options);
-		if (el.nodeType) {
-			replaceElement(el, styles, options);
-		}
-		else if (el.length) {
-			for (var i = 0, l = el.length; i < l; ++i) {
-				replaceElement(el[i], styles, options);
-			}
+		if (el.nodeType) el = [ el ];
+		for (var i = 0, l = el.length; i < l; ++i) {
+			replaceElement(el[i], styles, options);
 		}
 		return this;
 	}
