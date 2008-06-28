@@ -235,6 +235,7 @@ var Cufon = new function() {
 	};
 	
 	var CSS = {
+	
 		convertSize: function(n, unit, refSize) {
 			switch (unit) {
 				case 'em':
@@ -244,15 +245,64 @@ var Cufon = new function() {
 			}
 			return n;
 		},
+		
 		textTransform: function(text, style) {
 			return text[{
 				'uppercase': 'toUpperCase',
 				'lowercase': 'toLowerCase'
 			}[style.textTransform] || 'toString']();
 		}
+		
 	};
 	
-	var getFont = function(el, style) {
+	var DOM = {
+	
+		ready: (function() {
+		
+			var complete = document.readyState == 'complete';
+			
+			var queue = [], perform = function() {
+				if (complete) return;
+				complete = true;
+				for (var fn; fn = queue.shift(); fn());
+			};
+			
+			if (document.addEventListener) {
+				document.addEventListener('DOMContentLoaded', perform, false);
+			}
+			
+			if (!window.opera && document.readyState) {
+				setTimeout(function() {
+					document.readyState == 'complete' ? perform() : setTimeout(arguments.callee, 50);
+				}, 50);
+			}
+			
+			addEvent(window, 'load', perform);
+			
+			return function(listener) {
+				complete ? listener() : queue.push(listener);
+			}
+			
+		})()
+		
+	};
+	
+	function addEvent(el, type, listener) {
+		if (el.addEventListener) {
+			el.addEventListener(type, listener, false);
+		}
+		else if (el.attachEvent) {
+			el.attachEvent('on' + type, bind(listener, el));
+		}
+	}
+	
+	function bind(obj, to, args) {
+		return function() {
+			obj.apply(to, args || arguments);
+		}
+	}
+	
+	function getFont(el, style) {
 		if (!style) style = getStyle(el);
 		var families = style.fontFamily.split(/\s*,\s*/);
 		var weight = {
@@ -275,13 +325,13 @@ var Cufon = new function() {
 		return null;
 	}
 	
-	var getStyle = function(el) {
+	function getStyle(el) {
 		if (el.currentStyle) return el.currentStyle;
 		if (window.getComputedStyle) return window.getComputedStyle(el, '');
 		return el.style;
 	}
 	
-	var getViewBox = function(font) {
+	function getViewBox(font) {
 		var parts = font.face.bbox.split(/\s+/);
 		return {
 			minX: parseInt(parts[0], 10),
@@ -294,7 +344,7 @@ var Cufon = new function() {
 		};
 	}
 	
-	var merge = function() {
+	function merge() {
 		var merged = {};
 		for (var i = 0, l = arguments.length; i < l; ++i) {
 			for (var key in arguments[i]) merged[key] = arguments[i][key];
@@ -302,7 +352,7 @@ var Cufon = new function() {
 		return merged;
 	}
 	
-	var replaceElement = function(el, styles, options) {
+	function replaceElement(el, styles, options) {
 		var font, style;
 		for (var node = el.firstChild; node; node = nextNode) {
 			var nextNode = node.nextSibling;
@@ -335,21 +385,23 @@ var Cufon = new function() {
 		}
 		loader.src = src;
 		document.getElementsByTagName('head')[0].appendChild(loader);	
-	}
+	};
 	
 	this.registerFont = function(font) {
 		var family = font.face['font-family'].toLowerCase();
 		if (!fonts[family]) fonts[family] = {};
 		font.viewBox = getViewBox(font);
 		fonts[family][font.face['font-weight']] = font;
-	}
+	};
 	
 	this.replace = function(el, styles, options) {
-		options = merge(defaultOptions, options);
-		if (el.nodeType) el = [ el ];
-		for (var i = 0, l = el.length; i < l; ++i) {
-			replaceElement(el[i], styles, options);
-		}
-		return this;
-	}
+		DOM.ready(function() {
+			options = merge(defaultOptions, options);
+			if (el.nodeType) el = [ el ];
+			for (var i = 0, l = el.length; i < l; ++i) {
+				replaceElement(el[i], styles, options);
+			}
+		});
+	};
+	
 }
