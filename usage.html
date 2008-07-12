@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+	<head>
+	
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	
+		<title>cufón playground</title>
+		
+		<style type="text/css">
+		
+		h2 {
+			color: #105CB6;
+			font-family: ITC Tiepolo;
+		}
+		
+		</style>
+		
+		<script src="cufon.js" type="text/javascript"></script>
+		
+		<script type="text/javascript">
+		
+		Cufon.loadFont('ITC_Tiepolo.font.js', function() {
+			//this.replace(document.getElementsByTagName('h2'));
+		});
+		
+		window.onload = function() {
+			console.profile('all h2');
+			Cufon.replace(document.getElementsByTagName('h2'), {
+				fontFamily: 'ITC Tiepolo'
+			});
+			console.profileEnd('all h2');
+		}
+		
+		</script>
+		
+	</head>
+	
+	<body>
+	
+		<h2>Top 5 Science Standards to <span style="color: red">Make Carbon Offsets</span> Work Better</h2>
+		
+		<h2 style="text-shadow: ">After Steve Jobs: Apple's next CEO</h2>
+		
+		<h2 style="text-decoration: underline">McCain 2005: Give Gitmo Detainees A Trial Or Release Them!</h2>
+		
+		<h2 style="text-decoration: overline">Dragonfly: Amazing Hi-Res Headshot</h2>
+		
+		<h2 style="text-decoration: line-through">Ten Guilt-Free Luxury Cars</h2>
+		
+		<h2>Sears Is Officially Too Incompetent To Even Take Your Money</h2>
+		
+		<h2>How English Is Becoming a Language We May Not Understand</h2>
+		
+		<h2>Mapping the Political Blogosphere</h2>
+		
+		<h2>The Sneakiest Goal in the History of Soccer</h2>
+		
+		<h2>Interview with The Man Behind Audiobytes for Autobots</h2>
+		
+		<h2>ArsTechnica: Rockstar Games patches Grand Theft Auto IV ::</h2>
+		
+		<h2>Yoga Class Held Through Border Fence</h2>
+		
+		<h2>McCain to raise half of general election budget *privately*</h2>
+		
+		<h2>Oh, the irony!!</h2>
+		
+		<h2>Petabyte Age: More Isn't Just More -- More Is Different</h2>
+	
+	</body>
+	
+</html>
