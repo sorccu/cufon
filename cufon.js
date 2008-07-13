@@ -121,9 +121,9 @@ var Cufon = new function() {
 		}
 	}
 	
-	function bind(obj, to, args) {
+	function bind(obj, to) {
 		return function() {
-			obj.apply(to, args || arguments);
+			obj.apply(to, arguments);
 		}
 	}
 	
