@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" debug="true">
 
 	<head>
 	
@@ -11,27 +11,50 @@
 		<style type="text/css">
 		
 		h2 {
+			background: pink;
 			color: #105CB6;
-			font-family: ITC Tiepolo;
+			font-family: Calibri;
+			font-size: 12pt;
+			font-weight: normal;
+			letter-spacing: normal;
 		}
 		
 		</style>
 		
+		<script src="/firebug/firebug.js" type="text/javascript"></script>
+		
 		<script src="cufon.js" type="text/javascript"></script>
+		<script src="engines/canvas.js" type="text/javascript"></script>
+		<script src="engines/canvas-eval.js" type="text/javascript"></script>
+		<script src="engines/canvas-precalc.js" type="text/javascript"></script>
 		
 		<script type="text/javascript">
 		
-		Cufon.loadFont('ITC_Tiepolo.font.js', function() {
-			//this.replace(document.getElementsByTagName('h2'));
-		});
+		var c = document.createElement('canvas');
 		
-		window.onload = function() {
-			console.profile('all h2');
-			Cufon.replace(document.getElementsByTagName('h2'), {
-				fontFamily: 'ITC Tiepolo'
-			});
-			console.profileEnd('all h2');
-		}
+		Cufon.loadFont('Calibri.font.js', function() {
+		
+			var scheme = {
+				test1: 'canvas-precalc'
+				//test2: 'canvas',
+				//test3: 'canvas-eval'
+			};
+			
+			for (var id in scheme) {
+				var time = new Date();
+				
+				console.profile(scheme[id]);
+				
+				Cufon.replace(document.getElementById(id).getElementsByTagName('h2'), {
+					fontFamily: 'Calibri'
+				}, { engine: scheme[id] });
+				
+				console.profileEnd(scheme[id]);
+				
+				console.log(scheme[id] + ' took ' + (new Date() - time) + 'ms');
+			}
+			
+		});
 		
 		</script>
 		
@@ -39,35 +62,107 @@
 	
 	<body>
 	
-		<h2>Top 5 Science Standards to <span style="color: red">Make Carbon Offsets</span> Work Better</h2>
+		<div id="test1">
 		
-		<h2 style="text-shadow: ">After Steve Jobs: Apple's next CEO</h2>
+			<h2>Top 5 Science Standards to <span style="color: red">Make Carbon Offsets</span> Work Better</h2>
+			
+			<h2>After Steve Jobs: Apple's next CEO</h2>
+			
+			<h2 style="text-decoration: underline">McCain 2005: Give Gitmo Detainees A Trial Or Release Them!</h2>
+			
+			<h2 style="text-decoration: overline">Dragonfly: Amazing Hi-Res Headshot</h2>
+			
+			<h2 style="text-decoration: line-through">Ten Guilt-Free Luxury Cars</h2>
+			
+			<h2>Sears Is Officially Too Incompetent To Even Take Your Money</h2>
+			
+			<h2>How English Is Becoming a Language We May Not Understand</h2>
+			
+			<h2>Mapping the Political Blogosphere</h2>
+			
+			<h2>The Sneakiest Goal in the History of Soccer</h2>
+			
+			<h2>Interview with The Man Behind Audiobytes for Autobots</h2>
+			
+			<h2>ArsTechnica: Rockstar Games patches Grand Theft Auto IV ::</h2>
+			
+			<h2>Yoga Class Held Through Border Fence</h2>
+			
+			<h2>McCain to raise half of general election budget *privately*</h2>
+			
+			<h2>Oh, the irony!!</h2>
+			
+			<h2>Petabyte Age: More Isn't Just More - More Is Different</h2>
+			
+		</div>
 		
-		<h2 style="text-decoration: underline">McCain 2005: Give Gitmo Detainees A Trial Or Release Them!</h2>
+		<div id="test2">
+	
+			<h2>Top 5 Science Standards to <span style="color: red">Make Carbon Offsets</span> Work Better</h2>
+			
+			<h2>After Steve Jobs: Apple's next CEO</h2>
+			
+			<h2 style="text-decoration: underline">McCain 2005: Give Gitmo Detainees A Trial Or Release Them!</h2>
+			
+			<h2 style="text-decoration: overline">Dragonfly: Amazing Hi-Res Headshot</h2>
+			
+			<h2 style="text-decoration: line-through">Ten Guilt-Free Luxury Cars</h2>
+			
+			<h2>Sears Is Officially Too Incompetent To Even Take Your Money</h2>
+			
+			<h2>How English Is Becoming a Language We May Not Understand</h2>
+			
+			<h2>Mapping the Political Blogosphere</h2>
+			
+			<h2>The Sneakiest Goal in the History of Soccer</h2>
+			
+			<h2>Interview with The Man Behind Audiobytes for Autobots</h2>
+			
+			<h2>ArsTechnica: Rockstar Games patches Grand Theft Auto IV ::</h2>
+			
+			<h2>Yoga Class Held Through Border Fence</h2>
+			
+			<h2>McCain to raise half of general election budget *privately*</h2>
+			
+			<h2>Oh, the irony!!</h2>
+			
+			<h2>Petabyte Age: More Isn't Just More - More Is Different</h2>
+			
+		</div>
 		
-		<h2 style="text-decoration: overline">Dragonfly: Amazing Hi-Res Headshot</h2>
-		
-		<h2 style="text-decoration: line-through">Ten Guilt-Free Luxury Cars</h2>
-		
-		<h2>Sears Is Officially Too Incompetent To Even Take Your Money</h2>
-		
-		<h2>How English Is Becoming a Language We May Not Understand</h2>
-		
-		<h2>Mapping the Political Blogosphere</h2>
-		
-		<h2>The Sneakiest Goal in the History of Soccer</h2>
-		
-		<h2>Interview with The Man Behind Audiobytes for Autobots</h2>
-		
-		<h2>ArsTechnica: Rockstar Games patches Grand Theft Auto IV ::</h2>
-		
-		<h2>Yoga Class Held Through Border Fence</h2>
-		
-		<h2>McCain to raise half of general election budget *privately*</h2>
-		
-		<h2>Oh, the irony!!</h2>
-		
-		<h2>Petabyte Age: More Isn't Just More -- More Is Different</h2>
+		<div id="test3">
+	
+			<h2>Top 5 Science Standards to <span style="color: red">Make Carbon Offsets</span> Work Better</h2>
+			
+			<h2>After Steve Jobs: Apple's next CEO</h2>
+			
+			<h2 style="text-decoration: underline">McCain 2005: Give Gitmo Detainees A Trial Or Release Them!</h2>
+			
+			<h2 style="text-decoration: overline">Dragonfly: Amazing Hi-Res Headshot</h2>
+			
+			<h2 style="text-decoration: line-through">Ten Guilt-Free Luxury Cars</h2>
+			
+			<h2>Sears Is Officially Too Incompetent To Even Take Your Money</h2>
+			
+			<h2>How English Is Becoming a Language We May Not Understand</h2>
+			
+			<h2>Mapping the Political Blogosphere</h2>
+			
+			<h2>The Sneakiest Goal in the History of Soccer</h2>
+			
+			<h2>Interview with The Man Behind Audiobytes for Autobots</h2>
+			
+			<h2>ArsTechnica: Rockstar Games patches Grand Theft Auto IV ::</h2>
+			
+			<h2>Yoga Class Held Through Border Fence</h2>
+			
+			<h2>McCain to raise half of general election budget *privately*</h2>
+			
+			<h2>Oh, the irony!!</h2>
+			
+			<h2>Petabyte Age: More Isn't Just More - More Is Different</h2>
+			
+		</div>
 	
 	</body>
 	

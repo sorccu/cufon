@@ -22,7 +22,7 @@ var Cufon = new function() {
 			return text[{
 				'uppercase': 'toUpperCase',
 				'lowercase': 'toLowerCase'
-			}[style.get('text-transform')] || 'toString']();
+			}[style.get('textTransform')] || 'toString']();
 		}
 		
 	};
@@ -51,7 +51,7 @@ var Cufon = new function() {
 			
 			addEvent(window, 'load', perform);
 			
-			return function(listener) {
+			return function DOMReady(listener) {
 				complete ? listener() : queue.push(listener);
 			}
 			
@@ -65,10 +65,9 @@ var Cufon = new function() {
 			var cmds = [];
 			var parts = path.split(/(?=[a-zA-Z])/);
 			for (var i = 0, l = parts.length; i < l; ++i) {
-				if (parts[i] == '') continue;
 				cmds.push({
 					type: parts[i][0],
-					coords: parts[i].substr(1).split(/[, ]/).map(Number)
+					coords: parts[i].substr(1).split(/[, ]/)
 				});
 			}
 			return cmds;
@@ -76,31 +75,26 @@ var Cufon = new function() {
 			
 	};
 	
+	function Iterator(array) {
+		
+		var at = 0, limit = array.length;
+		
+		this.current = function() {
+			return (at < limit) ? array[at] : null;
+		};
+		
+		this.next = function() {
+			return (++at < limit) ? this.current() : null;
+		};
+		
+	}
+	
 	function Style(style) {
 	
-		if (!arguments.callee.propertyMap) arguments.callee.propertyMap = {};
+		var custom = {};
 		
-		var custom = {}, propertyMap = arguments.callee.propertyMap;
-		
-		function map(property) {
-			return propertyMap[property] || (propertyMap[property] = property.replace(/-([a-z])/g, function($0, $1) {
-				return $1.toUpperCase();
-			}));
-		}
-		
-		this.get = function(property, unit) {
-			if (custom[property] != undefined) return custom[property];
-			var mapped = map(property);
-			if (custom[mapped] != undefined) return custom[mapped];
-			if (unit && style.getPropertyCSSValue) try {
-				switch (unit) {
-					case 'px':
-						return style.getPropertyCSSValue(property).getFloatValue(5);
-						break;
-				}
-			}
-			catch (e) {}
-			return style[mapped];
+		this.get = function(property) {
+			return custom[property] != undefined ? custom[property] : style[property];
 		};
 		
 		this.extend = function(styles) {
@@ -135,20 +129,20 @@ var Cufon = new function() {
 	
 	function getFont(el, style) {
 		if (!style) style = this.CSS.getStyle(el);
-		var families = style.get('font-family').split(/\s*,\s*/);
+		var families = style.get('fontFamily').split(/\s*,\s*/), weight = style.get('fontWeight');
 		var weight = {
 			normal: 400,
 			bold: 700
-		}[style.get('font-weight')] || parseInt(style.get('font-weight'), 10);
+		}[weight] || parseInt(weight, 10);
 		for (var i = 0, l = families.length; i < l; ++i) {
 			var family = families[i].toLowerCase();
 			if (family[0] == '"' || family[0] == "'") family = family.substring(1, family.length - 1);
 			if (fonts[family]) {
 				if (fonts[family][weight]) return fonts[family][weight];
 				var closest = null;
-				for (var w in fonts[family]) {
-					w = parseInt(w, 10);
-					if (!closest || (w < weight && w > closest)) closest = w;
+				for (var alt in fonts[family]) {
+					alt = parseInt(alt, 10);
+					if (!closest || (alt < weight && alt > closest)) closest = alt;
 				}
 				return fonts[family][closest];
 			}

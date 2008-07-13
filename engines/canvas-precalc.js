@@ -13,53 +13,53 @@ Cufon.registerEngine('canvas-precalc', (function() {
 			var c = cmds[i].coords;
 			switch (cmd) {
 				case 'M':
-					code.push({ m: 'moveTo', a: [ at.x = c[0], at.y = c[1] ] });
+					code.push({ m: 'moveTo', a: [ at.x = Number(c[0]), at.y = Number(c[1]) ] });
 					break;
 				case 'L':
-					code.push({ m: 'lineTo', a: [ at.x = c[0], at.y = c[1] ] });
+					code.push({ m: 'lineTo', a: [ at.x = Number(c[0]), at.y = Number(c[1]) ] });
 					break;
 				case 'l':
-					code.push({ m: 'lineTo', a: [ at.x += c[0], at.y += c[1] ] });
+					code.push({ m: 'lineTo', a: [ at.x += Number(c[0]), at.y += Number(c[1]) ] });
 					break;
 				case 'H':
-					code.push({ m: 'lineTo', a: [ at.x = c[0], at.y ] });
+					code.push({ m: 'lineTo', a: [ at.x = Number(c[0]), at.y ] });
 					break;
 				case 'h':
-					code.push({ m: 'lineTo', a: [ at.x += c[0], at.y ] });
+					code.push({ m: 'lineTo', a: [ at.x += Number(c[0]), at.y ] });
 					break;
 				case 'V':
-					code.push({ m: 'lineTo', a: [ at.x, at.y = c[0] ] });
+					code.push({ m: 'lineTo', a: [ at.x, at.y = Number(c[0]) ] });
 					break;
 				case 'v':
-					code.push({ m: 'lineTo', a: [ at.x, at.y += c[0] ] });
+					code.push({ m: 'lineTo', a: [ at.x, at.y += Number(c[0]) ] });
 					break;
 				case 'C':
-					code.push({ m: 'bezierCurveTo', a: [ c[0], c[1], cp.x = c[2], cp.y = c[3], at.x = c[4], at.y = c[5] ] });
+					code.push({ m: 'bezierCurveTo', a: [ Number(c[0]), Number(c[1]), cp.x = Number(c[2]), cp.y = Number(c[3]), at.x = Number(c[4]), at.y = Number(c[5]) ] });
 					break;
 				case 'c':
-					code.push({ m: 'bezierCurveTo', a: [ at.x + c[0], at.y + c[1], cp.x = at.x + c[2], cp.y = at.y + c[3], at.x += c[4], at.y += c[5] ] });
+					code.push({ m: 'bezierCurveTo', a: [ at.x + Number(c[0]), at.y + Number(c[1]), cp.x = at.x + Number(c[2]), cp.y = at.y + Number(c[3]), at.x += Number(c[4]), at.y += Number(c[5]) ] });
 					break;
 				case 'S':
 					if (i == 0 || !/^[CcSs]$/.test(cmds[i - 1].type)) cp.x = at.x, cp.y = at.y;
-					code.push({ m: 'bezierCurveTo', a: [ at.x + (at.x - cp.x), at.y + (at.y - cp.y), cp.x = c[0], cp.y = c[1], at.x = c[2], at.y = c[3] ] });
+					code.push({ m: 'bezierCurveTo', a: [ at.x + (at.x - cp.x), at.y + (at.y - cp.y), cp.x = Number(c[0]), cp.y = Number(c[1]), at.x = Number(c[2]), at.y = Number(c[3]) ] });
 					break;
 				case 's':
 					if (i == 0 || !/^[CcSs]$/.test(cmds[i - 1].type)) cp.x = at.x, cp.y = at.y;
-					code.push({ m: 'bezierCurveTo', a: [ at.x + (at.x - cp.x), at.y + (at.y - cp.y), cp.x = at.x + c[0], cp.y = at.y + c[1], at.x += c[2], at.y += c[3] ] });
+					code.push({ m: 'bezierCurveTo', a: [ at.x + (at.x - cp.x), at.y + (at.y - cp.y), cp.x = at.x + Number(c[0]), cp.y = at.y + Number(c[1]), at.x += Number(c[2]), at.y += Number(c[3]) ] });
 					break;
 				case 'Q':
-					code.push({ m: 'quadraticCurveTo', a: [ cp.x = c[0], cp.y = c[1], at.x = c[2], at.y = c[3] ] });
+					code.push({ m: 'quadraticCurveTo', a: [ cp.x = Number(c[0]), cp.y = Number(c[1]), at.x = Number(c[2]), at.y = Number(c[3]) ] });
 					break;
 				case 'q':
-					code.push({ m: 'quadraticCurveTo', a: [ cp.x = at.x + c[0], cp.y = at.y + c[1], at.x += c[2], at.y += c[3] ] });
+					code.push({ m: 'quadraticCurveTo', a: [ cp.x = at.x + Number(c[0]), cp.y = at.y + Number(c[1]), at.x += Number(c[2]), at.y += Number(c[3]) ] });
 					break;
 				case 'T':
 					if (i == 0 || !/^[QqTt]$/.test(cmds[i - 1].type)) cp.x = at.x, cp.y = at.y;
-					code.push({ m: 'quadraticCurveTo', a: [ cp.x = at.x + (at.x - cp.x), cp.y = at.y + (at.y - cp.y), at.x = c[0], at.y = c[1] ] });
+					code.push({ m: 'quadraticCurveTo', a: [ cp.x = at.x + (at.x - cp.x), cp.y = at.y + (at.y - cp.y), at.x = Number(c[0]), at.y = Number(c[1]) ] });
 					break;
 				case 't':
 					if (i == 0 || !/^[QqTt]$/.test(cmds[i - 1].type)) cp.x = at.x, cp.y = at.y;
-					code.push({ m: 'quadraticCurveTo', a: [ cp.x = at.x + (at.x - cp.x), cp.y = at.y + (at.y - cp.y), at.x += c[0], at.y += c[1] ] });
+					code.push({ m: 'quadraticCurveTo', a: [ cp.x = at.x + (at.x - cp.x), cp.y = at.y + (at.y - cp.y), at.x += Number(c[0]), at.y += Number(c[1]) ] });
 					break;
 				case 'A':
 				case 'a':
@@ -75,7 +75,7 @@ Cufon.registerEngine('canvas-precalc', (function() {
 		}
 	}
 
-	return function(font, text, style, options, node) {
+	return function render(font, text, style, options, node) {
 	
 		var viewBox = font.viewBox;
 		var unit = font.face['units-per-em'];
@@ -159,7 +159,7 @@ Cufon.registerEngine('canvas-precalc', (function() {
 					
 				case 'line-through':
 				
-					buffer.push(function() {
+					buffer.push(function lineThrough() {
 						line(font.face['descent'], decoStyle.get('color'), true);
 					});
 					
