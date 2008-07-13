@@ -79,15 +79,15 @@ Cufon.registerEngine('canvas-precalc', (function() {
 	
 		var viewBox = font.viewBox;
 		var unit = font.face['units-per-em'];
-		var size = parseInt(style.get('font-size', 'px'), 10);
+		var size = parseInt(style.get('fontSize', 'px'), 10);
 		var boundingBox = {
 			offsetX: viewBox.minX / unit * size,
 			height: viewBox.height / unit * size
 		};
 		var pxScale = unit / size;
 		
-		var letterSpacing = pxScale * parseInt(style.get('letter-spacing'), 10) || 0;
-		var wordSpacing = pxScale * parseInt(style.get('word-spacing'), 10) || 0;
+		var letterSpacing = pxScale * parseInt(style.get('letterSpacing'), 10) || 0;
+		var wordSpacing = pxScale * parseInt(style.get('wordSpacing'), 10) || 0;
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		var width = -viewBox.minX, lastWidth;
@@ -143,7 +143,7 @@ Cufon.registerEngine('canvas-precalc', (function() {
 		
 			search = search.parentNode;
 		
-			switch (decoStyle.get('text-decoration')) {
+			switch (decoStyle.get('textDecoration')) {
 			
 				case 'underline':
 				
