@@ -79,21 +79,31 @@ Cufon.registerEngine('canvas-precalc', (function() {
 	
 		var viewBox = font.viewBox;
 		var unit = font.face['units-per-em'];
-		var size = parseInt(style.get('fontSize', 'px'), 10);
-		var boundingBox = {
-			offsetX: viewBox.minX / unit * size,
-			height: viewBox.height / unit * size
-		};
-		var pxScale = unit / size;
 		
-		var letterSpacing = pxScale * parseInt(style.get('letterSpacing'), 10) || 0;
-		var wordSpacing = pxScale * parseInt(style.get('wordSpacing'), 10) || 0;
+		var size = style.getSize('fontSize');
+		
+		var boundingBox = {
+			offsetX: viewBox.minX / unit * size.value,
+			height: viewBox.height / unit * size.value
+		};
+		
+		/*var pxScale = unit / size.value;
+		
+		var letterSpacing = style.getSize('letterSpacing');
+		
+		console.log(letterSpacing.value, letterSpacing.unit);
+		var wordSpacing = pxScale * parseInt(style.get('wordSpacing'), 10) || 0;*/
+		
+		var spacing = {
+			letter: 0,
+			word: 0
+		};
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		var width = -viewBox.minX, lastWidth;
 		
 		for (var j = 0, k = chars.length; j < k; ++j) {
-			width += lastWidth = Number((font.glyphs[chars[j]] || font.missingGlyph).h || font.h) + letterSpacing;
+			width += lastWidth = Number((font.glyphs[chars[j]] || font.missingGlyph).h || font.h) + spacing.letter;
 		}
 		
 		var extraWidth = viewBox.width - lastWidth;
@@ -105,18 +115,18 @@ Cufon.registerEngine('canvas-precalc', (function() {
 		var canvas = document.createElement('canvas');
 		
 		canvas.className = 'cufon';
-		canvas.width = width / unit * size;
+		canvas.width = width / unit * size.value;
 		canvas.height = boundingBox.height;
 		
-		if (options.fontScaling) {
+		if (true || options.fontScaling) {
 			canvas.style.marginLeft = (viewBox.minX / unit) + 'em';
 			canvas.style.marginRight = (-extraWidth / unit) + 'em';
 			canvas.style.width = (width / unit) + 'em';
 			canvas.style.height = (viewBox.height / unit) + 'em';
 		}
 		else {
-			canvas.style.marginLeft = (viewBox.minX / unit * size) + 'px';
-			canvas.style.marginRight = (-extraWidth / unit * size) + 'px';
+			canvas.style.marginLeft = size.convert(viewBox.minX, unit);
+			canvas.style.marginRight = size.convert(-extraWidth, unit);
 		}
 		
 		var buffer = [];
@@ -174,6 +184,8 @@ Cufon.registerEngine('canvas-precalc', (function() {
 		
 		}
 		
+		// opera does not support named colors, like "red"
+		
 		g.fillStyle = g.strokeStyle = style.get('color');
 		
 		for (var j = 0, k = chars.length; j < k; ++j) {
@@ -185,7 +197,7 @@ Cufon.registerEngine('canvas-precalc', (function() {
 				interpret(glyph.code, g);
 			}
 			g.fill();
-			g.translate(Number(glyph.h || font.h) + letterSpacing, 0);
+			g.translate(Number(glyph.h || font.h) + spacing.letter, 0);
 		}
 		
 		for (var fn; fn = buffer.shift(); fn());

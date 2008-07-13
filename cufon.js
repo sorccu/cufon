@@ -12,6 +12,17 @@ var Cufon = new function() {
 
 	this.CSS = {
 	
+		Size: function(css) {
+		
+			this.value = parseFloat(css, 10);
+			this.unit = css.match(/[a-z]+$/)[0];
+			
+			this.convert = function(value, base) {
+				return (value / base * this.value) + this.unit;
+			};
+			
+		},
+	
 		getStyle: function(el) {
 			if (el.currentStyle) return new Style(el.currentStyle);
 			if (window.getComputedStyle) return new Style(window.getComputedStyle(el, ''));
@@ -95,6 +106,10 @@ var Cufon = new function() {
 		
 		this.get = function(property) {
 			return custom[property] != undefined ? custom[property] : style[property];
+		};
+		
+		this.getSize = function(property) {
+			return new Cufon.CSS.Size(this.get(property));
 		};
 		
 		this.extend = function(styles) {
