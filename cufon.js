@@ -12,20 +12,34 @@ var Cufon = new function() {
 
 	this.CSS = {
 	
-		Size: function(css) {
+		Size: function(value) {
 		
-			this.value = parseFloat(css, 10);
-			this.unit = css.match(/[a-z]+$/)[0];
-			
 			this.convert = function(value, base) {
-				return (value / base * this.value) + this.unit;
+				return value / base * this.value;
 			};
+			
+			this.set = function(value, unit) {
+				if (unit == undefined) {
+					this.value = parseFloat(value, 10);
+					this.unit = value.replace(/^[^a-z]*/, '');
+				}
+				else {
+					this.value = value;
+					this.unit = unit;
+				}
+			};
+			
+			this.toString = function() {
+				return this.value + this.unit;
+			};
+			
+			this.set(value);
 			
 		},
 	
 		getStyle: function(el) {
-			if (el.currentStyle) return new Style(el.currentStyle);
 			if (window.getComputedStyle) return new Style(window.getComputedStyle(el, ''));
+			if (el.currentStyle) return new Style(el.currentStyle);
 			return new Style(el.style);
 		},
 		
@@ -121,6 +135,7 @@ var Cufon = new function() {
 
 	var engines = {}, fonts = {}, defaultOptions = {
 		fontScaling: false,
+		fontScale: 1.5,
 		textDecoration: true,
 		engine: !window.opera && window.ActiveXObject ? 'vml' : 'canvas'
 	};

@@ -30,9 +30,7 @@
 		
 		<script type="text/javascript">
 		
-		var c = document.createElement('canvas');
-		
-		Cufon.loadFont('Calibri.font.js', function() {
+		Cufon.loadFont('Frutiger_LT_Std.font.js', function() {
 		
 			var scheme = {
 				test1: 'canvas-precalc'
@@ -46,7 +44,7 @@
 				console.profile(scheme[id]);
 				
 				Cufon.replace(document.getElementById(id).getElementsByTagName('h2'), {
-					fontFamily: 'Calibri'
+					fontFamily: 'Frutiger Lt Std'
 				}, { engine: scheme[id] });
 				
 				console.profileEnd(scheme[id]);
@@ -64,7 +62,7 @@
 	
 		<div id="test1">
 		
-			<h2>Top 5 Science Standards to <span style="color: red">Make Carbon Offsets</span> Work Better</h2>
+			<h2>Top 5 Science Standards to <span style="color: #ff0000">Make Carbon Offsets</span> Work Better</h2>
 			
 			<h2>After Steve Jobs: Apple's next CEO</h2>
 			
@@ -98,7 +96,7 @@
 		
 		<div id="test2">
 	
-			<h2>Top 5 Science Standards to <span style="color: red">Make Carbon Offsets</span> Work Better</h2>
+			<h2>Top 5 Science Standards to <span style="color: #ff0000">Make Carbon Offsets</span> Work Better</h2>
 			
 			<h2>After Steve Jobs: Apple's next CEO</h2>
 			
