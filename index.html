@@ -161,37 +161,12 @@
 							<dl>
 								<dt><label for="ifontfile">Font variants</label></dt>
 								<dd>
-									<dl>
-										<dt><label for="ivariant_regular"><input type="checkbox" name="variants[regular]" id="ivariant_regular" value="yes" checked="checked" /> Regular</label></dt>
-										<dd>
-											<input type="file" name="font[regular]" />
-											<p class="info">Corresponds to CSS <code>font-weight: normal</code>.</p>
-										</dd>
-										<dt><label for="ivariant_bold"><input type="checkbox" name="variants[bold]" id="ivariant_bold" value="yes" /> Bold</label></dt>
-										<dd>
-											<input type="file" name="font[bold]" />
-											<p class="info">Corresponds to CSS <code>font-weight: bold</code>.</p>
-											<p class="info planned">If not included, the bold variant will be achieved by applying a stroke to the regular variant.</p>
-										</dd>
-										<dt><label for="ivariant_italic"><input type="checkbox" name="variants[italic]" id="ivariant_italic" value="yes" /> Italic</label></dt>
-										<dd>
-											<input type="file" name="font[italic]" />
-											<p class="info">Corresponds to CSS <code>font-style: italic</code>.</p>
-											<p class="info planned">If not included, the italic variant will be achieved by slightly skewing the regular variant.</p>
-										</dd>
-										<dt><label for="ivariant_bold_italic"><input type="checkbox" name="variants[bold+italic]" id="ivariant_bold_italic" value="yes" /> Bold Italic</label></dt>
-										<dd>
-											<input type="file" name="font[bold+italic]" />
-											<p class="info">Corresponds to CSS <code>font-style: italic; font-weight: bold</code>.</p>
-											<p class="info planned">If not included, the italic variant will be achieved by slightly skewing the bold variant.</p>
-										</dd>
-									</dl>
-									<p class="info">You may choose to include multiple variants of a font in order to create a single cufón font file. Please note that the more variants you select the bigger the resulting file will be.</p>
+									<input type="file" name="font[regular]" />
 									<p class="info">Note: for now only TrueType (TTF) and OpenType (OTF) fonts are supported.</p>
 								</dd>
-								<dt><label for="ipermission">Copyright &amp; Licensing</label></dt>
+								<dt><label for="ipermission">Licensing &amp; Protection</label></dt>
 								<dd>
-									<label for="ipermission"><input type="checkbox" name="permission" id="ipermission" value="yes" /> I hereby affirm that I have acquired permission to use the font and all of its selected variants from the Copyright Holder and that the Licensing Terms do not disallow me from using it this way.</label>
+									<label for="ipermission"><input type="checkbox" name="permission" id="ipermission" value="yes" /> I have the proper licenses for these fonts and they are OK with usage of this kind.</label>
 								</dd>
 							</dl>
 							
@@ -268,29 +243,18 @@
 									<label for="iallowScaling"><input type="checkbox" name="allowScaling" id="iallowScaling" value="yes" checked="checked" /> Allow scaling</label>
 									<p class="info">A lower value (64 at minimum) results in better performance and smaller file size at the cost of accuracy. Values lower than 100 are not recommended. The maximum value is 2048.</p>
 								</dd>
-								<dt><label for="iformat">I want my font to be based on..</label></dt>
+								<!--
+								<dt><label>And while you're at it, why don't you..</label></dt>
 								<dd>
 									<dl>
-										<dt><label for="iformatVml"><input type="radio" name="format" id="iformatVml" value="vml" checked="checked" /> VML</label></dt>
+										<dt><label for"igzip"><input type="checkbox" name="gzip" id="izgip" value="yes" disabled="disabled" /> Compress the file for me (using gzip)</label></dt>
 										<dd>
-											<p class="info"><strong>Recommended.</strong> VML is supported natively by Internet Explorer, which makes up for its otherwise rather slow JavaScript engine. Performs very well in all <em>supported browsers</em>.<sup class="note"><a href="#supported">[1]</a></sup></p>
-										</dd>
-										<dt><label for="iformatSvg"><input type="radio" name="format" id="iformatSvg" value="svg" disabled="disabled" /> SVG</label></dt>
-										<dd>
-											<p class="info">SVG-based fonts are generally slightly smaller in terms of file size. However, performance in Internet Explorer will drop significantly.</p>
+											<p class="info">Generates a pre-compressed file ready for use without having to worry about server configuration. Recommended for novice and lazy users.</p>
 											<p class="info"><em>Not functional yet.</em></p>
 										</dd>
 									</dl>
 								</dd>
-								<dt><label>And while you're at it, why don't you..</label></dt>
-								<dd>
-									<dl>
-										<dt><label for"igzip"><input type="checkbox" name="gzip" id="izgip" value="yes" checked="checked" /> Compress the file for me (using gzip)</label></dt>
-										<dd>
-											<p class="info">Generates a pre-compressed file ready for use without having to worry about server configuration. Recommended for novice and lazy users.</p>
-										</dd>
-									</dl>
-								</dd>
+								-->
 							</dl>
 						
 						</fieldset>

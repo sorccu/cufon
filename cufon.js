@@ -155,13 +155,14 @@ var Cufon = new function() {
 		};
 		
 	}
-
+	
 	var engines = {}, fonts = {}, sharedQueue = new ExecutionQueue(this), defaultOptions = {
 		fontScaling: false,
 		fontScale: 1.5,
 		textDecoration: true,
 		engine: null,
-		responsive: true
+		responsive: true,
+		wordWrap: true
 	};
 	
 	this.fonts = fonts; // @todo remove
@@ -214,8 +215,9 @@ var Cufon = new function() {
 	}
 	
 	function getViewBox(font) {
+		if (font.viewBox) return font.viewBox;
 		var parts = font.face.bbox.split(/\s+/);
-		return {
+		return font.viewBox = {
 			minX: parseInt(parts[0], 10),
 			minY: parseInt(parts[1], 10),
 			width: parseInt(parts[2]) - parseInt(parts[0]),
@@ -243,20 +245,25 @@ var Cufon = new function() {
 				if (!style) style = this.CSS.getStyle(el).extend(styles);
 				if (!font) font = getFont(el, style);
 				if (!font) continue;
-				var words = node.nodeValue.split(/\s+/), pad = '';
+				var words = options.wordWrap ? node.nodeValue.split(/\s+/) : [ node.nodeValue ], pad = '';
+				var fragment = document.createDocumentFragment();
 				for (var i = 0, l = words.length; i < l; ++i) {
 					if (words[i] === '') {
 						pad = ' ';
 						continue;
 					}
 					var replaceWith = engines[options.engine](font, pad + words[i] + (i < l - 1 ? ' ' : ''), style, options, node);
-					if (replaceWith) node.parentNode.insertBefore(replaceWith, node);
+					fragment.appendChild(replaceWith);
 					pad = '';
 				}
-				node.parentNode.removeChild(node);
+				node.parentNode.replaceChild(fragment, node);
 			}
-			else if (node.firstChild && !/cufon/.test(node.className)) {
-				arguments.callee.call(this, node, styles, options);
+			else if (node.firstChild) {
+				if (!/cufon/.test(node.className)) {
+					arguments.callee.call(this, node, styles, options);
+				}
+				else {
+				}
 			}
 		}
 	}
