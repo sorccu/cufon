@@ -91,7 +91,7 @@ var Cufon = new function() {
 			var parts = path.split(/(?=[a-zA-Z])/);
 			for (var i = 0, l = parts.length; i < l; ++i) {
 				cmds.push({
-					type: parts[i][0],
+					type: parts[i].substr(0, 1),
 					coords: parts[i].substr(1).split(/[, ]/)
 				});
 			}
@@ -100,18 +100,41 @@ var Cufon = new function() {
 			
 	};
 	
-	function Iterator(array) {
+	this.VML = {
+	
+		parsePath: function(path) {
+			var cmds = [];
+			var re = /([a-z]+)([0-9, .\-]*)/g, match;
+			while (match = re.exec(path)) {
+				cmds.push({
+					type: match[1],
+					coords: match[2].split(/[, ]/)
+				});
+			}
+			return cmds;
+		}
+			
+	};
+	
+	function ExecutionQueue(context) {
+	
+		var items = [], active = false;
 		
-		var at = 0, limit = array.length;
+		function next() {
+			if (active || !items.length) return;
+			active = true;
+			setTimeout(function() {
+				items.shift().call(context);
+				active = false;
+				next();
+			}, 1);
+		}
 		
-		this.current = function() {
-			return (at < limit) ? array[at] : null;
+		this.add = function(fn) {
+			items.push(fn);
+			next();
 		};
-		
-		this.next = function() {
-			return (++at < limit) ? this.current() : null;
-		};
-		
+	
 	}
 	
 	function Style(style) {
@@ -133,11 +156,12 @@ var Cufon = new function() {
 		
 	}
 
-	var engines = {}, fonts = {}, defaultOptions = {
+	var engines = {}, fonts = {}, sharedQueue = new ExecutionQueue(this), defaultOptions = {
 		fontScaling: false,
 		fontScale: 1.5,
 		textDecoration: true,
-		engine: !window.opera && window.ActiveXObject ? 'vml' : 'canvas'
+		engine: null,
+		responsive: true
 	};
 	
 	this.fonts = fonts; // @todo remove
@@ -153,7 +177,16 @@ var Cufon = new function() {
 	
 	function bind(obj, to) {
 		return function() {
-			obj.apply(to, arguments);
+			return obj.apply(to, arguments);
+		}
+	}
+	
+	function delayed(fn, bind, by) {
+		return function() {
+			var args = arguments;
+			setTimeout(function() {
+				fn.apply(bind, args);
+			}, by || 10);
 		}
 	}
 	
@@ -216,12 +249,13 @@ var Cufon = new function() {
 						pad = ' ';
 						continue;
 					}
-					node.parentNode.insertBefore(engines[options.engine](font, pad + words[i] + (i < l - 1 ? ' ' : ''), style, options, node), node);
+					var replaceWith = engines[options.engine](font, pad + words[i] + (i < l - 1 ? ' ' : ''), style, options, node);
+					if (replaceWith) node.parentNode.insertBefore(replaceWith, node);
 					pad = '';
 				}
 				node.parentNode.removeChild(node);
 			}
-			else if (node.firstChild) {
+			else if (node.firstChild && !/cufon/.test(node.className)) {
 				arguments.callee.call(this, node, styles, options);
 			}
 		}
@@ -231,9 +265,13 @@ var Cufon = new function() {
 		var loader = document.createElement('script');
 		loader.type = 'text/javascript';
 		if (onLoad) {
-			loader.onload = bind(function() {
-				this.DOM.ready(onLoad);
-			}, this);
+			addEvent(loader, 'load', function() {
+				Cufon.DOM.ready(onLoad);
+			});
+			addEvent(loader, 'readystatechange', function() {
+				if (!{ loaded: true, complete: true}[loader.readyState]) return;
+				Cufon.DOM.ready(onLoad);
+			});
 		}
 		loader.src = src;
 		document.getElementsByTagName('head')[0].appendChild(loader);	
@@ -257,11 +295,18 @@ var Cufon = new function() {
 		if (options && options.engine && !engines[options.engine]) throw new Error('Unrecognized Cufon engine: ' + options.engine);
 		options = merge(defaultOptions, options);
 		if (el.nodeType) el = [ el ];
-		this.DOM.ready(bind(function() {
+		var dispatch = bind(function() {
+			if (!options.responsive) return replaceElement.apply(this, arguments);
+			var args = arguments;
+			sharedQueue.add(function() {
+				replaceElement.apply(this, args);
+			});
+		}, this);
+		this.DOM.ready(function() {
 			for (var i = 0, l = el.length; i < l; ++i) {
-				replaceElement.call(this, el[i], styles || {}, options);
+				dispatch(el[i], styles || {}, options);
 			}
-		}, this));
+		});
 		return this;
 	};
 	

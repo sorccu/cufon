@@ -1,5 +1,0 @@
-#!/opt/local/bin/fontforge
-Open($1)
-SelectAll()
-VFlip(0)
-Generate($1:r + ".svg")

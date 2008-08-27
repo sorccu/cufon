@@ -10,6 +10,131 @@
 		<title>cufón</title>
 		
 		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		
+		<style type="text/css">
+		
+		html, body {
+			margin: 0;
+			padding: 0;
+		}
+		
+		body {
+			background: #fff;
+			color: #000;
+			font: 1em Georgia, Bitstream Vera Serif, serif;
+			text-align: center;
+		}
+		
+		#page {
+			margin: 0 auto;
+			text-align: left;
+			width: 45em;
+		}
+		
+		#foot {
+			text-align: center;
+		}
+		
+		h1 {
+			font-size: 2em;
+			margin: 1em 0;
+			text-align: center;
+		}
+		
+		a:link, a:visited {
+			color: #334455;
+		}
+		
+		a:hover: a:active {
+			
+		}
+		
+		form {
+			margin: 0;
+			text-align: center;
+		}
+		
+		fieldset {
+			border: 1px solid #334455;
+			padding-left: 2em;
+			padding-right: 2em;
+			text-align: left;
+		}
+		
+		legend {
+			font-size: 2em;
+			padding: 0 0.5em;
+			text-align: center;
+		}
+		
+		dl {
+			margin: 1em 0;
+		}
+		
+		dt {
+			border-bottom: 1px solid #727272;
+			font-weight: bold;
+		}
+		
+		dd {
+			margin: 1em 2em;
+			padding: 0;
+		}
+		
+		dd dt {
+			border-bottom: 0;
+		}
+		
+		dd dd, dd dd p {
+			margin-top: 0.5em;
+		}
+		
+		ul, ol {
+			margin: 1em 0;
+			padding-left: 1em;
+		}
+		
+		input, button, select, textarea {
+			font: 1em Georgia, Bitstream Vera Serif, serif;
+		}
+		
+		button {
+			font-size: 2em;
+			margin: 0.5em 0;
+		}
+		
+		.planned:before {
+			content: 'PLANNED: ';
+		}
+		
+		.planned {
+			color: #CE6100;
+		}
+		
+		</style>
+		
+		<script src="cufon.js" type="text/javascript"></script>
+		<script src="engines/canvas.js" type="text/javascript"></script>
+		
+		<script type="text/javascript">
+		
+			Cufon.loadFont('fonts/Affair_400.font.js', function() {
+			
+				Cufon.replace(document.getElementsByTagName('h1'), {
+					fontFamily: 'Affair',
+					fontSize: '64px'
+				}, {
+					responsive: false
+				});
+				
+				Cufon.replace(document.getElementsByTagName('legend'), {
+					fontFamily: 'Affair',
+					fontSize: '64px'
+				});
+				
+			});
+		
+		</script>
 	
 	</head>
 	
@@ -21,32 +146,164 @@
 			
 				<div id="head">
 				
-					<h1><a href="/">cufón</a></h1>
+					<h1><a href="/">cufón - fonts for the people</a></h1>
 					
 				</div>
 				
 				<div id="content">
 									
-					<form action="generator.php" method="post" enctype="multipart/form-data">
+					<form action="Cufón/generator.php" method="post" enctype="multipart/form-data">
 						
 						<fieldset>
 							
-							<legend>cufón generator</legend>
+							<legend>Fonts</legend>
 						
 							<dl>
-								<dt><label for="ifontfile">Font</label></dt>
-								<dd><input type="file" name="fontfile" id="ifontfile" /></dd>
+								<dt><label for="ifontfile">Font variants</label></dt>
+								<dd>
+									<dl>
+										<dt><label for="ivariant_regular"><input type="checkbox" name="variants[regular]" id="ivariant_regular" value="yes" checked="checked" /> Regular</label></dt>
+										<dd>
+											<input type="file" name="font[regular]" />
+											<p class="info">Corresponds to CSS <code>font-weight: normal</code>.</p>
+										</dd>
+										<dt><label for="ivariant_bold"><input type="checkbox" name="variants[bold]" id="ivariant_bold" value="yes" /> Bold</label></dt>
+										<dd>
+											<input type="file" name="font[bold]" />
+											<p class="info">Corresponds to CSS <code>font-weight: bold</code>.</p>
+											<p class="info planned">If not included, the bold variant will be achieved by applying a stroke to the regular variant.</p>
+										</dd>
+										<dt><label for="ivariant_italic"><input type="checkbox" name="variants[italic]" id="ivariant_italic" value="yes" /> Italic</label></dt>
+										<dd>
+											<input type="file" name="font[italic]" />
+											<p class="info">Corresponds to CSS <code>font-style: italic</code>.</p>
+											<p class="info planned">If not included, the italic variant will be achieved by slightly skewing the regular variant.</p>
+										</dd>
+										<dt><label for="ivariant_bold_italic"><input type="checkbox" name="variants[bold+italic]" id="ivariant_bold_italic" value="yes" /> Bold Italic</label></dt>
+										<dd>
+											<input type="file" name="font[bold+italic]" />
+											<p class="info">Corresponds to CSS <code>font-style: italic; font-weight: bold</code>.</p>
+											<p class="info planned">If not included, the italic variant will be achieved by slightly skewing the bold variant.</p>
+										</dd>
+									</dl>
+									<p class="info">You may choose to include multiple variants of a font in order to create a single cufón font file. Please note that the more variants you select the bigger the resulting file will be.</p>
+									<p class="info">Note: for now only TrueType (TTF) and OpenType (OTF) fonts are supported.</p>
+								</dd>
+								<dt><label for="ipermission">Copyright &amp; Licensing</label></dt>
+								<dd>
+									<label for="ipermission"><input type="checkbox" name="permission" id="ipermission" value="yes" /> I hereby affirm that I have acquired permission to use the font and all of its selected variants from the Copyright Holder and that the Licensing Terms do not disallow me from using it this way.</label>
+								</dd>
 							</dl>
-						
-							<div class="actions">
-							
-								 <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
-								
-								<button type="submit">Generate!</button>
-							
-							</div>
 							
 						</fieldset>
+						
+						<fieldset>
+							
+							<legend>Glyphs</legend>
+						
+							<dl>
+								<dt><label for="idomains">Include the following glyphs (if available)</label></dt>
+								<dd>
+									<dl>
+										<dt><label for="iglyphs_all"><input type="checkbox" name="glyphs[]" id="iglyphs_all" value="0x0-0xFFFF" /> All</label></dt>
+										<dd>Includes all available glyphs. Highly unrecommended.</dd>
+										<dt><label for="iglyphs_uc"><input type="checkbox" name="glyphs[]" id="iglyphs_uc" value="0x41-0x5A" /> Uppercase</label></dt>
+										<dd>Basic Latin uppercase letters (A-Z). (26 glyphs)</dd>
+										<dt><label for="iglyphs_lc"><input type="checkbox" name="glyphs[]" id="iglyphs_lc" value="0x61-0x7A" /> Lowercase</label></dt>
+										<dd>Basic Latin lowercase letters (a-z). (26 glyphs)</dd>
+										<dt><label for="iglyphs_n"><input type="checkbox" name="glyphs[]" id="iglyphs_n" value="0x30-0x39" /> Numerals</label></dt>
+										<dd>Basic Latin digits (0-9). (10 glyphs)</dd>
+										<dt><label for="iglyphs_p"><input type="checkbox" name="glyphs[]" id="iglyphs_p" value="0x20-0x2F,0x3A-0x40,0x5B-0x60,0x7B-0x7E" /> Punctuation</label></dt>
+										<dd>Basic Latin punctuation (!@#%...). (33 glyphs)</dd>
+										<dt><label for="iglyphs_bl"><input type="checkbox" name="glyphs[]" id="iglyphs_bl" value="0x21-0x7E" /> Basic Latin</label></dt>
+										<dd>Basic Latin glyphs within the Unicode range 0x0021 to 0x007E. (94 glyphs)</dd>
+										<dt><label for="imissingGlyph"><input type="checkbox" name="missingGlyph" id="imissingGlyph" value="yes" /> Missing Glyph</label></dt>
+										<dd>The Missing Glyph (usually a box or a question mark) will only be displayed if you use a character that isn't supported by the font (or its own glyph wasn't included). By default these characters will not be displayed at all. Note: Not all fonts have this glyph.</dd>
+										<dt><label for="icustomGlyphs"> .. and also these</label></dt>
+										<dd><input type="text" name="customGlyphs" id="icustomGlyphs" size="50" /></dd>
+									</dl>
+									<p class="info">The more glyphs you select the larger the resulting file will grow.</p>
+								</dd>
+							</dl>
+							
+						</fieldset>
+						
+						<fieldset>
+							
+							<legend>Security</legend>
+						
+							<dl>
+								<dt><label for="idomains">Limit usage to the following domain(s)</label></dt>
+								<dd>
+									<input type="text" name="domains" id="idomains" size="40" maxwidth="250" value="localhost" /> <span class="example">(ex. example.org)</span>
+									<p class="info">Separate multiple domains by either commas or spaces. Please make sure to include your domain both with and without &laquo;www&raquo; if necessary (if you're not sure, it's probably necessary).</p>
+									<p class="info">Note: This is not a fool-proof solution but will prevent people from hotlinking to your fonts.</p>
+								</dd>
+							</dl>
+							
+						</fieldset>
+						
+						<fieldset>
+						
+							<legend>Customization</legend>
+							
+							<dl>
+								<dt><label for="icallback">Function to call when loaded</label></dt>
+								<dd>
+									<input type="text" name="callback" id="icallback" size="30" maxlength="250" value="Cufon.registerFont" />
+									<p>Unless you plan on heavily customizing cufón, you should leave this value as it is.</p>
+								</dd>
+							</dl>
+						
+						</fieldset>
+						
+						<fieldset>
+						
+							<legend>Performance</legend>
+							
+							<dl>
+								<dt><label for="iemSize">The absolute maximum font size I'm ever going to need is..</label></dt>
+								<dd>
+									<label for="iemSize"><input type="text" name="emSize" id="iemSize" value="256" maxlength="4" size="4" /> pixels</label>
+									<label for="iallowScaling"><input type="checkbox" name="allowScaling" id="iallowScaling" value="yes" checked="checked" /> Allow scaling</label>
+									<p class="info">A lower value (64 at minimum) results in better performance and smaller file size at the cost of accuracy. Values lower than 100 are not recommended. The maximum value is 2048.</p>
+								</dd>
+								<dt><label for="iformat">I want my font to be based on..</label></dt>
+								<dd>
+									<dl>
+										<dt><label for="iformatVml"><input type="radio" name="format" id="iformatVml" value="vml" checked="checked" /> VML</label></dt>
+										<dd>
+											<p class="info"><strong>Recommended.</strong> VML is supported natively by Internet Explorer, which makes up for its otherwise rather slow JavaScript engine. Performs very well in all <em>supported browsers</em>.<sup class="note"><a href="#supported">[1]</a></sup></p>
+										</dd>
+										<dt><label for="iformatSvg"><input type="radio" name="format" id="iformatSvg" value="svg" disabled="disabled" /> SVG</label></dt>
+										<dd>
+											<p class="info">SVG-based fonts are generally slightly smaller in terms of file size. However, performance in Internet Explorer will drop significantly.</p>
+											<p class="info"><em>Not functional yet.</em></p>
+										</dd>
+									</dl>
+								</dd>
+								<dt><label>And while you're at it, why don't you..</label></dt>
+								<dd>
+									<dl>
+										<dt><label for"igzip"><input type="checkbox" name="gzip" id="izgip" value="yes" checked="checked" /> Compress the file for me (using gzip)</label></dt>
+										<dd>
+											<p class="info">Generates a pre-compressed file ready for use without having to worry about server configuration. Recommended for novice and lazy users.</p>
+										</dd>
+									</dl>
+								</dd>
+							</dl>
+						
+						</fieldset>
+						
+						<p><label for="iterms"><input type="checkbox" name="terms" id="iterms" value="yes" /> I acknowledge and accept that under no circumstance will I be able to hold the developers of this tool responsible for any possible damages of any kind.</label></p>
+						
+						<div class="actions">
+						
+							 <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
+							
+							<button type="submit">Generate!</button>
+						
+						</div>
 						
 					</form>
 					
@@ -54,7 +311,7 @@
 				
 				<div id="foot">
 					
-					<p>&copy; sorccu 2008</p>
+					<p>Idea and implementation by Simo Kinnunen, 2008-. Bugs by nature.</p>
 					
 				</div>
 				
