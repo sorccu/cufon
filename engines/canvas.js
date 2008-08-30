@@ -40,8 +40,7 @@ Cufon.registerEngine('canvas', (function() {
 
 	return function render(font, text, style, options, node) {
 	
-		var viewBox = font.viewBox;
-		var unit = font.face['units-per-em'];
+		var viewBox = font.viewBox, unit = font.baseSize;
 		
 		var size = style.getSize('fontSize');
 		
@@ -162,7 +161,7 @@ Cufon.registerEngine('canvas', (function() {
 		for (var fn; fn = buffer.shift(); fn());
 		
 		return canvas;
-		
+			
 	}
 	
 })());

@@ -1,18 +1,8 @@
-/**
- * Idea:
- *
- * Most of the coords are relative and therefore usually between -127 and 127,
- * so it might be possible to replace them with ascii characters to further decrease
- * download size. However this might slow down the engine a bit so it would probably
- * be wise to offer this functionality as an alternative rather than replacing the
- * current engine with it. It would probably decrease file size by 10-30%.
- */
-
 var Cufon = new function() {
 
 	this.CSS = {
 	
-		Size: function(value) {
+		Size: function(value, unit) {
 		
 			this.convert = function(value, base) {
 				return value / base * this.value;
@@ -33,7 +23,7 @@ var Cufon = new function() {
 				return this.value + this.unit;
 			};
 			
-			this.set(value);
+			this.set(value, unit);
 			
 		},
 	
@@ -56,7 +46,7 @@ var Cufon = new function() {
 	
 		ready: (function() {
 		
-			var complete = document.readyState == 'complete';
+			var complete = (document.readyState == 'complete');
 			
 			var queue = [], perform = function() {
 				if (complete) return;
@@ -82,22 +72,6 @@ var Cufon = new function() {
 			
 		})()
 		
-	};
-	
-	this.SVG = {
-	
-		parsePath: function(path) {
-			var cmds = [];
-			var parts = path.split(/(?=[a-zA-Z])/);
-			for (var i = 0, l = parts.length; i < l; ++i) {
-				cmds.push({
-					type: parts[i].substr(0, 1),
-					coords: parts[i].substr(1).split(/[, ]/)
-				});
-			}
-			return cmds;
-		}
-			
 	};
 	
 	this.VML = {
@@ -137,16 +111,69 @@ var Cufon = new function() {
 	
 	}
 	
+	function FontFamily(name) {
+
+		this.styles = {};
+		
+		this.add = function(font) {
+			if (!this.styles[font.style]) this.styles[font.style] = {};
+			this.styles[font.style][font.weight] = font;
+		}
+		
+		this.get = function(style, weight) {
+			var weights = this.styles[style];
+			if (!weights) return null;
+			weight = {
+				normal: 400,
+				bold: 700
+			}[weight] || parseInt(weight, 10);
+			if (weights[weight]) return weights[weight];
+			var closest = null;
+			for (var alt in weights) {
+				alt = parseInt(alt, 10);
+				if (!closest || (alt < weight && alt > closest)) closest = alt;
+			}
+			return weights[closest];
+		}
+	
+	}
+	
+	function Font(data) {
+		
+		this.face = data.face;
+		this.glyphs = data.glyphs;
+		this.w = data.w;
+		this.baseSize = parseInt(data.face['units-per-em'], 10);
+		
+		this.family = data.face['font-family'].toLowerCase();
+		this.weight = data.face['font-weight'];
+		this.style = data.face['font-style'] || 'normal';
+		
+		this.viewBox = (function () {
+			var parts = data.face.bbox.split(/\s+/);
+			return {
+				minX: parseInt(parts[0], 10),
+				minY: parseInt(parts[1], 10),
+				width: parseInt(parts[2]) - parseInt(parts[0]),
+				height: parseInt(parts[3], 10) - parseInt(parts[1], 10),
+				toString: function() {
+					return [ this.minX, this.minY, this.width, this.height ].join(' ');
+				}
+			};
+		})();
+		
+	}
+	
 	function Style(style) {
 	
-		var custom = {};
+		var custom = {}, sizes = {};
 		
 		this.get = function(property) {
 			return custom[property] != undefined ? custom[property] : style[property];
 		};
 		
 		this.getSize = function(property) {
-			return new Cufon.CSS.Size(this.get(property));
+			return sizes[property] || (sizes[property] = new Cufon.CSS.Size(this.get(property)));
 		};
 		
 		this.extend = function(styles) {
@@ -165,67 +192,26 @@ var Cufon = new function() {
 		wordWrap: true
 	};
 	
-	this.fonts = fonts; // @todo remove
-	
 	function addEvent(el, type, listener) {
 		if (el.addEventListener) {
 			el.addEventListener(type, listener, false);
 		}
 		else if (el.attachEvent) {
-			el.attachEvent('on' + type, bind(listener, el));
-		}
-	}
-	
-	function bind(obj, to) {
-		return function() {
-			return obj.apply(to, arguments);
-		}
-	}
-	
-	function delayed(fn, bind, by) {
-		return function() {
-			var args = arguments;
-			setTimeout(function() {
-				fn.apply(bind, args);
-			}, by || 10);
+			el.attachEvent('on' + type, function() {
+				return listener.apply(el, arguments);
+			});
 		}
 	}
 	
 	function getFont(el, style) {
 		if (!style) style = this.CSS.getStyle(el);
-		var families = style.get('fontFamily').split(/\s*,\s*/), weight = style.get('fontWeight');
-		var weight = {
-			normal: 400,
-			bold: 700
-		}[weight] || parseInt(weight, 10);
+		var families = style.get('fontFamily').split(/\s*,\s*/);
 		for (var i = 0, l = families.length; i < l; ++i) {
 			var family = families[i].toLowerCase();
 			if (family[0] == '"' || family[0] == "'") family = family.substring(1, family.length - 1);
-			if (fonts[family]) {
-				if (fonts[family][weight]) return fonts[family][weight];
-				var closest = null;
-				for (var alt in fonts[family]) {
-					alt = parseInt(alt, 10);
-					if (!closest || (alt < weight && alt > closest)) closest = alt;
-				}
-				return fonts[family][closest];
-			}
+			if (fonts[family]) return fonts[family].get(style.get('fontStyle'), style.get('fontWeight'));
 		}
 		return null;
-	}
-	
-	function getViewBox(font) {
-		if (font.viewBox) return font.viewBox;
-		var parts = font.face.bbox.split(/\s+/);
-		return font.viewBox = {
-			minX: parseInt(parts[0], 10),
-			minY: parseInt(parts[1], 10),
-			width: parseInt(parts[2]) - parseInt(parts[0]),
-			height: parseInt(parts[3], 10) - parseInt(parts[1], 10),
-			toString: function() {
-				return [ this.minX, this.minY, this.width, this.height ].join(' ');
-			}
-		};
 	}
 	
 	function merge() {
@@ -236,33 +222,40 @@ var Cufon = new function() {
 		return merged;
 	}
 	
+	function process(font, text, style, options, node) {
+		if (options.wordWrap) {
+			var fragment = document.createDocumentFragment();
+			var words = text.split(/\s+/), pad = ''; // @todo get rid of pad
+			for (var i = 0, l = words.length; i < l; ++i) {
+				if (words[i] === '') {
+					pad = ' ';
+					continue;
+				}
+				fragment.appendChild(engines[options.engine](font, pad + words[i] + (i < l - 1 ? ' ' : ''), style, options, node));
+				pad = '';
+			}
+			return fragment;
+		}
+		return engines[options.engine](font, text, style, options, node);
+	}
+	
 	function replaceElement(el, styles, options) {
 		var font, style;
 		for (var node = el.firstChild; node; node = nextNode) {
 			var nextNode = node.nextSibling;
 			if (node.nodeType == 3) {
 				if (node.nodeValue === '') continue;
-				if (!style) style = this.CSS.getStyle(el).extend(styles);
+				if (!style) style = Cufon.CSS.getStyle(el).extend(styles);
 				if (!font) font = getFont(el, style);
 				if (!font) continue;
-				var words = options.wordWrap ? node.nodeValue.split(/\s+/) : [ node.nodeValue ], pad = '';
-				var fragment = document.createDocumentFragment();
-				for (var i = 0, l = words.length; i < l; ++i) {
-					if (words[i] === '') {
-						pad = ' ';
-						continue;
-					}
-					var replaceWith = engines[options.engine](font, pad + words[i] + (i < l - 1 ? ' ' : ''), style, options, node);
-					fragment.appendChild(replaceWith);
-					pad = '';
-				}
-				node.parentNode.replaceChild(fragment, node);
+				node.parentNode.replaceChild(process(font, node.nodeValue, style, options, node), node);
 			}
 			else if (node.firstChild) {
 				if (!/cufon/.test(node.className)) {
-					arguments.callee.call(this, node, styles, options);
+					arguments.callee(node, styles, options);
 				}
 				else {
+					
 				}
 			}
 		}
@@ -272,12 +265,14 @@ var Cufon = new function() {
 		var loader = document.createElement('script');
 		loader.type = 'text/javascript';
 		if (onLoad) {
-			addEvent(loader, 'load', function() {
-				Cufon.DOM.ready(onLoad);
-			});
+			var loaded = false, dispatch = function() {
+				if (!loaded) Cufon.DOM.ready(onLoad);
+				loaded = true;
+			};
+			addEvent(loader, 'load', dispatch);
 			addEvent(loader, 'readystatechange', function() {
 				if (!{ loaded: true, complete: true}[loader.readyState]) return;
-				Cufon.DOM.ready(onLoad);
+				dispatch();
 			});
 		}
 		loader.src = src;
@@ -290,11 +285,10 @@ var Cufon = new function() {
 		return this;
 	};
 	
-	this.registerFont = function(font) {
-		var family = font.face['font-family'].toLowerCase();
-		if (!fonts[family]) fonts[family] = {};
-		font.viewBox = getViewBox(font);
-		fonts[family][font.face['font-weight']] = font;
+	this.registerFont = function(data) {
+		var font = new Font(data);
+		if (!fonts[font.family]) fonts[font.family] = new FontFamily(font.family);
+		fonts[font.family].add(font);
 		return this;
 	};
 	
@@ -302,13 +296,13 @@ var Cufon = new function() {
 		if (options && options.engine && !engines[options.engine]) throw new Error('Unrecognized Cufon engine: ' + options.engine);
 		options = merge(defaultOptions, options);
 		if (el.nodeType) el = [ el ];
-		var dispatch = bind(function() {
-			if (!options.responsive) return replaceElement.apply(this, arguments);
+		var dispatch = function() {
+			if (!options.responsive) return replaceElement.apply(null, arguments);
 			var args = arguments;
 			sharedQueue.add(function() {
-				replaceElement.apply(this, args);
+				replaceElement.apply(null, args);
 			});
-		}, this);
+		};
 		this.DOM.ready(function() {
 			for (var i = 0, l = el.length; i < l; ++i) {
 				dispatch(el[i], styles || {}, options);
