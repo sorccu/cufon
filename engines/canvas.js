@@ -151,7 +151,7 @@ Cufon.registerEngine('canvas', (function() {
 			if (!glyph) continue;
 			g.beginPath();
 			if (glyph.d) {
-				if (!glyph.code) glyph.code = generateFromVML(glyph.d, g);
+				if (!glyph.code) glyph.code = generateFromVML('m' + glyph.d + 'x', g);
 				else interpret(glyph.code, g);
 			}
 			g.fill();

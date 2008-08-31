@@ -78,7 +78,7 @@ var Cufon = new function() {
 	
 		parsePath: function(path) {
 			var cmds = [];
-			var re = /([a-z]+)([0-9, .\-]*)/g, match;
+			var re = /([mrvxe]|qb)([0-9, .\-]*)/g, match;
 			while (match = re.exec(path)) {
 				cmds.push({
 					type: match[1],
