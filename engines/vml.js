@@ -8,6 +8,7 @@ Cufon.registerEngine('vml', (function() {
 	// by Dean Edwards
 	// works great for small values, such as "1em"
 	// but larger values such as "5em" seem to work not so well.
+	// @todo fix
 	function getPixelValue(value, node) {
 		if (/px$/.test(value)) return parseInt(value, 10);
 		var el = node.nodeType == 1 ? node : node.parentNode;
@@ -41,6 +42,8 @@ Cufon.registerEngine('vml', (function() {
 
 	return function render(font, text, style, options, node) {
 	
+		// @todo letter-/word-spacing, text-decoration
+	
 		var viewBox = font.viewBox, unit = font.baseSize;
 		
 		var size = new Cufon.CSS.Size(getPixelValue(style.get('fontSize'), node), 'px');
@@ -48,7 +51,6 @@ Cufon.registerEngine('vml', (function() {
 		var glyphWidth = size.convert(viewBox.width, unit);
 		var glyphHeight = size.convert(viewBox.height, unit);
 		
-		//var canvas = document.createElement('v:group');
 		var canvas = document.createElement('span');
 		
 		canvas.className = 'cufon cufon-vml';
@@ -86,7 +88,7 @@ Cufon.registerEngine('vml', (function() {
 		}
 		
 		canvas.runtimeStyle.width = size.convert(width, unit);
-		
+				
 		return canvas;
 		
 	}

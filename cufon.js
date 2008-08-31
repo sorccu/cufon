@@ -183,6 +183,8 @@ var Cufon = new function() {
 		
 	}
 	
+	var BROKEN_REGEXP = ' '.split(/\s+/).length == 0;
+	
 	var engines = {}, fonts = {}, sharedQueue = new ExecutionQueue(this), defaultOptions = {
 		fontScaling: false,
 		fontScale: 1.5,
@@ -226,6 +228,11 @@ var Cufon = new function() {
 		if (options.wordWrap) {
 			var fragment = document.createDocumentFragment(), processed;
 			var words = text.split(/\s+/), pad = ''; // @todo get rid of pad
+			if (BROKEN_REGEXP) {
+				// @todo figure out a better way to do this
+				if (/^\s/.test(text)) words.unshift('');
+				if (/\s$/.test(text)) words.push('');
+			}
 			for (var i = 0, l = words.length; i < l; ++i) {
 				/*if (words[i] === '') {
 					pad = ' ';
