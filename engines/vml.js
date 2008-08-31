@@ -20,10 +20,12 @@ Cufon.registerEngine('vml', (function() {
 		return value;
 	}
 	
-	function cache(char, glyph, viewBox) {
+	var typeIndex = 0;
+	
+	function createType(glyph, viewBox) {
 		var shapeType = document.createElement('v:shapetype');
-		glyph.shapeTypeId = shapeType.id = 'cufon-glyph-' + char.charCodeAt(0);
-		shapeType.runtimeStyle.cssText = SHAPE_CSS;
+		shapeType.id = 'cufon-glyph-' + typeIndex++;
+		glyph.typeRef = '#' + shapeType.id;
 		shapeType.stroked = 'f';
 		shapeType.coordsize = viewBox.width + ',' + viewBox.height;
 		shapeType.coordorigin = viewBox.minX + ',' + viewBox.minY;
@@ -35,7 +37,7 @@ Cufon.registerEngine('vml', (function() {
 	// undocumented stuff: <!--[if gte vml 1]>, <!--[if vml]>
 	
 	var CANVAS_CSS = 'display: inline-block; position: relative';
-	var SHAPE_CSS = 'display: inline-block; behavior: url(#default#VML); antialias: true; position: absolute';
+	var SHAPE_CSS = 'display: inline-block; antialias: true; position: absolute';
 
 	return function render(font, text, style, options, node) {
 	
@@ -49,15 +51,14 @@ Cufon.registerEngine('vml', (function() {
 		//var canvas = document.createElement('v:group');
 		var canvas = document.createElement('span');
 		
+		canvas.className = 'cufon cufon-vml';
+		
 		canvas.runtimeStyle.cssText = CANVAS_CSS;
 		canvas.runtimeStyle.height = glyphHeight;
 		
 		var color = style.get('color');
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
-		
-		// we'll draw a line from the TL corner to the BR corner to force full size, stroke is off so it isn't visible anyway.
-		var ensureSize = ' m' + viewBox.minX + ',' + viewBox.minY + ' r' + viewBox.width + ',' + viewBox.height;
 		
 		var width = 0, offset = viewBox.minX;
 		
@@ -66,23 +67,21 @@ Cufon.registerEngine('vml', (function() {
 			var glyph = font.glyphs[chars[i]] || font.missingGlyph;
 			if (!glyph) continue;
 			
-			cache(chars[i], glyph, viewBox);
+			if (!glyph.typeRef) createType(glyph, viewBox);
 			
 			var shape = document.createElement('v:shape');
+			shape.type = glyph.typeRef;
 			shape.runtimeStyle.cssText = SHAPE_CSS;
 			shape.runtimeStyle.width = glyphWidth;
 			shape.runtimeStyle.height = glyphHeight;
 			shape.runtimeStyle.left = size.convert(offset, unit);
-			shape.stroked = 'f';
-			shape.coordsize = viewBox.width + ',' + viewBox.height;
-			shape.coordorigin = viewBox.minX + ',' + viewBox.minY;
 			shape.fillcolor = color;
-			shape.path = (glyph.d ? 'm' + glyph.d + 'x' : '') + ensureSize;
 			canvas.appendChild(shape);
 			
-			width += Number(glyph.w || font.w);
+			var advance = Number(glyph.w || font.w);
 			
-			offset += Number(glyph.w || font.w);
+			width += advance;
+			offset += advance;
 			
 		}
 		

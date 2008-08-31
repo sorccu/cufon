@@ -224,14 +224,15 @@ var Cufon = new function() {
 	
 	function process(font, text, style, options, node) {
 		if (options.wordWrap) {
-			var fragment = document.createDocumentFragment();
+			var fragment = document.createDocumentFragment(), processed;
 			var words = text.split(/\s+/), pad = ''; // @todo get rid of pad
 			for (var i = 0, l = words.length; i < l; ++i) {
-				if (words[i] === '') {
+				/*if (words[i] === '') {
 					pad = ' ';
 					continue;
-				}
-				fragment.appendChild(engines[options.engine](font, pad + words[i] + (i < l - 1 ? ' ' : ''), style, options, node));
+				}*/
+				processed = engines[options.engine](font, pad + words[i] + (i < l - 1 ? ' ' : ''), style, options, node);
+				if (processed) fragment.appendChild(processed);
 				pad = '';
 			}
 			return fragment;

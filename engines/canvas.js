@@ -69,7 +69,7 @@ Cufon.registerEngine('canvas', (function() {
 		
 		var canvas = document.createElement('canvas');
 		
-		canvas.className = 'cufon';
+		canvas.className = 'cufon cufon-canvas';
 		canvas.appendChild(document.createTextNode(text));
 		
 		var scale = size.convert(viewBox.height, unit) / viewBox.height;
