@@ -289,7 +289,7 @@ var Cufon = new function() {
 	};
 	
 	this.registerEngine = function(id, engine) {
-		engines[id] = engine;
+		if (engine) engines[id] = engine;
 		return this;
 	};
 	
@@ -301,8 +301,9 @@ var Cufon = new function() {
 	};
 	
 	this.replace = function(el, styles, options) {
-		if (options && options.engine && !engines[options.engine]) throw new Error('Unrecognized Cufon engine: ' + options.engine);
 		options = merge(defaultOptions, options);
+		if (!options.engine) return this; // cufón isn't supported
+		if (!engines[options.engine]) throw new Error('Unrecognized cufón engine: ' + options.engine);
 		if (el.nodeType) el = [ el ];
 		var dispatch = function() {
 			if (!options.responsive) return replaceElement.apply(null, arguments);

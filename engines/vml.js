@@ -1,6 +1,10 @@
 Cufon.registerEngine('vml', (function() {
 
-	if (!window.opera && window.ActiveXObject) Cufon.set('engine', 'vml');
+	// isn't undocumented stuff great?
+	document.write('<!--[if vml]><script type="text/javascript"> Cufon.hasVmlSupport = true; </script><![endif]-->');
+	if (!Cufon.hasVmlSupport) return null;
+
+	Cufon.set('engine', 'vml');
 	
 	document.write('<?xml:namespace prefix="v" ns="urn:schemas-microsoft-com:vml" />');
 	document.write('<style type="text/css"> v\\:* { behavior: url(#default#VML); } </style>');
@@ -34,8 +38,6 @@ Cufon.registerEngine('vml', (function() {
 		shapeType.path = (glyph.d ? 'm' + glyph.d + 'x' : '') + ensureSize;
 		document.body.appendChild(shapeType);
 	}
-	
-	// undocumented stuff: <!--[if gte vml 1]>, <!--[if vml]>
 	
 	var CANVAS_CSS = 'display: inline-block; position: relative';
 	var SHAPE_CSS = 'display: inline-block; antialias: true; position: absolute';

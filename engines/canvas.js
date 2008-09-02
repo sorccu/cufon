@@ -1,5 +1,9 @@
 Cufon.registerEngine('canvas', (function() {
 
+	var supported = document.createElement('canvas');
+	if (!supported || !supported.getContext) return null;
+	delete supported;
+
 	Cufon.set('engine', 'canvas');
 
 	function generateFromVML(path, context) {
@@ -112,6 +116,8 @@ Cufon.registerEngine('canvas', (function() {
 		if (options.textDecoration) textDecoration: for (var search = node, decoStyle = style; search.parentNode && search.parentNode.nodeType == 1; ) {
 		
 			search = search.parentNode;
+			
+			// @todo add support for multiple values
 		
 			switch (decoStyle.get('textDecoration')) {
 			
