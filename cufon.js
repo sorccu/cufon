@@ -235,20 +235,15 @@ var Cufon = new function() {
 	function process(font, text, style, options, node) {
 		if (options.wordWrap) {
 			var fragment = document.createDocumentFragment(), processed;
-			var words = text.split(/\s+/), pad = ''; // @todo get rid of pad
+			var words = text.split(/\s+/);
 			if (BROKEN_REGEXP) {
 				// @todo figure out a better way to do this
 				if (/^\s/.test(text)) words.unshift('');
 				if (/\s$/.test(text)) words.push('');
 			}
 			for (var i = 0, l = words.length; i < l; ++i) {
-				/*if (words[i] === '') {
-					pad = ' ';
-					continue;
-				}*/
-				processed = engines[options.engine](font, pad + words[i] + (i < l - 1 ? ' ' : ''), style, options, node);
+				processed = engines[options.engine](font, words[i] + (i < l - 1 ? ' ' : ''), style, options, node);
 				if (processed) fragment.appendChild(processed);
-				pad = '';
 			}
 			return fragment;
 		}
@@ -334,3 +329,281 @@ var Cufon = new function() {
 	};
 	
 };
+
+Cufon.registerEngine('canvas', (function() {
+
+	var check = document.createElement('canvas');
+	if (!check || !check.getContext) return null;
+	delete check;
+
+	Cufon.set('engine', 'canvas');
+
+	function generateFromVML(path, context) {
+		var at = { x: 0, y: 0 }, cp = { x: 0, y: 0 };
+		var cmds = Cufon.VML.parsePath(path);
+		var code = new Array(cmds.length - 1);
+		generate: for (var i = 0, l = cmds.length; i < l; ++i) {
+			var c = cmds[i].coords;
+			switch (cmds[i].type) {
+				case 'v':
+					code[i] = { m: 'bezierCurveTo', a: [ at.x + Number(c[0]), at.y + Number(c[1]), cp.x = at.x + Number(c[2]), cp.y = at.y + Number(c[3]), at.x += Number(c[4]), at.y += Number(c[5]) ] };
+					break;
+				case 'qb':
+					code[i] = { m: 'quadraticCurveTo', a: [ cp.x = Number(c[0]), cp.y = Number(c[1]), at.x = Number(c[2]), at.y = Number(c[3]) ] };
+					break;
+				case 'r':
+					code[i] = { m: 'lineTo', a: [ at.x += Number(c[0]), at.y += Number(c[1]) ] };
+					break;
+				case 'm':
+					code[i] = { m: 'moveTo', a: [ at.x = Number(c[0]), at.y = Number(c[1]) ] };
+					break;
+				case 'x':
+					code[i] = { m: 'closePath' };
+					break;
+				case 'e':
+					break generate;
+			}
+			if (context) context[code[i].m].apply(context, code[i].a);
+		}
+		return code;
+	}
+	
+	function interpret(code, context) {
+		for (var i = 0, l = code.length; i < l; ++i) {
+			context[code[i].m].apply(context, code[i].a);
+		}
+	}
+
+	return function render(font, text, style, options, node) {
+	
+		var viewBox = font.viewBox, base = font.baseSize;
+		
+		var size = style.getSize('fontSize'), spacing = {
+			letter: 0,
+			word: 0
+		};
+		
+		var chars = Cufon.CSS.textTransform(text, style).split('');
+		
+		var width = -viewBox.minX, lastWidth;
+		
+		for (var j = 0, k = chars.length; j < k; ++j) {
+			var glyph = font.glyphs[chars[j]] || font.missingGlyph;
+			if (!glyph) continue;
+			width += lastWidth = Number(glyph.w || font.w) + spacing.letter;
+		}
+		
+		if (!lastWidth) return null;
+		
+		var extraWidth = viewBox.width - lastWidth;
+		
+		width += extraWidth;
+		
+		// @todo fix line-height with negative top/bottom margins
+		
+		var canvas = document.createElement('canvas');
+		
+		canvas.className = 'cufon cufon-canvas';
+		canvas.appendChild(document.createTextNode(text));
+		
+		var baseHeight = Math.ceil(size.convert(viewBox.height, base));
+		
+		// @todo adjust to match full pixel size
+		var scale = baseHeight / viewBox.height;
+		
+		if (options.fontScaling) {
+			canvas.width = Math.ceil(size.convert(width, base) * options.fontScale);
+			canvas.height = Math.ceil(baseHeight * options.fontScale);
+			canvas.style.marginLeft = (viewBox.minX / base) + 'em';
+			canvas.style.marginRight = (-extraWidth / base) + 'em';
+			canvas.style.width = (width / base) + 'em';
+			canvas.style.height = (viewBox.height / base) + 'em';
+			scale *= options.fontScale;
+		}
+		else {
+			canvas.width = Math.ceil(size.convert(width, base));
+			canvas.height = baseHeight;
+			canvas.style.marginLeft = size.convert(viewBox.minX, base) + size.unit;
+			canvas.style.marginRight = size.convert(-extraWidth, base) + size.unit;
+		}
+		
+		var buffer = [];
+		
+		var g = canvas.getContext('2d');
+		
+		g.scale(scale, scale);
+		g.translate(-viewBox.minX, -viewBox.minY);
+		
+		function line(y, color, invert) {
+			g.strokeStyle = color;
+			
+			g.beginPath();
+			g.lineWidth = font.face['underline-thickness'];
+			
+			g.moveTo(0, y);
+			g.lineTo((invert ? -1 : 1) * (width - extraWidth + viewBox.minX), y);
+			
+			g.stroke();
+		}
+		
+		if (options.textDecoration) textDecoration: for (var search = node, decoStyle = style; search.parentNode && search.parentNode.nodeType == 1; ) {
+		
+			search = search.parentNode;
+			
+			// @todo add support for multiple values
+		
+			switch (decoStyle.get('textDecoration')) {
+			
+				case 'underline':
+				
+					line(-font.face['underline-position'], decoStyle.get('color'));
+					
+					break textDecoration;
+					
+				case 'overline':
+				
+					line(-font.face['ascent'], decoStyle.get('color'));
+					
+					break textDecoration;
+					
+				case 'line-through':
+				
+					buffer.push(function lineThrough() {
+						line(font.face['descent'], decoStyle.get('color'), true);
+					});
+					
+					break textDecoration;
+					
+				case 'none':
+				
+					decoStyle = Cufon.CSS.getStyle(search);
+				
+					break;
+			}
+		
+		}
+		
+		g.fillStyle = g.strokeStyle = style.get('color');
+		
+		for (var j = 0, k = chars.length; j < k; ++j) {
+			var glyph = font.glyphs[chars[j]] || font.missingGlyph;
+			if (!glyph) continue;
+			g.beginPath();
+			if (glyph.d) {
+				if (!glyph.code) glyph.code = generateFromVML('m' + glyph.d + 'x', g);
+				else interpret(glyph.code, g);
+			}
+			g.fill();
+			g.translate(Number(glyph.w || font.w) + spacing.letter, 0);
+		}
+		
+		for (var fn; fn = buffer.shift(); fn());
+		
+		return canvas;
+			
+	}
+	
+})());
+
+Cufon.registerEngine('vml', (function() {
+
+	// isn't undocumented stuff great?
+	document.write('<!--[if vml]><script type="text/javascript"> Cufon.hasVmlSupport = true; </script><![endif]-->');
+	if (!Cufon.hasVmlSupport) return null;
+
+	Cufon.set('engine', 'vml');
+	
+	document.write('<?xml:namespace prefix="v" ns="urn:schemas-microsoft-com:vml" />');
+	document.write('<style type="text/css"> v\\:* { behavior: url(#default#VML); } </style>');
+	
+	// by Dean Edwards
+	// works great for small values such as "1em" but larger values sometimes fail.
+	// @todo fix
+	function getPixelValue(value, node) {
+		if (/px$/.test(value)) return parseInt(value, 10);
+		var el = node.nodeType == 1 ? node : node.parentNode;
+		var style = el.style.left, runtimeStyle = el.runtimeStyle.left;
+		el.runtimeStyle.left = el.currentStyle.left;
+		el.style.left = value || 0;
+		value = el.style.pixelLeft;
+		el.style.left = style;
+		el.runtimeStyle.left = runtimeStyle;
+		return value;
+	}
+	
+	var typeIndex = 0;
+	
+	function createType(glyph, viewBox) {
+		var shapeType = document.createElement('v:shapetype');
+		shapeType.id = 'cufon-glyph-' + typeIndex++;
+		glyph.typeRef = '#' + shapeType.id;
+		shapeType.stroked = 'f';
+		shapeType.coordsize = viewBox.width + ',' + viewBox.height;
+		shapeType.coordorigin = viewBox.minX + ',' + viewBox.minY;
+		var ensureSize = 'm' + viewBox.minX + ',' + viewBox.minY + ' r' + viewBox.width + ',' + viewBox.height;
+		shapeType.path = (glyph.d ? 'm' + glyph.d + 'x' : '') + ensureSize;
+		document.body.appendChild(shapeType);
+	}
+	
+	var CANVAS_CSS = 'display: inline-block; position: relative';
+	var SHAPE_CSS = 'display: inline-block; antialias: true; position: absolute';
+
+	return function render(font, text, style, options, node) {
+	
+		// @todo letter-/word-spacing, text-decoration
+	
+		var viewBox = font.viewBox, base = font.baseSize;
+		
+		var size = new Cufon.CSS.Size(getPixelValue(style.get('fontSize'), node), 'px');
+		
+		var spacing = {
+			letter: 0,
+			word: 0
+		};
+		
+		var glyphWidth = size.convert(viewBox.width, base);
+		var glyphHeight = size.convert(viewBox.height, base);
+		
+		var canvas = document.createElement('span');
+		
+		canvas.className = 'cufon cufon-vml';
+		
+		canvas.runtimeStyle.cssText = CANVAS_CSS;
+		canvas.runtimeStyle.height = glyphHeight;
+		
+		var color = style.get('color');
+		
+		var chars = Cufon.CSS.textTransform(text, style).split('');
+		
+		var width = 0, offset = viewBox.minX;
+		
+		for (var i = 0, l = chars.length; i < l; ++i) {
+		
+			var glyph = font.glyphs[chars[i]] || font.missingGlyph;
+			if (!glyph) continue;
+			
+			if (!glyph.typeRef) createType(glyph, viewBox);
+			
+			var shape = document.createElement('v:shape');
+			shape.type = glyph.typeRef;
+			shape.runtimeStyle.cssText = SHAPE_CSS;
+			shape.runtimeStyle.width = glyphWidth;
+			shape.runtimeStyle.height = glyphHeight;
+			shape.runtimeStyle.left = size.convert(offset, base);
+			shape.fillcolor = color;
+			canvas.appendChild(shape);
+			
+			var advance = Number(glyph.w || font.w) + spacing.letter;
+			
+			width += advance;
+			offset += advance;
+			
+		}
+		
+		canvas.runtimeStyle.width = Math.max(size.convert(width, base), 0);
+				
+		return canvas;
+		
+	}
+	
+})());

@@ -166,9 +166,11 @@
 					
 						<p>First, <a href="cufon-yui.js">get the latest version of cufón</a>.<br />(an <a href="cufon.js">uncompressed version</a> is also available)</p>
 						
+						<p>Then..</p>
+						
 						<fieldset>
 							
-							<legend>Font</legend>
+							<legend>The Font</legend>
 						
 							<dl>
 								<dt><label for="ifontfile">Font file</label></dt>
@@ -202,7 +204,7 @@
 										<dd>Basic Latin digits (0-9). (10 glyphs)</dd>
 										<dt><label for="iglyphs_p"><input type="checkbox" name="glyphs[]" id="iglyphs_p" value="0x20-0x2F,0x3A-0x40,0x5B-0x60,0x7B-0x7E" /> Punctuation</label></dt>
 										<dd>Basic Latin punctuation (!@#%...). (33 glyphs)</dd>
-										<dt><label for="iglyphs_bl"><input type="checkbox" name="glyphs[]" id="iglyphs_bl" value="0x20-0x7E" /> Basic Latin</label></dt>
+										<dt><label for="iglyphs_bl"><input type="checkbox" name="glyphs[]" id="iglyphs_bl" value="0x20-0x7E" checked="checked" /> Basic Latin</label></dt>
 										<dd>Basic Latin glyphs within the Unicode range 0x0020 to 0x007E. (95 glyphs)</dd>
 										<dt><label for="iglyphs_l1s"><input type="checkbox" name="glyphs[]" id="iglyphs_l1s" value="0xA0-0xFF" /> Latin-1 Supplement</label></dt>
 										<dd>Latin glyphs within the Unicode range 0x00A0 to 0x00FF. Includes punctuation, currency symbols, numerals and accented characters (96 glyphs)</dd>
@@ -230,9 +232,9 @@
 							<dl>
 								<dt><label for="idomains">Limit usage to the following domain(s)</label></dt>
 								<dd>
-									<input type="text" name="domains" id="idomains" size="40" maxwidth="250" value="localhost" /> <span class="example">(ex. example.org)</span>
+									<input type="text" name="domains" id="idomains" size="40" maxwidth="250" value="" /> <span class="example">(ex. example.org)</span>
 									<p class="info">Separate multiple domains by either commas or spaces. Please make sure to include your domain both with and without &laquo;www&raquo; if necessary (if you're not sure, it's probably necessary).</p>
-									<p class="info">Note: This is not a fool-proof solution but will prevent people from hotlinking to your fonts.</p>
+									<p class="info">Note: This is <strong>not</strong> a fool-proof solution but will prevent people from hotlinking your fonts.</p>
 								</dd>
 							</dl>
 							
