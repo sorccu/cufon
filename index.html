@@ -41,6 +41,9 @@
 			text-align: center;
 		}
 		
+		h1 a {
+		}
+		
 		a:link, a:visited {
 			color: #334455;
 		}
@@ -123,7 +126,7 @@
 				Cufon.set('responsive', false).replace(document.getElementsByTagName('h1'), {
 					fontFamily: 'Affair',
 					fontSize: '64px'
-				});
+				}, { wordWrap: false });
 				
 				Cufon.set('responsive', true).replace(document.getElementsByTagName('legend'), {
 					fontFamily: 'Affair',
@@ -160,13 +163,15 @@
 				<div id="content">
 									
 					<form action="Cufón/generator.php" method="post" enctype="multipart/form-data">
+					
+						<p>First, <a href="cufon-yui.js">get the latest version of cufón</a>.<br />(an <a href="cufon.js">uncompressed version</a> is also available)</p>
 						
 						<fieldset>
 							
-							<legend>Fonts</legend>
+							<legend>Font</legend>
 						
 							<dl>
-								<dt><label for="ifontfile">Font variants</label></dt>
+								<dt><label for="ifontfile">Font file</label></dt>
 								<dd>
 									<input type="file" name="font[regular]" />
 									<p class="info">Note: for now only TrueType (TTF) and OpenType (OTF) fonts are supported.</p>

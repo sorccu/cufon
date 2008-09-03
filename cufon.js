@@ -1,3 +1,8 @@
+/*!
+ * Pre-release software. For now you may only use this script if given permission by the author.
+ * Copyright (c) 2008 Simo Kinnunen. All rights reserved.
+ */
+ 
 var Cufon = new function() {
 
 	this.CSS = {
@@ -28,7 +33,7 @@ var Cufon = new function() {
 		},
 	
 		getStyle: function(el) {
-			if (window.getComputedStyle) return new Style(window.getComputedStyle(el, ''));
+			if (document.defaultView && document.defaultView.getComputedStyle) return new Style(document.defaultView.getComputedStyle(el, ''));
 			if (el.currentStyle) return new Style(el.currentStyle);
 			return new Style(el.style);
 		},
@@ -64,10 +69,13 @@ var Cufon = new function() {
 				}, 50);
 			}
 			
+			// Object.watch for safari?
+			
 			addEvent(window, 'load', perform);
 			
 			return function DOMReady(listener) {
-				complete ? listener() : queue.push(listener);
+				if (!arguments.length) perform();
+				else complete ? listener() : queue.push(listener);
 			}
 			
 		})()

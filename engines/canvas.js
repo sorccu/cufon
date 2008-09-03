@@ -1,8 +1,8 @@
 Cufon.registerEngine('canvas', (function() {
 
-	var supported = document.createElement('canvas');
-	if (!supported || !supported.getContext) return null;
-	delete supported;
+	var check = document.createElement('canvas');
+	if (!check || !check.getContext) return null;
+	delete check;
 
 	Cufon.set('engine', 'canvas');
 
@@ -44,11 +44,9 @@ Cufon.registerEngine('canvas', (function() {
 
 	return function render(font, text, style, options, node) {
 	
-		var viewBox = font.viewBox, unit = font.baseSize;
+		var viewBox = font.viewBox, base = font.baseSize;
 		
-		var size = style.getSize('fontSize');
-		
-		var spacing = {
+		var size = style.getSize('fontSize'), spacing = {
 			letter: 0,
 			word: 0
 		};
@@ -76,22 +74,25 @@ Cufon.registerEngine('canvas', (function() {
 		canvas.className = 'cufon cufon-canvas';
 		canvas.appendChild(document.createTextNode(text));
 		
-		var scale = size.convert(viewBox.height, unit) / viewBox.height;
+		var baseHeight = Math.ceil(size.convert(viewBox.height, base));
+		
+		// @todo adjust to match full pixel size
+		var scale = baseHeight / viewBox.height;
 		
 		if (options.fontScaling) {
-			canvas.width = size.convert(width, unit) * options.fontScale;
-			canvas.height = size.convert(viewBox.height, unit) * options.fontScale;
-			canvas.style.marginLeft = (viewBox.minX / unit) + 'em';
-			canvas.style.marginRight = (-extraWidth / unit) + 'em';
-			canvas.style.width = (width / unit) + 'em';
-			canvas.style.height = (viewBox.height / unit) + 'em';
+			canvas.width = Math.ceil(size.convert(width, base) * options.fontScale);
+			canvas.height = Math.ceil(baseHeight * options.fontScale);
+			canvas.style.marginLeft = (viewBox.minX / base) + 'em';
+			canvas.style.marginRight = (-extraWidth / base) + 'em';
+			canvas.style.width = (width / base) + 'em';
+			canvas.style.height = (viewBox.height / base) + 'em';
 			scale *= options.fontScale;
 		}
 		else {
-			canvas.width = size.convert(width, unit);
-			canvas.height = size.convert(viewBox.height, unit);
-			canvas.style.marginLeft = size.convert(viewBox.minX, unit) + size.unit;
-			canvas.style.marginRight = size.convert(-extraWidth, unit) + size.unit;
+			canvas.width = Math.ceil(size.convert(width, base));
+			canvas.height = baseHeight;
+			canvas.style.marginLeft = size.convert(viewBox.minX, base) + size.unit;
+			canvas.style.marginRight = size.convert(-extraWidth, base) + size.unit;
 		}
 		
 		var buffer = [];

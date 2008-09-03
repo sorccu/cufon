@@ -46,12 +46,17 @@ Cufon.registerEngine('vml', (function() {
 	
 		// @todo letter-/word-spacing, text-decoration
 	
-		var viewBox = font.viewBox, unit = font.baseSize;
+		var viewBox = font.viewBox, base = font.baseSize;
 		
 		var size = new Cufon.CSS.Size(getPixelValue(style.get('fontSize'), node), 'px');
 		
-		var glyphWidth = size.convert(viewBox.width, unit);
-		var glyphHeight = size.convert(viewBox.height, unit);
+		var spacing = {
+			letter: 0,
+			word: 0
+		};
+		
+		var glyphWidth = size.convert(viewBox.width, base);
+		var glyphHeight = size.convert(viewBox.height, base);
 		
 		var canvas = document.createElement('span');
 		
@@ -78,18 +83,18 @@ Cufon.registerEngine('vml', (function() {
 			shape.runtimeStyle.cssText = SHAPE_CSS;
 			shape.runtimeStyle.width = glyphWidth;
 			shape.runtimeStyle.height = glyphHeight;
-			shape.runtimeStyle.left = size.convert(offset, unit);
+			shape.runtimeStyle.left = size.convert(offset, base);
 			shape.fillcolor = color;
 			canvas.appendChild(shape);
 			
-			var advance = Number(glyph.w || font.w);
+			var advance = Number(glyph.w || font.w) + spacing.letter;
 			
 			width += advance;
 			offset += advance;
 			
 		}
 		
-		canvas.runtimeStyle.width = size.convert(width, unit);
+		canvas.runtimeStyle.width = Math.max(size.convert(width, base), 0);
 				
 		return canvas;
 		
