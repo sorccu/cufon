@@ -468,7 +468,7 @@ Cufon.registerEngine('canvas', (function() {
 					
 				case 'line-through':
 				
-					buffer.push(function lineThrough() {
+					buffer.push(function() {
 						line(font.face['descent'], decoStyle.get('color'), true);
 					});
 					
