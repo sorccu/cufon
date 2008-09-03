@@ -69,8 +69,6 @@ var Cufon = new function() {
 				}, 50);
 			}
 			
-			// Object.watch for safari?
-			
 			addEvent(window, 'load', perform);
 			
 			return function DOMReady(listener) {
