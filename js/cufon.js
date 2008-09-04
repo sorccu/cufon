@@ -419,25 +419,24 @@ Cufon.registerEngine('canvas', (function() {
 		
 		canvas.className = 'cufon cufon-canvas';
 		
-		var baseHeight = Math.ceil(size.convert(viewBox.height, base));
+		var cStyle = canvas.style;
 		
-		// @todo adjust to match full pixel size
-		var scale = baseHeight / viewBox.height;
+		var baseHeight = Math.ceil(size.convert(viewBox.height, base)), scale = baseHeight / viewBox.height;
 		
 		if (options.fontScaling) {
 			canvas.width = Math.ceil(size.convert(width, base) * options.fontScale);
 			canvas.height = Math.ceil(baseHeight * options.fontScale);
-			canvas.style.marginLeft = (viewBox.minX / base) + 'em';
-			canvas.style.marginRight = (-extraWidth / base) + 'em';
-			canvas.style.width = (width / base) + 'em';
-			canvas.style.height = (viewBox.height / base) + 'em';
+			cStyle.marginLeft = (viewBox.minX / base) + 'em';
+			cStyle.marginRight = (-extraWidth / base) + 'em';
+			cStyle.width = (width / base) + 'em';
+			cStyle.height = (viewBox.height / base) + 'em';
 			scale *= options.fontScale;
 		}
 		else {
 			canvas.width = Math.ceil(size.convert(width, base));
 			canvas.height = baseHeight;
-			canvas.style.marginLeft = size.convert(viewBox.minX, base) + size.unit;
-			canvas.style.marginRight = size.convert(-extraWidth, base) + size.unit;
+			cStyle.marginLeft = size.convert(viewBox.minX, base) + size.unit;
+			cStyle.marginRight = size.convert(-extraWidth, base) + size.unit;
 		}
 		
 		var buffer = [];
@@ -529,19 +528,29 @@ Cufon.registerEngine('vml', (function() {
 	document.write('<?xml:namespace prefix="v" ns="urn:schemas-microsoft-com:vml" />');
 	document.write('<style type="text/css"> v\\:* { behavior: url(#default#VML); } </style>');
 	
-	// by Dean Edwards
-	// works great for small values such as "1em" but larger values sometimes fail.
-	// @todo fix
-	function getPixelValue(value, node) {
-		if (/px$/.test(value)) return parseInt(value, 10);
-		var el = node.nodeType == 1 ? node : node.parentNode;
+	// Original by Dean Edwards.
+	// Modified to work well with relative units (em, ex, %).
+	// Finally some use for the Dark Arts.
+	function getFontSizeInPixels(el, value) {
+		var unit = value.match(/[a-z%]+$/), value = parseInt(value, 10), result;
+		if (unit == 'px') return value;
+		if (unit == '%') unit = 'em'; // this cannot be moved to the switch. really.
 		var style = el.style.left, runtimeStyle = el.runtimeStyle.left;
 		el.runtimeStyle.left = el.currentStyle.left;
-		el.style.left = value || 0;
-		value = el.style.pixelLeft;
+		switch (unit) {
+			case 'em':
+				el.style.left = '1em'; // magic value
+				break;
+			case 'ex':
+				el.style.left = '2ex'; // magic value
+				break;
+			default:
+				el.style.left = value + unit;
+		}
+		result = el.style.pixelLeft;
 		el.style.left = style;
 		el.runtimeStyle.left = runtimeStyle;
-		return value;
+		return result;
 	}
 	
 	var typeIndex = 0;
@@ -567,7 +576,7 @@ Cufon.registerEngine('vml', (function() {
 	
 		var viewBox = font.viewBox, base = font.baseSize;
 		
-		var size = new Cufon.CSS.Size(getPixelValue(style.get('fontSize'), node), 'px');
+		var size = new Cufon.CSS.Size(getFontSizeInPixels(node.parentNode, style.get('fontSize')), 'px');
 		
 		var spacing = {
 			letter: 0,
