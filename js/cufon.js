@@ -59,19 +59,35 @@ var Cufon = new function() {
 				for (var fn; fn = queue.shift(); fn());
 			};
 			
+			// Mozilla, Opera
+			
 			if (document.addEventListener) {
 				document.addEventListener('DOMContentLoaded', perform, false);
 			}
 			
+			// WebKit
+			
 			if (!window.opera && document.readyState) {
 				setTimeout(function() {
-					document.readyState == 'complete' ? perform() : setTimeout(arguments.callee, 50);
+					({ loaded: 1, complete: 1 })[document.readyState] ? perform() : setTimeout(arguments.callee, 50);
 				}, 50);
 			}
 			
+			// Internet Explorer
+			
+			try {
+				var loader = document.createElement('<script defer src=javascript:void(0)>');
+				loader.onreadystatechange = function() {
+					if (({ loaded: 1, complete: 1 })[this.readyState]) perform();
+				};
+				document.getElementsByTagName('head')[0].appendChild(loader);
+			} catch (e) {}
+			
+			// Fallback
+			
 			addEvent(window, 'load', perform);
 			
-			return function DOMReady(listener) {
+			return function(listener) {
 				if (!arguments.length) perform();
 				else complete ? listener() : queue.push(listener);
 			}

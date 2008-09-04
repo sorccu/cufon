@@ -16,11 +16,24 @@
 	
 		<h2>Limitations</h2>
 		
-		<h3 id="blocky-edges">My font has blocky edges! How come?</h3>
+		<h3><a href="#browser-support" name="browser-support">Browser support</a></h3>
 		
-		<p>There are limits to how accurately you can draw with a <code>&lt;canvas&gt;</code>, which cufón uses. Your font just happens to have curves that cannot be drawn so well. Changing the scaling options does not help.</p>
+		<p>The following browers are supported:</p>
 		
-		<h3 id="note-ligature">Ligatures &amp; Digraphs</h3>
+		<ul>
+			<li>Safari 2+ (note: need to verify 2.0)</li>
+			<li>Firefox 1.5+ (note: need to verify 1.5)</li>
+			<li>Opera 9+</li>
+			<li>Internet Explorer 5.5+ (need to verify 5.5 with a non-multiple-ie)</li>
+		</ul>
+		
+		<p>Additionally any standards-compliant browser with support for <code>&lt;canvas&gt;</code> should work just fine.</p>
+		
+		<h3><a href="#blocky-edges" name="blocky-edges">My font has blocky edges! How come?</a></h3>
+		
+		<p>There are limits to how accurately you can draw with <code>&lt;canvas&gt;</code>, which cufón uses. Your font just happens to have curves that cannot be drawn so well. Changing the scaling options rarely helps, but using a different font size might give slightly better results in some cases.</p>
+		
+		<h3><a href="#ligatures" name="ligatures">Ligatures &amp; Digraphs</a></h3>
 		
 		<p>For now ligatures and digraphs are unsupported due to performance reasons. Support for them might be added in a future release but even then it would only be made available as an option that would be disabled by default.</p>
 		
