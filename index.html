@@ -129,7 +129,7 @@
 				
 				Cufon.set('responsive', true).replace(document.getElementsByTagName('legend'), {
 					fontFamily: 'Affair',
-					fontSize: '64px'
+					fontSize: '60px'
 				});
 				
 			});
@@ -165,11 +165,13 @@
 					
 						<p>First, <a href="js/cufon-yui.js">get the latest version of cufón</a>.<br /><em>(an <a href="js/cufon.js">uncompressed version</a> is also available)</em></p>
 						
+						<p>Make sure you're aware of the <a href="notes.html">limitations</a>.</p>
+						
 						<p>Then..</p>
 						
 						<fieldset>
 							
-							<legend>The Font</legend>
+							<legend>the Font</legend>
 						
 							<dl>
 								<dt><label for="ifontfile">Font file</label></dt>
@@ -216,7 +218,7 @@
 										<dt><label for="imissingGlyph"><input type="checkbox" name="missingGlyph" id="imissingGlyph" value="yes" disabled="disabled" /> Missing Glyph</label></dt>
 										<dd>The Missing Glyph (usually a box or a question mark) will only be displayed if you use a character that isn't supported by the font (or its own glyph wasn't included). By default these characters will not be displayed at all. Note: Not all fonts have this glyph. <em>Unsupported.</em></dd>
 										<dt><label for="icustomGlyphs"> .. and also these</label></dt>
-										<dd><input type="text" name="customGlyphs" id="icustomGlyphs" size="50" /></dd>
+										<dd><input type="text" name="customGlyphs" id="icustomGlyphs" size="50" disabled="disabled"/> <em>Does not work yet.</em></dd>
 									</dl>
 									<p class="info">The more glyphs you select the larger the resulting file will grow.</p>
 								</dd>
