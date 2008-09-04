@@ -418,7 +418,6 @@ Cufon.registerEngine('canvas', (function() {
 		var canvas = document.createElement('canvas');
 		
 		canvas.className = 'cufon cufon-canvas';
-		canvas.appendChild(document.createTextNode(text));
 		
 		var baseHeight = Math.ceil(size.convert(viewBox.height, base));
 		
