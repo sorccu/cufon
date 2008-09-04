@@ -196,7 +196,7 @@ var Cufon = new function() {
 		fontScale: 1.5,
 		textDecoration: true,
 		engine: null,
-		responsive: true,
+		responsive: false,
 		wordWrap: true
 	};
 	

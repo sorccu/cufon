@@ -77,7 +77,7 @@ if (!empty($errors))
 
 ob_start();
 
-$domains = preg_split('/\s*,\s*/', trim($options['domains']), -1, PREG_SPLIT_NO_EMPTY);
+$domains = preg_split('/\s*[, ]\s*/', trim($options['domains']), -1, PREG_SPLIT_NO_EMPTY);
 
 if (!empty($domains))
 {
