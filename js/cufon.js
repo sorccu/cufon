@@ -576,7 +576,7 @@ Cufon.registerEngine('vml', (function() {
 	
 		var viewBox = font.viewBox, base = font.baseSize;
 		
-		var size = new Cufon.CSS.Size(getFontSizeInPixels(node.parentNode, style.get('fontSize')), 'px');
+		var size = style.computedFontSize || (style.computedFontSize = new Cufon.CSS.Size(getFontSizeInPixels(node.parentNode, style.get('fontSize')), 'px'));
 		
 		var spacing = {
 			letter: 0,
