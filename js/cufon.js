@@ -532,12 +532,12 @@ Cufon.registerEngine('vml', (function() {
 	// Modified to work well with relative units (em, ex, %).
 	// Finally some use for the Dark Arts.
 	function getFontSizeInPixels(el, value) {
-		var unit = value.match(/[a-z%]+$/), value = parseInt(value, 10), result;
+		var unit = (value.match(/[a-z%]+$/)[0] || '').toLowerCase(), value = parseFloat(value, 10), result;
 		if (unit == 'px') return value;
-		if (unit == '%') unit = 'em'; // this cannot be moved to the switch. really.
 		var style = el.style.left, runtimeStyle = el.runtimeStyle.left;
 		el.runtimeStyle.left = el.currentStyle.left;
 		switch (unit) {
+			case '%':
 			case 'em':
 				el.style.left = '1em'; // magic value
 				break;
