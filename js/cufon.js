@@ -7,29 +7,19 @@ var Cufon = new function() {
 
 	this.CSS = {
 	
-		Size: function(value, unit) {
+		Size: function(value, base) {
 		
-			this.convert = function(value, base) {
-				return value / base * this.value;
-			};
-			
-			this.set = function(value, unit) {
-				if (unit == undefined) {
-					this.value = parseFloat(value, 10);
-					this.unit = value.replace(/^[^a-z]*/, '');
-				}
-				else {
-					this.value = value;
-					this.unit = unit;
-				}
+			this.value = parseFloat(value, 10);
+			this.unit = String(value).match(/[a-z%]+$/)[0] || 'px';
+		
+			this.convert = function(value) {
+				return value / base * this.value
 			};
 			
 			this.toString = function() {
 				return this.value + this.unit;
 			};
-			
-			this.set(value, unit);
-			
+
 		},
 	
 		getStyle: function(el) {
@@ -184,6 +174,9 @@ var Cufon = new function() {
 			};
 		})();
 		
+		this.ascent = -parseInt(data.face['ascent'], 10);
+		this.descent = -parseInt(data.face['descent'], 10);
+		
 	}
 	
 	function Style(style) {
@@ -194,8 +187,8 @@ var Cufon = new function() {
 			return custom[property] != undefined ? custom[property] : style[property];
 		};
 		
-		this.getSize = function(property) {
-			return sizes[property] || (sizes[property] = new Cufon.CSS.Size(this.get(property)));
+		this.getSize = function(property, base) {
+			return sizes[property] || (sizes[property] = new Cufon.CSS.Size(this.get(property), base));
 		};
 		
 		this.extend = function(styles) {
@@ -390,9 +383,9 @@ Cufon.registerEngine('canvas', (function() {
 
 	return function render(font, text, style, options, node) {
 	
-		var viewBox = font.viewBox, base = font.baseSize;
+		var viewBox = font.viewBox;
 		
-		var size = style.getSize('fontSize'), spacing = {
+		var base = font.baseSize, size = style.getSize('fontSize', base), spacing = {
 			letter: 0,
 			word: 0
 		};
@@ -415,16 +408,28 @@ Cufon.registerEngine('canvas', (function() {
 		
 		// @todo fix line-height with negative top/bottom margins
 		
+		var wrapper = document.createElement('span');
+		
+		wrapper.className = 'cufon cufon-canvas';
+		
 		var canvas = document.createElement('canvas');
 		
-		canvas.className = 'cufon cufon-canvas';
+		var wStyle = wrapper.style, cStyle = canvas.style;
 		
-		var cStyle = canvas.style;
+		wStyle.display = 'inline'; /* firefox -2 */
+		wStyle.display = 'inline-block';
+		wStyle.position = 'relative';
 		
-		var baseHeight = Math.ceil(size.convert(viewBox.height, base)), scale = baseHeight / viewBox.height;
+		cStyle.display = 'block';
+		cStyle.position = 'absolute';
+		cStyle.top = 0;
+		cStyle.left = 0;
+		
+		var baseHeight = Math.ceil(size.convert(viewBox.height)), scale = baseHeight / viewBox.height;
 		
 		if (options.fontScaling) {
-			canvas.width = Math.ceil(size.convert(width, base) * options.fontScale);
+			/* @todo outdated - reimplement */
+			canvas.width = Math.ceil(size.convert(width) * options.fontScale);
 			canvas.height = Math.ceil(baseHeight * options.fontScale);
 			cStyle.marginLeft = (viewBox.minX / base) + 'em';
 			cStyle.marginRight = (-extraWidth / base) + 'em';
@@ -433,10 +438,12 @@ Cufon.registerEngine('canvas', (function() {
 			scale *= options.fontScale;
 		}
 		else {
-			canvas.width = Math.ceil(size.convert(width, base));
+			canvas.width = Math.ceil(size.convert(width));
 			canvas.height = baseHeight;
-			cStyle.marginLeft = size.convert(viewBox.minX, base) + size.unit;
-			cStyle.marginRight = size.convert(-extraWidth, base) + size.unit;
+			wStyle.paddingLeft = Math.ceil(size.convert(width - extraWidth + viewBox.minX)) + size.unit;
+			wStyle.paddingBottom = size.convert(-font.ascent + font.descent) + size.unit;
+			cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + size.unit;
+			cStyle.left = Math.floor(size.convert(viewBox.minX)) + size.unit;
 		}
 		
 		var buffer = [];
@@ -511,7 +518,9 @@ Cufon.registerEngine('canvas', (function() {
 		
 		for (var fn; fn = buffer.shift(); fn());
 		
-		return canvas;
+		wrapper.appendChild(canvas);
+		
+		return wrapper;
 			
 	}
 	
@@ -576,7 +585,7 @@ Cufon.registerEngine('vml', (function() {
 	
 		var viewBox = font.viewBox, base = font.baseSize;
 		
-		var size = style.computedFontSize || (style.computedFontSize = new Cufon.CSS.Size(getFontSizeInPixels(node.parentNode, style.get('fontSize')), 'px'));
+		var size = style.computedFontSize || (style.computedFontSize = new Cufon.CSS.Size(getFontSizeInPixels(node.parentNode, style.get('fontSize')), base));
 		
 		var spacing = {
 			letter: 0,
@@ -611,7 +620,7 @@ Cufon.registerEngine('vml', (function() {
 			shape.runtimeStyle.cssText = SHAPE_CSS;
 			shape.runtimeStyle.width = glyphWidth;
 			shape.runtimeStyle.height = glyphHeight;
-			shape.runtimeStyle.left = size.convert(offset, base);
+			shape.runtimeStyle.left = size.convert(offset);
 			shape.fillcolor = color;
 			canvas.appendChild(shape);
 			
@@ -622,7 +631,7 @@ Cufon.registerEngine('vml', (function() {
 			
 		}
 		
-		canvas.runtimeStyle.width = Math.max(size.convert(width, base), 0);
+		canvas.runtimeStyle.width = Math.max(size.convert(width), 0);
 				
 		return canvas;
 		
