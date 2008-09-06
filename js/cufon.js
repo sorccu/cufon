@@ -420,7 +420,6 @@ Cufon.registerEngine('canvas', (function() {
 		wStyle.display = 'inline-block';
 		wStyle.position = 'relative';
 		
-		cStyle.display = 'block';
 		cStyle.position = 'absolute';
 		cStyle.top = 0;
 		cStyle.left = 0;
