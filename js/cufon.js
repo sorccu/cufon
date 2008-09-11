@@ -23,7 +23,7 @@ var Cufon = new function() {
 		},
 	
 		getStyle: function(el) {
-			if (document.defaultView && document.defaultView.getComputedStyle) return new Style(document.defaultView.getComputedStyle(el, ''));
+			if (document.defaultView && document.defaultView.getComputedStyle) return new Style(document.defaultView.getComputedStyle(el, null));
 			if (el.currentStyle) return new Style(el.currentStyle);
 			return new Style(el.style);
 		},
@@ -89,8 +89,7 @@ var Cufon = new function() {
 	this.VML = {
 	
 		parsePath: function(path) {
-			var cmds = [];
-			var re = /([mrvxe]|qb)([0-9, .\-]*)/g, match;
+			var cmds = [], re = /([mrvxe]|qb)([0-9, .\-]*)/g, match;
 			while (match = re.exec(path)) {
 				cmds.push({
 					type: match[1],
@@ -133,14 +132,13 @@ var Cufon = new function() {
 		}
 		
 		this.get = function(style, weight) {
-			var weights = this.styles[style];
+			var weights = this.styles[style], closest;
 			if (!weights) return null;
 			weight = {
 				normal: 400,
 				bold: 700
 			}[weight] || parseInt(weight, 10);
 			if (weights[weight]) return weights[weight];
-			var closest = null;
 			for (var alt in weights) {
 				alt = parseInt(alt, 10);
 				if (!closest || (alt < weight && alt > closest)) closest = alt;
@@ -222,9 +220,9 @@ var Cufon = new function() {
 	
 	function getFont(el, style) {
 		if (!style) style = this.CSS.getStyle(el);
-		var families = style.get('fontFamily').split(/\s*,\s*/);
+		var families = style.get('fontFamily').split(/\s*,\s*/), family;
 		for (var i = 0, l = families.length; i < l; ++i) {
-			var family = families[i].toLowerCase();
+			family = families[i].toLowerCase();
 			if (family[0] == '"' || family[0] == "'") family = family.substring(1, family.length - 1);
 			if (fonts[family]) return fonts[family].get(style.get('fontStyle'), style.get('fontWeight'));
 		}
@@ -232,9 +230,9 @@ var Cufon = new function() {
 	}
 	
 	function merge() {
-		var merged = {};
+		var merged = {}, key;
 		for (var i = 0, l = arguments.length; i < l; ++i) {
-			for (var key in arguments[i]) merged[key] = arguments[i][key];
+			for (key in arguments[i]) merged[key] = arguments[i][key];
 		}
 		return merged;
 	}
@@ -258,9 +256,9 @@ var Cufon = new function() {
 	}
 	
 	function replaceElement(el, styles, options) {
-		var font, style;
+		var font, style, nextNode;
 		for (var node = el.firstChild; node; node = nextNode) {
-			var nextNode = node.nextSibling;
+			nextNode = node.nextSibling;
 			if (node.nodeType == 3) {
 				if (node.nodeValue === '') continue;
 				if (!style) style = Cufon.CSS.getStyle(el).extend(styles);
@@ -289,7 +287,7 @@ var Cufon = new function() {
 			};
 			addEvent(loader, 'load', dispatch);
 			addEvent(loader, 'readystatechange', function() {
-				if (!{ loaded: true, complete: true}[loader.readyState]) return;
+				if (!{ loaded: true, complete: true }[loader.readyState]) return;
 				dispatch();
 			});
 		}
@@ -527,15 +525,19 @@ Cufon.registerEngine('canvas', (function() {
 
 Cufon.registerEngine('vml', (function() {
 
+	if (!document.namespaces) return;
+
 	// isn't undocumented stuff great?
 	document.write('<!--[if vml]><script type="text/javascript"> Cufon.hasVmlSupport = true; </script><![endif]-->');
 	if (!Cufon.hasVmlSupport) return null;
 
-	Cufon.set('engine', 'vml');
-	
-	document.write('<?xml:namespace prefix="v" ns="urn:schemas-microsoft-com:vml" />');
-	document.write('<style type="text/css"> v\\:* { behavior: url(#default#VML); } </style>');
-	
+	if (document.namespaces['v'] == null) {
+		document.createStyleSheet().addRule('v\\:*', 'behavior: url(#default#VML);');
+		document.namespaces.add('v', 'urn:schemas-microsoft-com:vml');
+	}
+
+	Cufon.set('engine', 'vml');	
+
 	// Original by Dean Edwards.
 	// Modified to work well with relative units (em, ex, %).
 	// Finally some use for the Dark Arts.
