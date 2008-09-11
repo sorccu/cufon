@@ -49,17 +49,17 @@ var Cufon = new function() {
 				for (var fn; fn = queue.shift(); fn());
 			};
 			
-			// Mozilla, Opera
+			// Mozilla, Opera, WebKit r26101+
 			
 			if (document.addEventListener) {
 				document.addEventListener('DOMContentLoaded', perform, false);
 			}
 			
-			// WebKit
+			// Old WebKit
 			
 			if (!window.opera && document.readyState) {
 				setTimeout(function() {
-					({ loaded: 1, complete: 1 })[document.readyState] ? perform() : setTimeout(arguments.callee, 50);
+					({ loaded: 1, complete: 1 })[document.readyState] ? perform() : setTimeout(arguments.callee, 10);
 				}, 50);
 			}
 			
@@ -339,7 +339,7 @@ Cufon.registerEngine('canvas', (function() {
 
 	var check = document.createElement('canvas');
 	if (!check || !check.getContext) return null;
-	delete check;
+	check = null;
 
 	Cufon.set('engine', 'canvas');
 
