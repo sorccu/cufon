@@ -23,15 +23,25 @@ var Cufon = new function() {
 		},
 	
 		getStyle: function(el) {
-			if (document.defaultView && document.defaultView.getComputedStyle) return new Style(document.defaultView.getComputedStyle(el, null));
+			var view = document.defaultView;
+			if (view && view.getComputedStyle) return new Style(view.getComputedStyle(el, null));
 			if (el.currentStyle) return new Style(el.currentStyle);
 			return new Style(el.style);
 		},
 		
+		// @todo benchmark
+		
+		getOverrideStyle: function(el) {
+			if (el.runtimeStyle) return el.runtimeStyle;
+			var view = document.defaultView;
+			if (view && view.getComputedStyle) return view.getOverrideStyle(el, null);
+			return el.style;
+		},
+		
 		textTransform: function(text, style) {
 			return text[{
-				'uppercase': 'toUpperCase',
-				'lowercase': 'toLowerCase'
+				uppercase: 'toUpperCase',
+				lowercase: 'toLowerCase'
 			}[style.get('textTransform')] || 'toString']();
 		}
 		
@@ -49,10 +59,11 @@ var Cufon = new function() {
 				for (var fn; fn = queue.shift(); fn());
 			};
 			
-			// Mozilla, Opera, WebKit r26101+
+			// Gecko, Opera, WebKit r26101+
 			
 			if (document.addEventListener) {
 				document.addEventListener('DOMContentLoaded', perform, false);
+				window.addEventListener('pageshow', perform, false); // For cached Gecko pages
 			}
 			
 			// Old WebKit
@@ -73,9 +84,7 @@ var Cufon = new function() {
 				document.getElementsByTagName('head')[0].appendChild(loader);
 			} catch (e) {}
 			
-			// Fallback
-			
-			addEvent(window, 'load', perform);
+			addEvent(window, 'load', perform); // Fallback
 			
 			return function(listener) {
 				if (!arguments.length) perform();
@@ -89,11 +98,12 @@ var Cufon = new function() {
 	this.VML = {
 	
 		parsePath: function(path) {
+			// @todo make sure the regex is optimized
 			var cmds = [], re = /([mrvxe]|qb)([0-9, .\-]*)/g, match;
 			while (match = re.exec(path)) {
 				cmds.push({
 					type: match[1],
-					coords: match[2].split(/[, ]/)
+					coords: match[2].split(',')
 				});
 			}
 			return cmds;
