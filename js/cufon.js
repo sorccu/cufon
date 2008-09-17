@@ -29,20 +29,11 @@ var Cufon = new function() {
 			return new Style(el.style);
 		},
 		
-		// @todo benchmark
-		
-		getOverrideStyle: function(el) {
-			if (el.runtimeStyle) return el.runtimeStyle;
-			var view = document.defaultView;
-			if (view && view.getComputedStyle) return view.getOverrideStyle(el, null);
-			return el.style;
-		},
-		
 		textTransform: function(text, style) {
 			return text[{
 				uppercase: 'toUpperCase',
 				lowercase: 'toLowerCase'
-			}[style.get('textTransform')] || 'toString']();
+			}[style.get('textTransform')] || 'toString'](); // @todo use valueOf instead?
 		}
 		
 	};
@@ -70,7 +61,7 @@ var Cufon = new function() {
 			
 			if (!window.opera && document.readyState) {
 				setTimeout(function() {
-					({ loaded: 1, complete: 1 })[document.readyState] ? perform() : setTimeout(arguments.callee, 10);
+					{ loaded: 1, complete: 1 }[document.readyState] ? perform() : setTimeout(arguments.callee, 10);
 				}, 50);
 			}
 			
@@ -79,7 +70,7 @@ var Cufon = new function() {
 			try {
 				var loader = document.createElement('<script defer src=javascript:void(0)>');
 				loader.onreadystatechange = function() {
-					if (({ loaded: 1, complete: 1 })[this.readyState]) perform();
+					if ({ loaded: 1, complete: 1 }[this.readyState]) perform();
 				};
 				document.getElementsByTagName('head')[0].appendChild(loader);
 			} catch (e) {}
@@ -98,8 +89,7 @@ var Cufon = new function() {
 	this.VML = {
 	
 		parsePath: function(path) {
-			// @todo make sure the regex is optimized
-			var cmds = [], re = /([mrvxe]|qb)([0-9, .\-]*)/g, match;
+			var cmds = [], re = /([mrvxe]|qb)([^a-z]*)/g, match;
 			while (match = re.exec(path)) {
 				cmds.push({
 					type: match[1],
@@ -210,7 +200,7 @@ var Cufon = new function() {
 	
 	var engines = {}, fonts = {}, sharedQueue = new ExecutionQueue(this), defaultOptions = {
 		fontScaling: false,
-		fontScale: 1.5,
+		fontScale: 1.2,
 		textDecoration: true,
 		engine: null,
 		responsive: false,
@@ -297,8 +287,7 @@ var Cufon = new function() {
 			};
 			addEvent(loader, 'load', dispatch);
 			addEvent(loader, 'readystatechange', function() {
-				if (!{ loaded: true, complete: true }[loader.readyState]) return;
-				dispatch();
+				if ({ loaded: 1, complete: 1 }[loader.readyState]) dispatch();
 			});
 		}
 		loader.src = src;
