@@ -31,19 +31,19 @@ class VMLPath {
 					$vml[] = 'x';
 					break;
 				case 'M':
-					$vml[] = sprintf('m%d %d',
+					$vml[] = sprintf('m%d,%d',
 						$at->x = $coords[0],
 						$at->y = $coords[1]
 					);
 					break;
 				case 'L':
-					$vml[] = sprintf('r%d %d',
+					$vml[] = sprintf('r%d,%d',
 						-($at->x - ($at->x = $coords[0])),
 						-($at->y - ($at->y = $coords[1]))
 					);
 					break;
 				case 'l':
-					$vml[] = sprintf('r%d %d',
+					$vml[] = sprintf('r%d,%d',
 						-($at->x - ($at->x += $coords[0])),
 						-($at->y - ($at->y += $coords[1]))
 					);
@@ -69,7 +69,7 @@ class VMLPath {
 					);
 					break;
 				case 'C':
-					$vml[] = sprintf('v%d %d %d %d %d %d',
+					$vml[] = sprintf('v%d,%d,%d,%d,%d,%d',
 						-($at->x - $coords[0]),
 						-($at->y - $coords[1]),
 						-($at->x - ($cp->x = $coords[2])),
@@ -79,7 +79,7 @@ class VMLPath {
 					);
 					break;
 				case 'c':
-					$vml[] = sprintf('v%d %d %d %d %d %d',
+					$vml[] = sprintf('v%d,%d,%d,%d,%d,%d',
 						$coords[0],
 						$coords[1],
 						-($at->x - ($cp->x = $at->x + $coords[2])),
@@ -94,7 +94,7 @@ class VMLPath {
 						$cp->x = $at->x;
 						$cp->y = $at->y;
 					}
-					$vml[] = sprintf('v%d %d %d %d %d %d',
+					$vml[] = sprintf('v%d,%d,%d,%d,%d,%d',
 						$at->x - $cp->x,
 						$at->y - $cp->y,
 						-($at->x - ($cp->x = $coords[0])),
@@ -109,7 +109,7 @@ class VMLPath {
 						$cp->x = $at->x;
 						$cp->y = $at->y;
 					}
-					$vml[] = sprintf('v%d %d %d %d %d %d',
+					$vml[] = sprintf('v%d,%d,%d,%d,%d,%d',
 						$at->x - $cp->x,
 						$at->y - $cp->y,
 						-($at->x - ($cp->x = $at->x + $coords[0])),
@@ -119,7 +119,7 @@ class VMLPath {
 					);
 					break;
 				case 'Q':
-					$vml[] = sprintf('qb%d %d %d %d',
+					$vml[] = sprintf('qb%d,%d,%d,%d',
 						$cp->x = $coords[0],
 						$cp->y = $coords[1],
 						$at->x = $coords[2],
@@ -127,7 +127,7 @@ class VMLPath {
 					);
 					break;
 				case 'q':
-					$vml[] = sprintf('qb%d %d %d %d',
+					$vml[] = sprintf('qb%d,%d,%d,%d',
 						$cp->x = $at->x + $coords[0],
 						$cp->y = $at->y + $coords[1],
 						$at->x += $coords[2],
@@ -140,7 +140,7 @@ class VMLPath {
 						$cp->x = $at->x;
 						$cp->y = $at->y;
 					}
-					$vml[] = sprintf('qb%d %d %d %d',
+					$vml[] = sprintf('qb%d,%d,%d,%d',
 						$cp->x = $at->x + ($at->x - $cp->x),
 						$cp->y = $at->y + ($at->y - $cp->y),
 						$at->x = $coords[0],
@@ -153,7 +153,7 @@ class VMLPath {
 						$cp->x = $at->x;
 						$cp->y = $at->y;
 					}
-					$vml[] = sprintf('qb%d %d %d %d',
+					$vml[] = sprintf('qb%d,%d,%d,%d',
 						$cp->x = $at->x + ($at->x - $cp->x),
 						$cp->y = $at->y + ($at->y - $cp->y),
 						$at->x += $coords[0],

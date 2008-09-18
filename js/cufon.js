@@ -61,8 +61,8 @@ var Cufon = new function() {
 			
 			if (!window.opera && document.readyState) {
 				setTimeout(function() {
-					{ loaded: 1, complete: 1 }[document.readyState] ? perform() : setTimeout(arguments.callee, 10);
-				}, 50);
+					({ loaded: 1, complete: 1 })[document.readyState] ? perform() : setTimeout(arguments.callee, 10);
+				}, 10);
 			}
 			
 			// Internet Explorer
@@ -339,6 +339,14 @@ Cufon.registerEngine('canvas', (function() {
 	var check = document.createElement('canvas');
 	if (!check || !check.getContext) return null;
 	check = null;
+	
+	var styleSheet = document.createElement('style');
+	styleSheet.type = 'text/css';
+	styleSheet.appendChild(document.createTextNode(
+		'.cufon-canvas { display: inline; display: inline-block; position: relative; }' + 
+		'.cufon-canvas canvas { position: absolute; }'
+	));
+	document.getElementsByTagName('head')[0].appendChild(styleSheet);
 
 	Cufon.set('engine', 'canvas');
 
@@ -378,7 +386,7 @@ Cufon.registerEngine('canvas', (function() {
 		}
 	}
 
-	return function render(font, text, style, options, node) {
+	return function(font, text, style, options, node) {
 	
 		var viewBox = font.viewBox;
 		
@@ -412,14 +420,6 @@ Cufon.registerEngine('canvas', (function() {
 		var canvas = document.createElement('canvas');
 		
 		var wStyle = wrapper.style, cStyle = canvas.style;
-		
-		wStyle.display = 'inline'; /* firefox -2 */
-		wStyle.display = 'inline-block';
-		wStyle.position = 'relative';
-		
-		cStyle.position = 'absolute';
-		cStyle.top = 0;
-		cStyle.left = 0;
 		
 		var baseHeight = Math.ceil(size.convert(viewBox.height)), scale = baseHeight / viewBox.height;
 		
@@ -579,7 +579,7 @@ Cufon.registerEngine('vml', (function() {
 	var CANVAS_CSS = 'display: inline-block; position: relative';
 	var SHAPE_CSS = 'display: inline-block; antialias: true; position: absolute';
 
-	return function render(font, text, style, options, node) {
+	return function(font, text, style, options, node) {
 	
 		// @todo letter-/word-spacing, text-decoration
 	
