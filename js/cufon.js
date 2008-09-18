@@ -13,7 +13,7 @@ var Cufon = new function() {
 			this.unit = String(value).match(/[a-z%]+$/)[0] || 'px';
 		
 			this.convert = function(value) {
-				return value / base * this.value
+				return value / base * this.value;
 			};
 			
 			this.toString = function() {
@@ -351,23 +351,23 @@ Cufon.registerEngine('canvas', (function() {
 	Cufon.set('engine', 'canvas');
 
 	function generateFromVML(path, context) {
-		var at = { x: 0, y: 0 }, cp = { x: 0, y: 0 };
+		var atX = 0, atY = 0, cpX = 0, cpY = 0;
 		var cmds = Cufon.VML.parsePath(path);
 		var code = new Array(cmds.length - 1);
 		generate: for (var i = 0, l = cmds.length; i < l; ++i) {
 			var c = cmds[i].coords;
 			switch (cmds[i].type) {
 				case 'v':
-					code[i] = { m: 'bezierCurveTo', a: [ at.x + Number(c[0]), at.y + Number(c[1]), cp.x = at.x + Number(c[2]), cp.y = at.y + Number(c[3]), at.x += Number(c[4]), at.y += Number(c[5]) ] };
+					code[i] = { m: 'bezierCurveTo', a: [ atX + Number(c[0]), atY + Number(c[1]), cpX = atX + Number(c[2]), cpY = atY + Number(c[3]), atX += Number(c[4]), atY += Number(c[5]) ] };
 					break;
 				case 'qb':
-					code[i] = { m: 'quadraticCurveTo', a: [ cp.x = Number(c[0]), cp.y = Number(c[1]), at.x = Number(c[2]), at.y = Number(c[3]) ] };
+					code[i] = { m: 'quadraticCurveTo', a: [ cpX = Number(c[0]), cpY = Number(c[1]), atX = Number(c[2]), atY = Number(c[3]) ] };
 					break;
 				case 'r':
-					code[i] = { m: 'lineTo', a: [ at.x += Number(c[0]), at.y += Number(c[1]) ] };
+					code[i] = { m: 'lineTo', a: [ atX += Number(c[0]), atY += Number(c[1]) ] };
 					break;
 				case 'm':
-					code[i] = { m: 'moveTo', a: [ at.x = Number(c[0]), at.y = Number(c[1]) ] };
+					code[i] = { m: 'moveTo', a: [ atX = Number(c[0]), atY = Number(c[1]) ] };
 					break;
 				case 'x':
 					code[i] = { m: 'closePath' };
@@ -375,22 +375,23 @@ Cufon.registerEngine('canvas', (function() {
 				case 'e':
 					break generate;
 			}
-			if (context) context[code[i].m].apply(context, code[i].a);
+			context[code[i].m].apply(context, code[i].a);
 		}
 		return code;
 	}
 	
 	function interpret(code, context) {
 		for (var i = 0, l = code.length; i < l; ++i) {
-			context[code[i].m].apply(context, code[i].a);
+			var line = code[i];
+			context[line.m].apply(context, line.a);
 		}
 	}
 
 	return function(font, text, style, options, node) {
 	
-		var viewBox = font.viewBox;
+		var viewBox = font.viewBox, base = font.baseSize, size = style.getSize('fontSize', base);
 		
-		var base = font.baseSize, size = style.getSize('fontSize', base), spacing = {
+		var spacing = {
 			letter: 0,
 			word: 0
 		};
@@ -411,15 +412,11 @@ Cufon.registerEngine('canvas', (function() {
 		
 		width += extraWidth;
 		
-		// @todo fix line-height with negative top/bottom margins
-		
-		var wrapper = document.createElement('span');
+		var wrapper = document.createElement('span'), wStyle = wrapper.style;
 		
 		wrapper.className = 'cufon cufon-canvas';
 		
-		var canvas = document.createElement('canvas');
-		
-		var wStyle = wrapper.style, cStyle = canvas.style;
+		var canvas = document.createElement('canvas'), cStyle = canvas.style;
 		
 		var baseHeight = Math.ceil(size.convert(viewBox.height)), scale = baseHeight / viewBox.height;
 		
@@ -436,15 +433,13 @@ Cufon.registerEngine('canvas', (function() {
 		else {
 			canvas.width = Math.ceil(size.convert(width));
 			canvas.height = baseHeight;
-			wStyle.paddingLeft = Math.ceil(size.convert(width - extraWidth + viewBox.minX)) + size.unit;
-			wStyle.paddingBottom = size.convert(-font.ascent + font.descent) + size.unit;
-			cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + size.unit;
-			cStyle.left = Math.floor(size.convert(viewBox.minX)) + size.unit;
+			wStyle.paddingLeft = Math.ceil(size.convert(width - extraWidth + viewBox.minX)) + 'px';
+			wStyle.paddingBottom = size.convert(-font.ascent + font.descent) + 'px';
+			cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
+			cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
 		}
 		
-		var buffer = [];
-		
-		var g = canvas.getContext('2d');
+		var g = canvas.getContext('2d'), buffer = [];
 		
 		g.scale(scale, scale);
 		g.translate(-viewBox.minX, -viewBox.minY);
