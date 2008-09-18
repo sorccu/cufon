@@ -201,10 +201,11 @@ var Cufon = new function() {
 	var engines = {}, fonts = {}, sharedQueue = new ExecutionQueue(this), defaultOptions = {
 		fontScaling: false,
 		fontScale: 1.2,
-		textDecoration: true,
+		enableTextDecoration: true,
 		engine: null,
 		responsive: false,
-		wordWrap: true
+		wordWrap: true,
+		rotation: 0
 	};
 	
 	function addEvent(el, type, listener) {
@@ -386,10 +387,16 @@ Cufon.registerEngine('canvas', (function() {
 			context[line.m].apply(context, line.a);
 		}
 	}
+	
+	function radians(degrees) {
+		return Math.PI / 180 * degrees;	
+	}
 
 	return function(font, text, style, options, node) {
 	
-		var viewBox = font.viewBox, base = font.baseSize, size = style.getSize('fontSize', base);
+		var viewBox = font.viewBox, base = font.baseSize;
+		
+		var size = style.getSize('fontSize', base);
 		
 		var spacing = {
 			letter: 0,
@@ -398,7 +405,10 @@ Cufon.registerEngine('canvas', (function() {
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
-		var width = -viewBox.minX, lastWidth;
+		var width = -viewBox.minX;
+		var height = Math.ceil(size.convert(viewBox.height));
+		
+		var lastWidth;
 		
 		for (var j = 0, k = chars.length; j < k; ++j) {
 			var glyph = font.glyphs[chars[j]] || font.missingGlyph;
@@ -406,24 +416,26 @@ Cufon.registerEngine('canvas', (function() {
 			width += lastWidth = Number(glyph.w || font.w) + spacing.letter;
 		}
 		
-		if (!lastWidth) return null;
+		if (!lastWidth) return null; // there's nothing to render
 		
-		var extraWidth = viewBox.width - lastWidth;
+		var adjust = viewBox.width - lastWidth;
 		
-		width += extraWidth;
+		width += adjust;
+
+		var scale = height / viewBox.height;
 		
-		var wrapper = document.createElement('span'), wStyle = wrapper.style;
-		
+		var wrapper = document.createElement('span');
 		wrapper.className = 'cufon cufon-canvas';
 		
-		var canvas = document.createElement('canvas'), cStyle = canvas.style;
+		var canvas = document.createElement('canvas');
 		
-		var baseHeight = Math.ceil(size.convert(viewBox.height)), scale = baseHeight / viewBox.height;
+		var wStyle = wrapper.style;
+		var cStyle = canvas.style;
 		
 		if (options.fontScaling) {
 			/* @todo outdated - reimplement */
 			canvas.width = Math.ceil(size.convert(width) * options.fontScale);
-			canvas.height = Math.ceil(baseHeight * options.fontScale);
+			canvas.height = Math.ceil(height * options.fontScale);
 			cStyle.marginLeft = (viewBox.minX / base) + 'em';
 			cStyle.marginRight = (-extraWidth / base) + 'em';
 			cStyle.width = (width / base) + 'em';
@@ -432,8 +444,8 @@ Cufon.registerEngine('canvas', (function() {
 		}
 		else {
 			canvas.width = Math.ceil(size.convert(width));
-			canvas.height = baseHeight;
-			wStyle.paddingLeft = Math.ceil(size.convert(width - extraWidth + viewBox.minX)) + 'px';
+			canvas.height = height;
+			wStyle.paddingLeft = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
 			wStyle.paddingBottom = size.convert(-font.ascent + font.descent) + 'px';
 			cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
 			cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
@@ -451,12 +463,12 @@ Cufon.registerEngine('canvas', (function() {
 			g.lineWidth = font.face['underline-thickness'];
 			
 			g.moveTo(0, y);
-			g.lineTo((invert ? -1 : 1) * (width - extraWidth + viewBox.minX), y);
+			g.lineTo((invert ? -1 : 1) * (width - adjust + viewBox.minX), y);
 			
 			g.stroke();
 		}
 		
-		if (options.textDecoration) textDecoration: for (var search = node, decoStyle = style; search.parentNode && search.parentNode.nodeType == 1; ) {
+		if (options.enableTextDecoration) textDecoration: for (var search = node, decoStyle = style; search.parentNode && search.parentNode.nodeType == 1; ) {
 		
 			search = search.parentNode;
 			
@@ -526,7 +538,9 @@ Cufon.registerEngine('vml', (function() {
 	if (!Cufon.hasVmlSupport) return null;
 
 	if (document.namespaces['v'] == null) {
-		document.createStyleSheet().addRule('v\\:*', 'behavior: url(#default#VML);');
+		var styleSheet = document.createStyleSheet();
+		styleSheet.addRule('v\\:*', 'behavior: url(#default#VML);');
+		styleSheet.addRule('a .cufon-vml', 'cursor: pointer;');
 		document.namespaces.add('v', 'urn:schemas-microsoft-com:vml');
 	}
 
