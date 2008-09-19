@@ -344,7 +344,7 @@ Cufon.registerEngine('canvas', (function() {
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
-		'.cufon-canvas { display: inline; display: inline-block; position: relative; }' + 
+		'.cufon-canvas { display: inline; display: inline-block; position: relative; vertical-align: middle; }' + 
 		'.cufon-canvas canvas { position: absolute; }'
 	));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
