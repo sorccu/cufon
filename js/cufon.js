@@ -54,7 +54,7 @@ var Cufon = new function() {
 			
 			if (document.addEventListener) {
 				document.addEventListener('DOMContentLoaded', perform, false);
-				window.addEventListener('pageshow', perform, false); // For cached Gecko pages
+				//window.addEventListener('pageshow', perform, false); // For cached Gecko pages
 			}
 			
 			// Old WebKit
@@ -199,13 +199,16 @@ var Cufon = new function() {
 	var BROKEN_REGEXP = ' '.split(/\s+/).length == 0;
 	
 	var engines = {}, fonts = {}, sharedQueue = new ExecutionQueue(this), defaultOptions = {
-		fontScaling: false,
-		fontScale: 1.2,
 		enableTextDecoration: true,
 		engine: null,
+		fontScale: 1.2,
+		fontScaling: false,
 		responsive: false,
-		wordWrap: true,
-		rotation: 0
+		rotation: 0,
+		selector: function(query) {
+			(document.querySelectorAll || document.getElementsByTagName)(query);
+		},
+		wordWrap: true
 	};
 	
 	function addEvent(el, type, listener) {
@@ -256,20 +259,20 @@ var Cufon = new function() {
 		return engines[options.engine](font, text, style, options, node);
 	}
 	
-	function replaceElement(el, styles, options) {
+	function replaceElement(el, options) {
 		var font, style, nextNode;
 		for (var node = el.firstChild; node; node = nextNode) {
 			nextNode = node.nextSibling;
 			if (node.nodeType == 3) {
 				if (node.nodeValue === '') continue;
-				if (!style) style = Cufon.CSS.getStyle(el).extend(styles);
+				if (!style) style = Cufon.CSS.getStyle(el).extend(options);
 				if (!font) font = getFont(el, style);
 				if (!font) continue;
 				node.parentNode.replaceChild(process(font, node.nodeValue, style, options, node), node);
 			}
 			else if (node.firstChild) {
 				if (!/cufon/.test(node.className)) {
-					arguments.callee(node, styles, options);
+					arguments.callee(node, options);
 				}
 				else {
 					
@@ -308,10 +311,15 @@ var Cufon = new function() {
 		return this;
 	};
 	
-	this.replace = function(el, styles, options) {
+	this.replace = function(el, options) {
 		options = merge(defaultOptions, options);
-		if (!options.engine) return this; // cufón isn't supported
-		if (!engines[options.engine]) throw new Error('Unrecognized cufón engine: ' + options.engine);
+		if (!options.engine) return this; // Cufon isn't supported
+		if (typeof el === 'string' && options.selector) {
+			this.DOM.ready(function() {
+				Cufon.replace(options.selector(el), options);
+			});
+			return this;
+		}
 		if (el.nodeType) el = [ el ];
 		var dispatch = function() {
 			if (!options.responsive) return replaceElement.apply(null, arguments);
@@ -322,7 +330,7 @@ var Cufon = new function() {
 		};
 		this.DOM.ready(function() {
 			for (var i = 0, l = el.length; i < l; ++i) {
-				dispatch(el[i], styles || {}, options);
+				dispatch(el[i], options);
 			}
 		});
 		return this;
