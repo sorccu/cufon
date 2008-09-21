@@ -33,7 +33,7 @@ var Cufon = new function() {
 			return text[{
 				uppercase: 'toUpperCase',
 				lowercase: 'toLowerCase'
-			}[style.get('textTransform')] || 'toString'](); // @todo use valueOf instead?
+			}[style.get('textTransform')] || 'toString']();
 		}
 		
 	};
@@ -54,7 +54,7 @@ var Cufon = new function() {
 			
 			if (document.addEventListener) {
 				document.addEventListener('DOMContentLoaded', perform, false);
-				//window.addEventListener('pageshow', perform, false); // For cached Gecko pages
+				window.addEventListener('pageshow', perform, false); // For cached Gecko pages
 			}
 			
 			// Old WebKit
@@ -205,9 +205,11 @@ var Cufon = new function() {
 		fontScaling: false,
 		responsive: false,
 		rotation: 0,
-		selector: function(query) {
-			(document.querySelectorAll || document.getElementsByTagName)(query);
-		},
+		selector: (
+			document.querySelectorAll
+				? function(query) { return document.querySelectorAll(query); }
+				: function(query) { return document.getElementsByTagName(query); }
+		),
 		wordWrap: true
 	};
 	
@@ -352,7 +354,7 @@ Cufon.registerEngine('canvas', (function() {
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
-		'.cufon-canvas { display: inline; display: inline-block; position: relative; vertical-align: middle; }' + 
+		'.cufon-canvas { display: -moz-inline-box; display: inline-block; position: relative; vertical-align: middle; }' + 
 		'.cufon-canvas canvas { position: absolute; }'
 	));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
@@ -453,10 +455,10 @@ Cufon.registerEngine('canvas', (function() {
 		else {
 			canvas.width = Math.ceil(size.convert(width));
 			canvas.height = height;
-			wStyle.paddingLeft = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
-			wStyle.paddingBottom = size.convert(-font.ascent + font.descent) + 'px';
-			cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
-			cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
+			wStyle.width = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
+			wStyle.height = size.convert(-font.ascent + font.descent) + 'px';
+			cStyle.marginTop = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
+			cStyle.marginLeft = Math.floor(size.convert(viewBox.minX)) + 'px';
 		}
 		
 		var g = canvas.getContext('2d'), buffer = [];
