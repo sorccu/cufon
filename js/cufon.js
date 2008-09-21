@@ -44,7 +44,7 @@ var Cufon = new function() {
 		
 			var complete = (document.readyState == 'complete');
 			
-			var queue = [], perform = function() {
+			var queue = [], perform = function(id) {
 				if (complete) return;
 				complete = true;
 				for (var fn; fn = queue.shift(); fn());
@@ -57,7 +57,7 @@ var Cufon = new function() {
 				window.addEventListener('pageshow', perform, false); // For cached Gecko pages
 			}
 			
-			// Old WebKit
+			// Old WebKit, Internet Explorer
 			
 			if (!window.opera && document.readyState) {
 				setTimeout(function() {
@@ -67,13 +67,17 @@ var Cufon = new function() {
 			
 			// Internet Explorer
 			
-			try {
-				var loader = document.createElement('<script defer src=javascript:void(0)>');
-				loader.onreadystatechange = function() {
-					if ({ loaded: 1, complete: 1 }[this.readyState]) perform();
-				};
-				document.getElementsByTagName('head')[0].appendChild(loader);
-			} catch (e) {}
+			if (document.readyState && document.createStyleSheet) {
+				(function() {
+					try {
+						document.body.doScroll('left');
+						perform();
+					}
+					catch (e) {
+						setTimeout(arguments.callee, 1);
+					}
+				})();
+			}
 			
 			addEvent(window, 'load', perform); // Fallback
 			
@@ -201,7 +205,7 @@ var Cufon = new function() {
 	var engines = {}, fonts = {}, sharedQueue = new ExecutionQueue(this), defaultOptions = {
 		enableTextDecoration: true,
 		engine: null,
-		fontScale: 1.2,
+		fontScale: 1,
 		fontScaling: false,
 		responsive: false,
 		rotation: 0,
@@ -354,12 +358,19 @@ Cufon.registerEngine('canvas', (function() {
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
-		'.cufon-canvas { display: -moz-inline-box; display: inline-block; position: relative; vertical-align: middle; }' + 
+		'.cufon-canvas { display: inline; display: inline-block; position: relative; vertical-align: middle; font-size: 1px }' +
 		'.cufon-canvas canvas { position: absolute; }'
 	));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
 
 	Cufon.set('engine', 'canvas');
+
+	var HAS_INLINE_BLOCK = (function() {
+		var style = document.createElement('span').style;
+		style.display = 'inline';
+		style.display = 'inline-block';
+		return style.display == 'inline-block';
+	})();
 
 	function generateFromVML(path, context) {
 		var atX = 0, atY = 0, cpX = 0, cpY = 0;
@@ -442,24 +453,12 @@ Cufon.registerEngine('canvas', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 		
-		if (options.fontScaling) {
-			/* @todo outdated - reimplement */
-			canvas.width = Math.ceil(size.convert(width) * options.fontScale);
-			canvas.height = Math.ceil(height * options.fontScale);
-			cStyle.marginLeft = (viewBox.minX / base) + 'em';
-			cStyle.marginRight = (-extraWidth / base) + 'em';
-			cStyle.width = (width / base) + 'em';
-			cStyle.height = (viewBox.height / base) + 'em';
-			scale *= options.fontScale;
-		}
-		else {
-			canvas.width = Math.ceil(size.convert(width));
-			canvas.height = height;
-			wStyle.width = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
-			wStyle.height = size.convert(-font.ascent + font.descent) + 'px';
-			cStyle.marginTop = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
-			cStyle.marginLeft = Math.floor(size.convert(viewBox.minX)) + 'px';
-		}
+		canvas.width = Math.ceil(size.convert(width));
+		canvas.height = height;
+		wStyle.paddingLeft = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
+		wStyle.paddingBottom = (size.convert(-font.ascent + font.descent) - 1 + HAS_INLINE_BLOCK) + 'px';
+		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
+		cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
 		
 		var g = canvas.getContext('2d'), buffer = [];
 		
@@ -550,6 +549,8 @@ Cufon.registerEngine('vml', (function() {
 	if (document.namespaces['v'] == null) {
 		var styleSheet = document.createStyleSheet();
 		styleSheet.addRule('v\\:*', 'behavior: url(#default#VML);');
+		styleSheet.addRule('.cufon-vml', 'display: inline-block; position: relative; vertical-align: middle;');
+		styleSheet.addRule('.cufon-vml v\\:*', 'display: inline-block; antialias: true; position: absolute;');
 		styleSheet.addRule('a .cufon-vml', 'cursor: pointer;');
 		document.namespaces.add('v', 'urn:schemas-microsoft-com:vml');
 	}
@@ -595,9 +596,6 @@ Cufon.registerEngine('vml', (function() {
 		document.body.appendChild(shapeType);
 	}
 	
-	var CANVAS_CSS = 'display: inline-block; position: relative';
-	var SHAPE_CSS = 'display: inline-block; antialias: true; position: absolute';
-
 	return function(font, text, style, options, node) {
 	
 		// @todo letter-/word-spacing, text-decoration
@@ -611,21 +609,21 @@ Cufon.registerEngine('vml', (function() {
 			word: 0
 		};
 		
-		var glyphWidth = size.convert(viewBox.width, base);
-		var glyphHeight = size.convert(viewBox.height, base);
+		var glyphWidth = size.convert(viewBox.width);
+		var glyphHeight = size.convert(viewBox.height);
 		
 		var canvas = document.createElement('span');
-		
 		canvas.className = 'cufon cufon-vml';
 		
-		canvas.runtimeStyle.cssText = CANVAS_CSS;
-		canvas.runtimeStyle.height = glyphHeight;
+		var cStyle = canvas.runtimeStyle;
+		
+		cStyle.height = size.convert(-font.ascent + font.descent) + 'px';
 		
 		var color = style.get('color');
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
-		var width = 0, offset = viewBox.minX;
+		var width = 0, offsetX = viewBox.minX, offsetY = Math.floor(size.convert(viewBox.minY - font.ascent));
 		
 		for (var i = 0, l = chars.length; i < l; ++i) {
 		
@@ -636,21 +634,22 @@ Cufon.registerEngine('vml', (function() {
 			
 			var shape = document.createElement('v:shape');
 			shape.type = glyph.typeRef;
-			shape.runtimeStyle.cssText = SHAPE_CSS;
-			shape.runtimeStyle.width = glyphWidth;
-			shape.runtimeStyle.height = glyphHeight;
-			shape.runtimeStyle.left = size.convert(offset);
+			var sStyle = shape.runtimeStyle;
+			sStyle.width = glyphWidth;
+			sStyle.height = glyphHeight;
+			sStyle.top = offsetY;
+			sStyle.left = size.convert(offsetX);
 			shape.fillcolor = color;
 			canvas.appendChild(shape);
 			
 			var advance = Number(glyph.w || font.w) + spacing.letter;
 			
 			width += advance;
-			offset += advance;
+			offsetX += advance;
 			
 		}
 		
-		canvas.runtimeStyle.width = Math.max(size.convert(width), 0);
+		cStyle.width = Math.max(Math.ceil(size.convert(width)), 0);
 				
 		return canvas;
 		
