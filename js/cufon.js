@@ -545,14 +545,13 @@ Cufon.registerEngine('vml', (function() {
 	// isn't undocumented stuff great?
 	document.write('<!--[if vml]><script type="text/javascript"> Cufon.hasVmlSupport = true; </script><![endif]-->');
 	if (!Cufon.hasVmlSupport) return null;
-
-	if (document.namespaces['v'] == null) {
+	
+	if (document.namespaces['cvml'] == null) {
 		var styleSheet = document.createStyleSheet();
-		styleSheet.addRule('v\\:*', 'behavior: url(#default#VML);');
+		styleSheet.addRule('cvml\\:*', 'behavior: url(#default#VML); display: inline-block; antialias: true; position: absolute;');
 		styleSheet.addRule('.cufon-vml', 'display: inline-block; position: relative; vertical-align: middle;');
-		styleSheet.addRule('.cufon-vml v\\:*', 'display: inline-block; antialias: true; position: absolute;');
 		styleSheet.addRule('a .cufon-vml', 'cursor: pointer;');
-		document.namespaces.add('v', 'urn:schemas-microsoft-com:vml');
+		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
 	}
 
 	Cufon.set('engine', 'vml');	
@@ -583,9 +582,9 @@ Cufon.registerEngine('vml', (function() {
 	}
 	
 	var typeIndex = 0;
-	
+
 	function createType(glyph, viewBox) {
-		var shapeType = document.createElement('v:shapetype');
+		var shapeType = document.createElement('cvml:shapetype');
 		shapeType.id = 'cufon-glyph-' + typeIndex++;
 		glyph.typeRef = '#' + shapeType.id;
 		shapeType.stroked = 'f';
@@ -593,7 +592,7 @@ Cufon.registerEngine('vml', (function() {
 		shapeType.coordorigin = viewBox.minX + ',' + viewBox.minY;
 		var ensureSize = 'm' + viewBox.minX + ',' + viewBox.minY + ' r' + viewBox.width + ',' + viewBox.height;
 		shapeType.path = (glyph.d ? 'm' + glyph.d + 'x' : '') + ensureSize;
-		document.body.appendChild(shapeType);
+		document.body.insertBefore(shapeType, document.body.firstChild);
 	}
 	
 	return function(font, text, style, options, node) {
@@ -612,18 +611,27 @@ Cufon.registerEngine('vml', (function() {
 		var glyphWidth = size.convert(viewBox.width);
 		var glyphHeight = size.convert(viewBox.height);
 		
-		var canvas = document.createElement('span');
-		canvas.className = 'cufon cufon-vml';
+		var wrapper = document.createElement('span');
+		wrapper.className = 'cufon cufon-vml';
 		
-		var cStyle = canvas.runtimeStyle;
+		wrapper.style.border = '1px solid blue';
 		
-		cStyle.height = size.convert(-font.ascent + font.descent) + 'px';
+		var canvas = document.createElement('cvml:group');
+		
+		canvas.style.border = '1px solid red';
+		canvas.style.height = glyphHeight;
+		canvas.style.top = Math.floor(size.convert(viewBox.minY - font.ascent));
+		canvas.style.left = size.convert(viewBox.minX);
+		
+		var wStyle = wrapper.runtimeStyle;
+		
+		wStyle.height = size.convert(-font.ascent + font.descent) + 'px';
 		
 		var color = style.get('color');
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
-		var width = 0, offsetX = viewBox.minX, offsetY = Math.floor(size.convert(viewBox.minY - font.ascent));
+		var width = 0, offsetX = 0, advance = null;
 		
 		for (var i = 0, l = chars.length; i < l; ++i) {
 		
@@ -632,26 +640,36 @@ Cufon.registerEngine('vml', (function() {
 			
 			if (!glyph.typeRef) createType(glyph, viewBox);
 			
-			var shape = document.createElement('v:shape');
+			var shape = document.createElement('cvml:shape');
 			shape.type = glyph.typeRef;
 			var sStyle = shape.runtimeStyle;
-			sStyle.width = glyphWidth;
-			sStyle.height = glyphHeight;
-			sStyle.top = offsetY;
-			sStyle.left = size.convert(offsetX);
+			sStyle.width = viewBox.width;
+			sStyle.height = viewBox.height;
+			sStyle.top = 0;
+			sStyle.left = offsetX;
 			shape.fillcolor = color;
 			canvas.appendChild(shape);
 			
-			var advance = Number(glyph.w || font.w) + spacing.letter;
+			advance = Number(glyph.w || font.w) + spacing.letter;
 			
 			width += advance;
 			offsetX += advance;
 			
 		}
 		
-		cStyle.width = Math.max(Math.ceil(size.convert(width)), 0);
+		if (advance === null) return null;
+		
+		var fullWidth = -viewBox.minX + width + (viewBox.width - advance);
+		
+		canvas.coordsize = fullWidth + ',' + viewBox.height;
+		
+		canvas.style.width = size.convert(fullWidth);
+		
+		wStyle.width = Math.max(Math.ceil(size.convert(width)), 0);
+		
+		wrapper.appendChild(canvas);
 				
-		return canvas;
+		return wrapper;
 		
 	}
 	
