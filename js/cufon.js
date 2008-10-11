@@ -614,16 +614,14 @@ Cufon.registerEngine('vml', (function() {
 		var wrapper = document.createElement('span');
 		wrapper.className = 'cufon cufon-vml';
 		
-		wrapper.style.border = '1px solid blue';
-		
 		var canvas = document.createElement('cvml:group');
 		
-		canvas.style.border = '1px solid red';
-		canvas.style.height = glyphHeight;
-		canvas.style.top = Math.floor(size.convert(viewBox.minY - font.ascent));
-		canvas.style.left = size.convert(viewBox.minX);
-		
+		var cStyle = canvas.style;
 		var wStyle = wrapper.runtimeStyle;
+		
+		cStyle.height = glyphHeight;
+		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent));
+		cStyle.left = size.convert(viewBox.minX);
 		
 		wStyle.height = size.convert(-font.ascent + font.descent) + 'px';
 		
@@ -663,7 +661,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		canvas.coordsize = fullWidth + ',' + viewBox.height;
 		
-		canvas.style.width = size.convert(fullWidth);
+		cStyle.width = size.convert(fullWidth);
 		
 		wStyle.width = Math.max(Math.ceil(size.convert(width)), 0);
 		

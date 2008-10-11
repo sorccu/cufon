@@ -4,7 +4,7 @@ date_default_timezone_set('Europe/Helsinki');
 
 require 'Cufon.php';
 require 'FontForgeScript.php';
-require 'SVGFont.php';
+require 'SVGFontContainer.php';
 
 switch ($_SERVER['REQUEST_METHOD'])
 {
@@ -164,15 +164,16 @@ foreach ($_FILES['font']['error'] as $key => $error)
 	
 	$script->execute();
 	
-	$svgFont = SVGFont::fromFile($svgFile);
+	$id = array();
 	
-	unlink($svgFile);
+	foreach (SVGFontContainer::fromFile($svgFile) as $font)
+	{
+		echo $options['callback'], '(', $font->toJSON(), ');';
+		
+		$fonts[] = $font->getId();
+	}
 	
-	$fonts[] = $svgFont->getId();
-	
-	echo $svgFont->toJSON($options['callback']);
-	
-	unset($svgFont);
+	//unlink($svgFile);
 }
 
 $filename = preg_replace(
