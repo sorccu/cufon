@@ -42,8 +42,8 @@ var Cufon = new function() {
 	
 		ready: (function() {
 		
-			var complete = (document.readyState == 'complete');
-			
+			var complete = false, readyStatus = { loaded: 1, complete: 1 };
+		
 			var queue = [], perform = function(id) {
 				if (complete) return;
 				complete = true;
@@ -59,11 +59,9 @@ var Cufon = new function() {
 			
 			// Old WebKit, Internet Explorer
 			
-			if (!window.opera && document.readyState) {
-				setTimeout(function() {
-					({ loaded: 1, complete: 1 })[document.readyState] ? perform() : setTimeout(arguments.callee, 10);
-				}, 10);
-			}
+			if (!window.opera && document.readyState) (function() {
+				readyStatus[document.readyState] ? perform() : setTimeout(arguments.callee, 10);
+			})();
 			
 			// Internet Explorer
 			
@@ -210,9 +208,10 @@ var Cufon = new function() {
 		responsive: false,
 		rotation: 0,
 		selector: (
-			document.querySelectorAll
-				? function(query) { return document.querySelectorAll(query); }
-				: function(query) { return document.getElementsByTagName(query); }
+				window.$$
+			||	window.$
+			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
+			||	function(query) { return document.getElementsByTagName(query); }
 		),
 		wordWrap: true
 	};

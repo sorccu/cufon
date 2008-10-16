@@ -173,7 +173,7 @@ foreach ($_FILES['font']['error'] as $key => $error)
 		$fonts[] = $font->getId();
 	}
 	
-	//unlink($svgFile);
+	unlink($svgFile);
 }
 
 $filename = preg_replace(

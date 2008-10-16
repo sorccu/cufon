@@ -118,29 +118,19 @@
 		
 		<script src="js/cufon.js" type="text/javascript"></script>
 		
-		<script type="text/javascript">
+		<script src="fonts/Affair_400.font.js" type="text/javascript"></script>
 		
-			Cufon.loadFont('fonts/Affair_400.font.js', function() {
-			
-				Cufon.set('responsive', false).replace(document.getElementsByTagName('h1'), {
-					fontFamily: 'Affair',
-					fontSize: '64px'
-				}, { wordWrap: false });
-				
-				Cufon.set('responsive', true).replace(document.getElementsByTagName('legend'), {
-					fontFamily: 'Affair',
-					fontSize: '60px'
-				});
-				
+		<script type="text/javascript">
+	
+			Cufon.replace(document.getElementsByTagName('h1'), {
+				fontFamily: 'Affair',
+				fontSize: '64px',
+				wordWrap: false
 			});
 			
-			Cufon.loadFont('fonts/Brisa_400.font.js', function() {
-			
-				Cufon.replace(document.getElementsByTagName('button'), {
-					fontFamily: 'Brisa',
-					fontSize: '64px'
-				});
-				
+			Cufon.replace(document.getElementsByTagName('legend'), {
+				fontFamily: 'Affair',
+				fontSize: '60px'
 			});
 		
 		</script>
