@@ -164,8 +164,6 @@ foreach ($_FILES['font']['error'] as $key => $error)
 	
 	$script->execute();
 	
-	$id = array();
-	
 	foreach (SVGFontContainer::fromFile($svgFile) as $font)
 	{
 		echo $options['callback'], '(', $font->toJSON(), ');';
@@ -173,7 +171,7 @@ foreach ($_FILES['font']['error'] as $key => $error)
 		$fonts[] = $font->getId();
 	}
 	
-	unlink($svgFile);
+	//unlink($svgFile);
 }
 
 $filename = preg_replace(
