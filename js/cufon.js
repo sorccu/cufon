@@ -281,7 +281,7 @@ var Cufon = new function() {
 		return merged;
 	}
 	
-	function process(font, text, style, options, node) {
+	function process(font, text, style, options, node, el) {
 		if (options.separate) {
 			var fragment = document.createDocumentFragment(), processed;
 			var words = text.split(/\s+/);
@@ -291,12 +291,12 @@ var Cufon = new function() {
 				if (/\s$/.test(text)) words.push('');
 			}
 			for (var i = 0, l = words.length; i < l; ++i) {
-				processed = engines[options.engine](font, words[i] + (i < l - 1 ? ' ' : ''), style, options, node);
+				processed = engines[options.engine](font, words[i] + (i < l - 1 ? ' ' : ''), style, options, node, el);
 				if (processed) fragment.appendChild(processed);
 			}
 			return fragment;
 		}
-		return engines[options.engine](font, text, style, options, node);
+		return engines[options.engine](font, text, style, options, node, el);
 	}
 	
 	function replaceElement(el, options) {
@@ -314,7 +314,7 @@ var Cufon = new function() {
 			if (!style) style = Cufon.CSS.getStyle(el).extend(options);
 			if (!font) font = getFont(el, style);
 			if (!font) continue;
-			node.parentNode.replaceChild(process(font, text, style, options, node), node);
+			node.parentNode.replaceChild(process(font, text, style, options, node, el), node);
 		}
 		if (!storage.options) {
 			if (options.hover) hoverHandler.attach(el);
@@ -465,7 +465,7 @@ Cufon.registerEngine('canvas', (function() {
 		return Math.PI / 180 * degrees;	
 	}
 
-	return function(font, text, style, options, node) {
+	return function(font, text, style, options, node, el) {
 	
 		var viewBox = font.viewBox, base = font.baseSize;
 		
@@ -506,16 +506,17 @@ Cufon.registerEngine('canvas', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 		
-		var angle = radians(options.rotation);
+		var rotation = typeof options.rotation == 'function' ? options.rotation(el) : options.rotation;
+		
+		var angle = radians(rotation);
 		var angleSin = Math.sin(angle);
 		var angleCos = Math.cos(angle);
 		
-		if (options.rotation) {
+		if (rotation) {
 			var pxWidth = size.convert(width);
 			
 			canvas.width = angleCos * pxWidth + (height * angleSin);
 			canvas.height = height + pxWidth * angleSin;
-			
 			
 			wStyle.paddingLeft = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
 			wStyle.paddingBottom = (size.convert(-font.ascent + font.descent) - 1 + HAS_INLINE_BLOCK) + 'px';
@@ -531,11 +532,11 @@ Cufon.registerEngine('canvas', (function() {
 			cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
 		}
 		
-		var g = canvas.getContext('2d'), buffer = [];
+		var g = canvas.getContext('2d');
 		
 		g.scale(scale, scale);
 		
-		if (options.rotation) {
+		if (rotation) {
 			console.log(viewBox);
 			g.translate(-viewBox.minX * angleCos + (viewBox.height + viewBox.minY) * angleSin, -viewBox.minY * angleCos + -viewBox.minX * angleSin);
 			g.rotate(angle);
@@ -558,42 +559,32 @@ Cufon.registerEngine('canvas', (function() {
 			g.stroke();
 		}
 		
-		if (options.enableTextDecoration) textDecoration: for (var search = node, decoStyle = style; search.parentNode && search.parentNode.nodeType == 1; ) {
+		var textDecoration = {
+			underline: null,
+			overline: null,
+			'line-through': null
+		};
 		
-			search = search.parentNode;
+		if (options.enableTextDecoration) for (var search = node, decoStyle = style; search.parentNode && search.parentNode.nodeType == 1; ) {
+	
+			var foundAll = true;
 			
-			// @todo add support for multiple values
-		
-			switch (decoStyle.get('textDecoration')) {
-			
-				case 'underline':
-				
-					line(-font.face['underline-position'], decoStyle.get('color'));
-					
-					break textDecoration;
-					
-				case 'overline':
-				
-					line(-font.face['ascent'], decoStyle.get('color'));
-					
-					break textDecoration;
-					
-				case 'line-through':
-				
-					buffer.push(function() {
-						line(font.face['descent'], decoStyle.get('color'), true);
-					});
-					
-					break textDecoration;
-					
-				case 'none':
-				
-					decoStyle = Cufon.CSS.getStyle(search);
-				
-					break;
+			for (var type in textDecoration) {
+				if (textDecoration[type]) continue;
+				if (decoStyle.get('textDecoration').indexOf(type) != -1) textDecoration[type] = decoStyle.get('color');
+				foundAll = false;
 			}
-		
+			
+			if (foundAll) break; // this is rather unlikely to happen
+			
+			decoStyle = Cufon.CSS.getStyle(search = search.parentNode);
+			
 		}
+		
+		if (textDecoration.underline) line(-font.face['underline-position'], textDecoration.underline);
+		if (textDecoration.overline) line(-font.face['ascent'], textDecoration.overline);
+		
+		console.dir(textDecoration);
 		
 		g.fillStyle = style.get('color');
 		
@@ -611,7 +602,7 @@ Cufon.registerEngine('canvas', (function() {
 		
 		g.restore();
 		
-		for (var fn; fn = buffer.shift(); fn());
+		if (textDecoration['line-through']) line(font.face['descent'], textDecoration['line-through']);
 		
 		wrapper.appendChild(canvas);
 		
