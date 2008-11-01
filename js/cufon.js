@@ -584,8 +584,6 @@ Cufon.registerEngine('canvas', (function() {
 		if (textDecoration.underline) line(-font.face['underline-position'], textDecoration.underline);
 		if (textDecoration.overline) line(-font.face['ascent'], textDecoration.overline);
 		
-		console.dir(textDecoration);
-		
 		g.fillStyle = style.get('color');
 		
 		for (var j = 0, k = chars.length; j < k; ++j) {
