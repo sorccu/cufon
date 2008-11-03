@@ -461,8 +461,8 @@ Cufon.registerEngine('canvas', (function() {
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
-		var width = -viewBox.minX;
-		var height = Math.ceil(size.convert(viewBox.height));
+		var width = -letterSpacing;
+		var height = size.convert(viewBox.height);
 		
 		var lastWidth;
 		
@@ -475,9 +475,6 @@ Cufon.registerEngine('canvas', (function() {
 		if (!lastWidth) return null; // there's nothing to render
 		
 		var adjust = viewBox.width - lastWidth;
-		
-		width += adjust - letterSpacing;
-		
 		var scale = height / viewBox.height;
 		
 		var wrapper = document.createElement('span');
@@ -489,10 +486,10 @@ Cufon.registerEngine('canvas', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 		
-		canvas.width = Math.ceil(size.convert(width));
-		canvas.height = height;
-		wStyle.paddingLeft = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
-		wStyle.paddingBottom = (size.convert(-font.ascent + font.descent) - 1 + HAS_INLINE_BLOCK) + 'px';
+		canvas.width = Math.ceil(size.convert(-viewBox.minX + width + adjust));
+		canvas.height = Math.ceil(height);
+		wStyle.paddingLeft = Math.ceil(size.convert(width)) + 'px';
+		wStyle.paddingBottom = (size.convert(font.height) - 1 + HAS_INLINE_BLOCK) + 'px';
 		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
 		cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
 		
@@ -511,7 +508,7 @@ Cufon.registerEngine('canvas', (function() {
 			g.beginPath();
 			
 			g.moveTo(0, y);
-			g.lineTo(width - adjust + viewBox.minX, y);
+			g.lineTo(width, y);
 			
 			g.stroke();
 		}
