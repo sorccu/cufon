@@ -1,10 +1,12 @@
 <?php
 
+define('CUFON_FONTFORGE', '/opt/local/bin/fontforge');
+
 date_default_timezone_set('Europe/Helsinki');
 
+set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__));
+
 require 'Cufon.php';
-require 'FontForgeScript.php';
-require 'SVGFontContainer.php';
 
 switch ($_SERVER['REQUEST_METHOD'])
 {
@@ -32,9 +34,6 @@ $options = filter_input_array(INPUT_POST, array(
 	'ligatures' => array(
 		'filter' => FILTER_VALIDATE_BOOLEAN
 	),
-	'missingGlyph' => array(
-		'filter' => FILTER_VALIDATE_BOOLEAN
-	),
 	'customGlyphs' => array(
 		'filter' => FILTER_UNSAFE_RAW,
 		'flags' => FILTER_REQUIRE_SCALAR | FILTER_NULL_ON_FAILURE
@@ -55,8 +54,19 @@ $options = filter_input_array(INPUT_POST, array(
 			'max_range' => 2048
 		)
 	),
-	'allowScaling' => array(
+	'disableScaling' => array(
 		'filter' => FILTER_VALIDATE_BOOLEAN
+	),
+	'simplify' => array(
+		'filter' => FILTER_VALIDATE_BOOLEAN
+	),
+	'simplifyDelta' => array(
+		'filter' => FILTER_VALIDATE_INT,
+		'flags' => FILTER_NULL_ON_FAILURE,
+		'options' => array(
+			'min_range' => 0,
+			'max_range' => 100
+		)
 	)
 ));
 
@@ -64,14 +74,15 @@ $errors = array_filter($options, 'is_null');
 
 $errors = array_diff_key($errors, array(
 	'ligatures' => 1,
-	'missingGlyph' => 1,
-	'allowScaling' => 1
+	'disableScaling' => 1,
+	'simplify' => 1,
+	'glyphs' => 1
 ));
 
 if (!empty($errors))
 {
-	header('HTTP/1.1 400 Bad Request');
-	echo "Sry u is fail";
+	header('HTTP/1.1 303 See Other');
+	header('Location: /cufon/?fail=' . implode(',', array_keys($errors)));
 	exit(0);
 }
 
@@ -88,7 +99,7 @@ if (!empty($domains))
 		$domainList[$domain] = 1;
 	}
 	
-	printf('if (!%s[location.host]) throw Error("Invalid cuf—n hostname");', json_encode($domainList));
+	printf('if (!%s[location.host]) throw Error("Host not allowed");', json_encode($domainList));
 }
 
 $fonts = array();
@@ -113,65 +124,12 @@ foreach ($_FILES['font']['error'] as $key => $error)
 			exit(0);
 	}
 	
-	$file = $_FILES['font']['tmp_name'][$key];
-	
-	Cufon::log('Processing %s', $file);
-	
-	$script = new FontForgeScript();
-	
-	$script->open($file);
-	$script->selectNone();
-	
-	foreach ($options['glyphs'] as $glyph)
+	foreach (Cufon::generate($_FILES['font']['tmp_name'][$key], $options) as $id => $json)
 	{
-		$ranges = explode(',', $glyph);
+		echo $json;
 		
-		foreach ($ranges as $range)
-		{
-			if (strpos($range, '-')) // can't be 0 anyway
-			{
-				// the range regex allows for things like 0xff-0xff-0xff, so we'll
-				// just ignore everything between the first and last one.
-				
-				$points = explode('-', $range);
-				
-				$script->selectUnicodeRange(intval(reset($points), 16), intval(end($points), 16));
-			}
-			else
-			{
-				$script->selectUnicode(intval($range, 16));
-			}
-		}
+		$fonts[] = $id;
 	}
-	
-	$script->selectInvert();
-	$script->clear();
-	
-	if ($options['allowScaling'])
-	{
-		$script->scaleToEm($options['emSize']);
-	}
-	
-	$script->removeAllKerns();
-	$script->selectAll();
-	$script->verticalFlip(0);
-	
-	$svgFile = Cufon::getUnusedFilename('.svg');
-	
-	Cufon::log('Converting to SVG with filename %s', $svgFile);
-	
-	$script->generate($svgFile);
-	
-	$script->execute();
-	
-	foreach (SVGFontContainer::fromFile($svgFile) as $font)
-	{
-		echo $options['callback'], '(', $font->toJSON(), ');';
-		
-		$fonts[] = $font->getId();
-	}
-	
-	unlink($svgFile);
 }
 
 $filename = preg_replace(

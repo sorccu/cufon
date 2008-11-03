@@ -1,14 +1,13 @@
 <?php
 
+require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'FontForgeScript.php';
+require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFontContainer.php';
+
 class Cufon {
-	
-	const FONTFORGE = '/opt/local/bin/fontforge';
-	const TEMP_DIR = 'tmp/';
-	const LOG_FILE = 'cufon.log';
 	
 	public static function getUnusedFilename($suffix)
 	{
-		$filename = self::TEMP_DIR . 'cufon_';
+		$filename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'cufon_';
 		
 		do
 		{
@@ -25,14 +24,97 @@ class Cufon {
 		
 		array_shift($args);
 		
-		error_log(sprintf("%s [%s]: %s\n", $_SERVER['REMOTE_ADDR'], date('Y-m-d H:i:s'), vsprintf($message, $args)), 3, self::LOG_FILE);
+		error_log(sprintf("[cufon] %s: %s\n", date('Y-m-d H:i:s'), vsprintf($message, $args)), 0);
 	}
 	
-	public static function redirect($to)
+	/**
+	 * @param string $file
+	 * @param array $options
+	 * @return array
+	 */
+	public static function generate($file, array $options)
 	{
-		header('HTTP/1.1 303 See Other');
-		header('Location: ' . $to);
-		exit(0);
+		Cufon::log('Processing %s', $file);
+		
+		$script = new FontForgeScript();
+		
+		$script->open($file);
+		$script->selectNone();
+		
+		if (!empty($options['glyphs']))
+		{
+			foreach ($options['glyphs'] as $glyph)
+			{
+				$ranges = explode(',', $glyph);
+				
+				foreach ($ranges as $range)
+				{
+					if (strpos($range, '-')) // can't be 0 anyway
+					{
+						// the range regex allows for things like 0xff-0xff-0xff, so we'll
+						// just ignore everything between the first and last one.
+						
+						$points = explode('-', $range);
+						
+						$script->selectUnicodeRange(intval(reset($points), 16), intval(end($points), 16));
+					}
+					else
+					{
+						$script->selectUnicode(intval($range, 16));
+					}
+				}
+			}
+		}
+		
+		if (!empty($options['customGlyphs']))
+		{	
+			$glyphs = preg_split('//u', $options['customGlyphs'], -1, PREG_SPLIT_NO_EMPTY);
+			
+			foreach ($glyphs as $glyph)
+			{
+				// http://www.php.net/manual/en/function.ord.php#68914
+				
+				$cp = unpack('N', mb_convert_encoding($glyph, 'UCS-4BE', 'UTF-8'));
+				
+				$script->selectUnicode($cp[1]);
+			}
+		}
+		
+		$script->selectInvert();
+		$script->clear();
+		
+		if (!$options['disableScaling'])
+		{
+			$script->scaleToEm($options['emSize']);
+		}
+		
+		$script->removeAllKerns();
+		$script->selectAll();
+		$script->verticalFlip(0);
+		
+		if ($options['simplify'])
+		{
+			$script->simplify($options['simplifyDelta']);
+		}
+		
+		$svgFile = Cufon::getUnusedFilename('.svg');
+		
+		Cufon::log('Converting to SVG with filename %s', $svgFile);
+		
+		$script->generate($svgFile);
+		
+		$script->execute();
+		
+		$fonts = array();
+		
+		foreach (SVGFontContainer::fromFile($svgFile) as $font)
+		{
+			$fonts[$font->getId()] = $options['callback'] . '(' . $font->toJSON() . ');';
+		}
+		
+		unlink($svgFile);
+		
+		return $fonts;
 	}
 
 }

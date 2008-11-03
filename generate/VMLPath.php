@@ -3,19 +3,36 @@
 class VMLPath {
 	
 	/**
+	 * @param string $type
+	 * @param array $coords
+	 * @return string
+	 */
+	private static function commandToString($type, $coords)
+	{
+		if (!is_array($coords))
+		{
+			$coords = func_get_args();
+			
+			array_shift($coords);
+		}
+		
+		return $type . implode(',', $coords);
+	}
+	
+	/**
 	 * @param string $path
 	 * @return VMLPath
 	 */
 	public static function fromSVG($path)
 	{
+		$vml = new VMLPath();
+		
 		$matches = array();
 		
 		if (!preg_match_all('/([a-zA-Z])([0-9. \-,]*)/', $path, $matches, PREG_SET_ORDER))
 		{
-			return new VMLPath();
+			return $vml;
 		}
-		
-		$vml = array();
 		
 		$at = (object) array('x' => 0, 'y' => 0);
 		$cp = (object) array('x' => 0, 'y' => 0);
@@ -30,68 +47,68 @@ class VMLPath {
 			{
 				case 'z':
 				case 'Z':
-					$vml[] = 'x';
+					$vml->closePath();
 					break;
 				case 'M':
-					$vml[] = self::path('m',
+					$vml->moveTo(
 						$at->x = $coords[0],
 						$at->y = $coords[1]
 					);
 					break;
 				case 'L':
-					$vml[] = self::path('r',
-						-($at->x - ($at->x = $coords[0])),
-						-($at->y - ($at->y = $coords[1]))
+					$vml->lineTo(
+						$at->x = $coords[0],
+						$at->y = $coords[1]
 					);
 					break;
 				case 'l':
-					$vml[] = self::path('r',
-						-($at->x - ($at->x += $coords[0])),
-						-($at->y - ($at->y += $coords[1]))
+					$vml->lineTo(
+						$at->x += $coords[0],
+						$at->y += $coords[1]
 					);
 					break;
 				case 'H':
-					$vml[] = self::path('r',
-						-($at->x - ($at->x = $coords[0])),
-						0
+					$vml->lineTo(
+						$at->x = $coords[0],
+						$at->y
 					);
 					break;
 				case 'h':
-					$vml[] = self::path('r',
-						-($at->x - ($at->x += $coords[0])),
-						0
+					$vml->lineTo(
+						$at->x += $coords[0],
+						$at->y
 					);
 					break;
 				case 'V':
-					$vml[] = self::path('r',
-						0,
-						-($at->y - ($at->y = $coords[0]))
+					$vml->lineTo(
+						$at->x,
+						$at->y = $coords[0]
 					);
 					break;
 				case 'v':
-					$vml[] = self::path('r',
-						0,
-						-($at->y - ($at->y += $coords[0]))
+					$vml->lineTo(
+						$at->x,
+						$at->y += $coords[0]
 					);
 					break;
 				case 'C':
-					$vml[] = self::path('v',
-						-($at->x - $coords[0]),
-						-($at->y - $coords[1]),
-						-($at->x - ($cp->x = $coords[2])),
-						-($at->y - ($cp->y = $coords[3])),
-						-($at->x - ($at->x = $coords[4])),
-						-($at->y - ($at->y = $coords[5]))
+					$vml->bezierCurveTo(
+						$coords[0],
+						$coords[1],
+						$cp->x = $coords[2],
+						$cp->y = $coords[3],
+						$at->x = $coords[4],
+						$at->y = $coords[5]
 					);
 					break;
 				case 'c':
-					$vml[] = self::path('v',
-						$coords[0],
-						$coords[1],
-						-($at->x - ($cp->x = $at->x + $coords[2])),
-						-($at->y - ($cp->y = $at->y + $coords[3])),
-						-($at->x - ($at->x += $coords[4])),
-						-($at->y - ($at->y += $coords[5]))
+					$vml->bezierCurveTo(
+						$at->x + $coords[0],
+						$at->y + $coords[1],
+						$cp->x = $at->x + $coords[2],
+						$cp->y = $at->y + $coords[3],
+						$at->x += $coords[4],
+						$at->y += $coords[5]
 					);
 					break;
 				case 'S':
@@ -100,13 +117,13 @@ class VMLPath {
 						$cp->x = $at->x;
 						$cp->y = $at->y;
 					}
-					$vml[] = self::path('v',
-						$at->x - $cp->x,
-						$at->y - $cp->y,
-						-($at->x - ($cp->x = $coords[0])),
-						-($at->y - ($cp->y = $coords[1])),
-						-($at->x - ($at->x = $coords[2])),
-						-($at->y - ($at->y = $coords[3]))
+					$vml->bezierCurveTo(
+						$at->x + ($at->x - $cp->x),
+						$at->y + ($at->y - $cp->y),
+						$cp->x = $coords[0],
+						$cp->y = $coords[1],
+						$at->x = $coords[2],
+						$at->y = $coords[3]
 					);
 					break;
 				case 's':
@@ -115,34 +132,30 @@ class VMLPath {
 						$cp->x = $at->x;
 						$cp->y = $at->y;
 					}
-					$vml[] = self::path('v',
-						$at->x - $cp->x,
-						$at->y - $cp->y,
-						-($at->x - ($cp->x = $at->x + $coords[0])),
-						-($at->y - ($cp->y = $at->y + $coords[1])),
-						-($at->x - ($at->x += $coords[2])),
-						-($at->y - ($at->y += $coords[3]))
-					);
-					break;
-				case 'Q':
-					$vml[] = self::path('v', self::quadraticBezierToCubic(
-						$at->x,
-						$at->y,
-						$cp->x = $coords[0],
-						$cp->y = $coords[1],
-						$at->x = $coords[2],
-						$at->y = $coords[3]
-					));
-					break;
-				case 'q':
-					$vml[] = self::path('v', self::quadraticBezierToCubic(
-						$at->x,
-						$at->y,
+					$vml->bezierCurveTo(
+						$at->x + ($at->x - $cp->x),
+						$at->y + ($at->y - $cp->y),
 						$cp->x = $at->x + $coords[0],
 						$cp->y = $at->y + $coords[1],
 						$at->x += $coords[2],
 						$at->y += $coords[3]
-					));
+					);
+					break;
+				case 'Q':
+					$vml->quadraticCurveTo(
+						$cp->x = $coords[0],
+						$cp->y = $coords[1],
+						$at->x = $coords[2],
+						$at->y = $coords[3]
+					);
+					break;
+				case 'q':
+					$vml->quadraticCurveTo(
+						$cp->x = $at->x + $coords[0],
+						$cp->y = $at->y + $coords[1],
+						$at->x += $coords[2],
+						$at->y += $coords[3]
+					);
 					break;
 				case 'T':
 					if (!$previous || !preg_match('/^[QqTt]$/', $previous))
@@ -150,14 +163,12 @@ class VMLPath {
 						$cp->x = $at->x;
 						$cp->y = $at->y;
 					}
-					$vml[] = self::path('v', self::quadraticBezierToCubic(
-						$at->x,
-						$at->y,
+					$vml->quadraticCurveTo(
 						$cp->x = $at->x + ($at->x - $cp->x),
 						$cp->y = $at->y + ($at->y - $cp->y),
 						$at->x = $coords[0],
 						$at->y = $coords[1]
-					));
+					);
 					break;
 				case 't':
 					if (!$previous || !preg_match('/^[QqTt]$/', $previous))
@@ -165,14 +176,12 @@ class VMLPath {
 						$cp->x = $at->x;
 						$cp->y = $at->y;
 					}
-					$vml[] = self::path('v', self::quadraticBezierToCubic(
-						$at->x,
-						$at->y,
+					$vml->quadraticCurveTo(
 						$cp->x = $at->x + ($at->x - $cp->x),
 						$cp->y = $at->y + ($at->y - $cp->y),
 						$at->x += $coords[0],
 						$at->y += $coords[1]
-					));
+					);
 					break;
 				case 'A':
 				case 'a':
@@ -183,9 +192,160 @@ class VMLPath {
 			$previous = $cmd;
 		}
 		
-		$vml[] = 'e';
+		$vml->endPath();
 		
-		return new VMLPath(implode('', $vml));
+		return $vml;
+	}
+	
+	private $parts = array();
+	
+	private $atX = 0;
+	private $atY = 0;
+	
+	private $cpX = 0;
+	private $cpY = 0;
+	
+	private $remainderX = 0;
+	private $remainderY = 0;
+	
+	/**
+	 * @return void
+	 */
+	public function __construct()
+	{
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return implode('', $this->parts);
+	}
+
+	/**
+	 * @param float $cp1x
+	 * @param float $cp1y
+	 * @param float $cp2x
+	 * @param float $cp2y
+	 * @param float $toX
+	 * @param float $toY
+	 * @return VMLPath
+	 */
+	public function bezierCurveTo($cp1x, $cp1y, $cp2x, $cp2y, $toX, $toY)
+	{
+		$this->parts[] = $this->draw('v', $cp1x, $cp1y, $cp2x, $cp2y, $toX, $toY);
+		
+		return $this;
+	}
+	
+	/**
+	 * @return VMLPath
+	 */
+	public function closePath()
+	{
+		$this->parts[] = 'x';
+		
+		return $this;
+	}
+	
+	/**
+	 * Returns a shortened, relative VML path part
+	 *
+	 * @param string $type
+	 * @param mixed $coords
+	 * @return string
+	 */
+	private function draw($type, $coords)
+	{
+		if (!is_array($coords))
+		{
+			$coords = func_get_args();
+			
+			array_shift($coords);
+		}
+		
+		$toY = array_pop($coords);
+		$toX = array_pop($coords);
+		
+		$parts = array();
+		
+		foreach ($coords as $i => $coord)
+		{
+			$parts[] = $coord === 0 ? '' : round($coord - ($i % 2 ? $this->atY : $this->atX));
+		}
+		
+		$parts[] = $this->moveX($toX);
+		$parts[] = $this->moveY($toY);
+	
+		return self::commandToString($type, $parts);
+	}
+	
+	/**
+	 * @return VMLPath
+	 */
+	public function endPath()
+	{
+		$this->parts[] = 'e';
+		
+		return $this;
+	}
+	
+	/**
+	 * @param float $toX
+	 * @param float $toY
+	 * @return VMLPath
+	 */
+	public function lineTo($toX, $toY)
+	{
+		$this->parts[] = $this->draw('r', $toX, $toY);
+		
+		return $this;
+	}
+	
+	/**
+	 * @param float $toX
+	 * @param float $toY
+	 * @return VMLPath
+	 */
+	public function moveTo($toX, $toY)
+	{	
+		$this->moveX($toX);
+		$this->moveY($toY);
+		
+		$this->parts[] = self::commandToString('m', $this->atX, $this->atY);
+		
+		return $this;
+	}
+	
+	/**
+	 * @param float $to
+	 * @return int
+	 */
+	private function moveX($to)
+	{
+		$delta = $to - $this->atX;
+		
+		$rounded = round($delta);
+
+		$this->atX += $rounded;
+		
+		return $rounded;
+	}
+	
+	/**
+	 * @param float $to
+	 * @return int
+	 */
+	private function moveY($to)
+	{
+		$delta = $to - $this->atY;
+		
+		$rounded = round($delta);
+
+		$this->atY += $rounded;
+		
+		return $rounded;
 	}
 	
 	/**
@@ -199,76 +359,28 @@ class VMLPath {
 	 * @param float $cpY
 	 * @param float $toX
 	 * @param float $toY
-	 * @return array
+	 * @return VMLPath
 	 */
-	private static function quadraticBezierToCubic($atX, $atY, $cpX, $cpY, $toX, $toY)
+	private function quadraticCurveTo($cpX, $cpY, $toX, $toY)
 	{
 		$cp1 = (object) array(
-			'x' => $atX + 2 / 3 * ($cpX - $atX),
-			'y' => $atY + 2 / 3 * ($cpY - $atY)
+			'x' => $this->atX + 2 / 3 * ($cpX - $this->atX),
+			'y' => $this->atY + 2 / 3 * ($cpY - $this->atY)
 		);
 	
 		$cp2 = (object) array(
-			'x' => $cp1->x + ($toX - $atX) / 3,
-			'y' => $cp1->y + ($toY - $atY) / 3
+			'x' => $cp1->x + ($toX - $this->atX) / 3,
+			'y' => $cp1->y + ($toY - $this->atY) / 3
 		);
 		
-		return array(
-			$cp1->x - $atX,
-			$cp1->y - $atY,
-			$cp2->x - $atX,
-			$cp2->y - $atY,
-			$toX - $atX,
-			$toY - $atY
+		return $this->bezierCurveTo(
+			$cp1->x,
+			$cp1->y,
+			$cp2->x,
+			$cp2->y,
+			$toX,
+			$toY
 		);
-	}
-	
-	/**
-	 * Returns a shortened VML path part
-	 *
-	 * @param string $type
-	 * @param mixed $coords
-	 * @return string
-	 */
-	private static function path($type, $coords)
-	{
-		if (!is_array($coords))
-		{
-			$coords = func_get_args();
-			
-			array_shift($coords);
-		}
-		
-		$parts = array();
-		
-		foreach ($coords as $coord)
-		{
-			$parts[] = $coord === 0 ? '' : round($coord, 1);
-		}
-		
-		return $type . implode(',', $parts);
-	}
-	
-	/**
-	 * @var string
-	 */
-	public $path;
-
-	/**
-	 * @param string $path
-	 * @return void
-	 */
-	public function __construct($path = '')
-	{
-		$this->path = $path;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return $this->path;
 	}
 	
 }

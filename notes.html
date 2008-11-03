@@ -42,6 +42,24 @@
 		
 		<p>There are limits to how accurately you can draw with <code>&lt;canvas&gt;</code>, which cufón uses. Your font just happens to have curves that cannot be drawn so well. Changing the scaling options rarely helps, but using a different font size might give slightly better results in some cases.</p>
 		
+		<h3><a href="#optimal-scaling" name="optimal-scaling">Optimal scaling options</a></h3>
+		
+		<table>
+			<thead>
+				<tr>
+					<th>Value</th>
+					<th>8px</th>
+					<th>10px</th>
+					<th>12px</th>
+					<th>14px</th>
+					<th>16px</th>
+					<th>18px</th>
+					<th>20px</th>
+					
+				</tr>
+			</thead>
+		</table>
+		
 		<h3><a href="#ligatures" name="ligatures">Ligatures &amp; Digraphs</a></h3>
 		
 		<p>For now ligatures and digraphs are unsupported due to performance reasons. Support for them might be added in a future release but even then it would only be made available as an option that would be disabled by default.</p>
@@ -51,6 +69,17 @@
 		<ul>
 			<li><a href="http://unicode.org/faq/ligature_digraph.html">Unicode.org / FAQ - Ligatures, Digraphs and Presentation Form</a></li>
 			<li><a href="http://typophile.com/node/33330">Unicode Ligatures | Typophile</a></li>
+		</ul>
+		
+		<h3><a href="#related" name="related">Related projects</a></h3>
+		
+		<ul>
+			<li><a href="http://www.netzgesta.de/dev/text/">strokeText.js by Christian Effenberg</a>
+				<p>Christian seems to have come up with the same idea of rendering text with VML and <code>&lt;canvas&gt;</code> (this is the internet after all), but he's using it for a different purpose.</p>
+			</li>
+			<li><a href="http://typeface.neocracy.org/">Typeface</a>
+				<p>Same ideas, even comes with a generator.</p>
+			</li>
 		</ul>
 	
 	</body>

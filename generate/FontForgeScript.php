@@ -33,6 +33,7 @@ class FontForgeScript {
 	}
 	
 	/**
+	 * @fixme Sometimes removes glyphs it shouldn't.
 	 * @return FontForgeScript
 	 */
 	public function clear()
@@ -51,7 +52,9 @@ class FontForgeScript {
 		
 		file_put_contents($filename, $this->__toString());
 		
-		$command = sprintf('env %s -script %s 2>&1', Cufon::FONTFORGE, escapeshellarg($filename));
+		chmod($filename, 0777);
+		
+		$command = sprintf('env %s -script %s 2>&1', CUFON_FONTFORGE, escapeshellarg($filename));
 		
 		Cufon::log('Executing command: %s', $command);
 		
@@ -60,7 +63,7 @@ class FontForgeScript {
 		$output = array();
 		
 		exec($command, $output, $status);
-
+		
 		Cufon::log('Exited with status %d', $status);
 		
 		unlink($filename);
@@ -97,6 +100,31 @@ class FontForgeScript {
 	public function open($filename)
 	{
 		$this->commands[] = sprintf('Open("%s")', addslashes($filename));
+		
+		chmod($filename, 0777);
+		
+		return $this;
+	}
+	
+/**
+	 * @param int $point
+	 * @return FontForgeScript
+	 */
+	public function reduceUnicode($point)
+	{
+		$this->commands[] = sprintf('SelectFewerSingletons(0u%X)', $point);
+		
+		return $this;
+	}
+	
+	/**
+	 * @param int $from
+	 * @param int $to
+	 * @return FontForgeScript
+	 */
+	public function reduceUnicodeRange($from, $to)
+	{
+		$this->commands[] = sprintf('SelectFewer(0u%X, 0u%X)', $from, $to);
 		
 		return $this;
 	}
@@ -169,6 +197,16 @@ class FontForgeScript {
 	public function selectUnicodeRange($from, $to)
 	{
 		$this->commands[] = sprintf('SelectMore(0u%X, 0u%X)', $from, $to);
+		
+		return $this;
+	}
+	
+	/**
+	 * @return FontForgeScript
+	 */
+	public function simplify($error = 3)
+	{
+		$this->commands[] = sprintf('Simplify(1 | 2 | 4 | 8 | 32 | 64, %d)', $error);
 		
 		return $this;
 	}

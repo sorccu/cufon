@@ -1,6 +1,6 @@
 <?php
 
-require 'VMLPath.php';
+require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'VMLPath.php';
 
 class SVGFont {
 	

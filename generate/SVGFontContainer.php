@@ -1,6 +1,6 @@
 <?php
 
-require 'SVGFont.php';
+require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFont.php';
 
 class SVGFontContainer implements IteratorAggregate {
 	

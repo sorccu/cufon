@@ -16,6 +16,10 @@ var Cufon = new function() {
 				return value / base * this.value;
 			};
 			
+			this.convertFrom = function(value) {
+				return value / this.value * base;
+			};
+			
 			this.toString = function() {
 				return this.value + this.unit;
 			};
@@ -29,6 +33,26 @@ var Cufon = new function() {
 			return new Style(el.style);
 		},
 		
+		textDecoration: function(el, style) {
+			if (!style) style = this.getStyle(el);
+			var types = {
+				underline: null,
+				overline: null,
+				'line-through': null
+			};
+			for (var search = el; search.parentNode && search.parentNode.nodeType == 1; ) {
+				var foundAll = true;
+				for (var type in types) {
+					if (types[type]) continue;
+					if (style.get('textDecoration').indexOf(type) != -1) types[type] = style.get('color');
+					foundAll = false;
+				}
+				if (foundAll) break; // this is rather unlikely to happen
+				style = this.getStyle(search = search.parentNode);
+			}
+			return types;
+		},
+		
 		textTransform: function(text, style) {
 			return text[{
 				uppercase: 'toUpperCase',
@@ -40,12 +64,6 @@ var Cufon = new function() {
 	
 	this.DOM = {
 			
-		contains: function(el, query) {
-			if (el.compareDocumentPosition) return !!(el.compareDocumentPosition(query) & 16);
-			if (el.contains) return el.contains(query);
-			return false;
-		},
-	
 		ready: (function() {
 		
 			var complete = false, readyStatus = { loaded: 1, complete: 1 };
@@ -71,24 +89,22 @@ var Cufon = new function() {
 			
 			// Internet Explorer
 			
-			if (document.readyState && document.createStyleSheet) {
-				(function() {
-					try {
-						document.body.doScroll('left');
-						perform();
-					}
-					catch (e) {
-						setTimeout(arguments.callee, 1);
-					}
-				})();
-			}
+			if (document.readyState && document.createStyleSheet) (function() {
+				try {
+					document.body.doScroll('left');
+					perform();
+				}
+				catch (e) {
+					setTimeout(arguments.callee, 1);
+				}
+			})();
 			
 			addEvent(window, 'load', perform); // Fallback
 			
 			return function(listener) {
 				if (!arguments.length) perform();
 				else complete ? listener() : queue.push(listener);
-			}
+			};
 			
 		})()
 		
@@ -108,38 +124,6 @@ var Cufon = new function() {
 		}
 			
 	};
-	
-	function HoverHandler(onStateChange) {
-		
-		var supportCheck = document.createElement('span');
-		var HAS_MOUSEENTER = supportCheck.onmouseenter !== undefined;
-		supportCheck = null;
-		
-		function dispatcher() {
-			var currentState, reactionDelay;
-			return function(e) {
-				//log(e.type, 'srcElement:', e.srcElement.nodeName, 'fromElement:', e.fromElement && e.fromElement.nodeName, 'toElement:', e.toElement && e.toElement.nodeName);
-				var el = this;
-				if (reactionDelay) clearTimeout(reactionDelay);
-				reactionDelay = setTimeout(function() {
-					onStateChange(el);
-				}, 10);
-			};
-		}
-		
-		this.attach = HAS_MOUSEENTER
-			? function(el) {
-				var listener = dispatcher();
-				addEvent(el, 'mouseenter', listener);
-				addEvent(el, 'mouseleave', listener);
-			}
-			: function(el) {
-				var listener = dispatcher();
-				addEvent(el, 'mouseover', listener);
-				addEvent(el, 'mouseout', listener);
-			};
-		
-	}
 	
 	function ExecutionQueue(context) {
 	
@@ -188,6 +172,8 @@ var Cufon = new function() {
 		
 		this.ascent = -parseInt(data.face['ascent'], 10);
 		this.descent = -parseInt(data.face['descent'], 10);
+		
+		this.height = -this.ascent + this.descent;
 		
 	}
 	
@@ -282,7 +268,7 @@ var Cufon = new function() {
 	}
 	
 	function process(font, text, style, options, node, el) {
-		if (options.separate) {
+		if (options.separateWords) {
 			var fragment = document.createDocumentFragment(), processed;
 			var words = text.split(/\s+/);
 			if (HAS_BROKEN_REGEXP) {
@@ -314,10 +300,11 @@ var Cufon = new function() {
 			if (!style) style = Cufon.CSS.getStyle(el).extend(options);
 			if (!font) font = getFont(el, style);
 			if (!font) continue;
-			node.parentNode.replaceChild(process(font, text, style, options, node, el), node);
+			var processed = process(font, text, style, options, node, el);
+			if (processed) node.parentNode.replaceChild(processed, node);
+			else node.parentNode.removeChild(node);
 		}
 		if (!storage.options) {
-			if (options.hover) hoverHandler.attach(el);
 			storage.options = options;
 		}
 	}
@@ -326,24 +313,22 @@ var Cufon = new function() {
 	
 	var sharedQueue = new ExecutionQueue(this), sharedStorage = new Storage();
 	
-	var hoverHandler = new HoverHandler(replaceElement);
-	
 	var engines = {}, fonts = {}, defaultOptions = {
 		enableTextDecoration: false,
 		engine: null,
 		fontScale: 1,
 		fontScaling: false,
-		hover: false,
+		//hover: false,
 		responsive: false,
-		rotation: 0,
-		selectable: false,
+		//rotation: 0,
+		//selectable: false,
 		selector: (
 				window.$$
 			||	window.$
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
 			||	function(query) { return document.getElementsByTagName(query); }
 		),
-		separate: true
+		separateWords: true
 	};
 	
 	this.loadFont = function(src, onLoad) {
@@ -378,7 +363,7 @@ var Cufon = new function() {
 	
 	this.replace = function(elements, options) {
 		options = merge(defaultOptions, options);
-		if (!options.engine) return this; // there's no browser support
+		if (!options.engine) return this; // there's no browser support so we'll just stop here
 		var dispatch = function() {
 			if (!options.responsive) return replaceElement.apply(null, arguments);
 			var args = arguments;
@@ -466,15 +451,13 @@ Cufon.registerEngine('canvas', (function() {
 	}
 
 	return function(font, text, style, options, node, el) {
-	
+		
 		var viewBox = font.viewBox, base = font.baseSize;
 		
 		var size = style.getSize('fontSize', base);
 		
-		var spacing = {
-			letter: 0,
-			word: 0
-		};
+		var letterSpacing = style.get('letterSpacing');
+		letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(parseInt(letterSpacing, 10));
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
@@ -486,15 +469,15 @@ Cufon.registerEngine('canvas', (function() {
 		for (var j = 0, k = chars.length; j < k; ++j) {
 			var glyph = font.glyphs[chars[j]] || font.missingGlyph;
 			if (!glyph) continue;
-			width += lastWidth = Number(glyph.w || font.w) + spacing.letter;
+			width += lastWidth = Number(glyph.w || font.w) + letterSpacing;
 		}
 		
 		if (!lastWidth) return null; // there's nothing to render
 		
 		var adjust = viewBox.width - lastWidth;
 		
-		width += adjust;
-
+		width += adjust - letterSpacing;
+		
 		var scale = height / viewBox.height;
 		
 		var wrapper = document.createElement('span');
@@ -506,44 +489,19 @@ Cufon.registerEngine('canvas', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 		
-		var rotation = typeof options.rotation == 'function' ? options.rotation(el) : options.rotation;
-		
-		var angle = radians(rotation);
-		var angleSin = Math.sin(angle);
-		var angleCos = Math.cos(angle);
-		
-		if (rotation) {
-			var pxWidth = size.convert(width);
-			
-			canvas.width = angleCos * pxWidth + (height * angleSin);
-			canvas.height = height + pxWidth * angleSin;
-			
-			wStyle.paddingLeft = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
-			wStyle.paddingBottom = (size.convert(-font.ascent + font.descent) - 1 + HAS_INLINE_BLOCK) + 'px';
-			cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
-			cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';	
-		}
-		else {
-			canvas.width = Math.ceil(size.convert(width));
-			canvas.height = height;
-			wStyle.paddingLeft = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
-			wStyle.paddingBottom = (size.convert(-font.ascent + font.descent) - 1 + HAS_INLINE_BLOCK) + 'px';
-			cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
-			cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
-		}
+		canvas.width = Math.ceil(size.convert(width));
+		canvas.height = height;
+		wStyle.paddingLeft = Math.ceil(size.convert(width - adjust + viewBox.minX)) + 'px';
+		wStyle.paddingBottom = (size.convert(-font.ascent + font.descent) - 1 + HAS_INLINE_BLOCK) + 'px';
+		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
+		cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
 		
 		var g = canvas.getContext('2d');
 		
 		g.scale(scale, scale);
+		g.translate(-viewBox.minX, -viewBox.minY);
 		
-		if (rotation) {
-			console.log(viewBox);
-			g.translate(-viewBox.minX * angleCos + (viewBox.height + viewBox.minY) * angleSin, -viewBox.minY * angleCos + -viewBox.minX * angleSin);
-			g.rotate(angle);
-		}
-		else {
-			g.translate(-viewBox.minX, -viewBox.minY);
-		}
+		g.lineWidth = font.face['underline-thickness'];
 		
 		g.save();
 		
@@ -551,7 +509,6 @@ Cufon.registerEngine('canvas', (function() {
 			g.strokeStyle = color;
 			
 			g.beginPath();
-			g.lineWidth = font.face['underline-thickness'];
 			
 			g.moveTo(0, y);
 			g.lineTo(width - adjust + viewBox.minX, y);
@@ -559,27 +516,7 @@ Cufon.registerEngine('canvas', (function() {
 			g.stroke();
 		}
 		
-		var textDecoration = {
-			underline: null,
-			overline: null,
-			'line-through': null
-		};
-		
-		if (options.enableTextDecoration) for (var search = node, decoStyle = style; search.parentNode && search.parentNode.nodeType == 1; ) {
-	
-			var foundAll = true;
-			
-			for (var type in textDecoration) {
-				if (textDecoration[type]) continue;
-				if (decoStyle.get('textDecoration').indexOf(type) != -1) textDecoration[type] = decoStyle.get('color');
-				foundAll = false;
-			}
-			
-			if (foundAll) break; // this is rather unlikely to happen
-			
-			decoStyle = Cufon.CSS.getStyle(search = search.parentNode);
-			
-		}
+		var textDecoration = options.enableTextDecoration ? Cufon.CSS.textDecoration(el, style) : {};
 		
 		if (textDecoration.underline) line(-font.face['underline-position'], textDecoration.underline);
 		if (textDecoration.overline) line(-font.face['ascent'], textDecoration.overline);
@@ -591,11 +528,12 @@ Cufon.registerEngine('canvas', (function() {
 			if (!glyph) continue;
 			g.beginPath();
 			if (glyph.d) {
-				if (!glyph.code) glyph.code = generateFromVML('m' + glyph.d + 'x', g);
-				else interpret(glyph.code, g);
+				if (glyph.code) interpret(glyph.code, g);
+				else glyph.code = generateFromVML('m' + glyph.d, g);
 			}
 			g.fill();
-			g.translate(Number(glyph.w || font.w) + spacing.letter, 0);
+			g.translate(Number(glyph.w || font.w) + letterSpacing, 0);
+			g.beginPath();
 		}
 		
 		g.restore();
@@ -606,7 +544,7 @@ Cufon.registerEngine('canvas', (function() {
 		
 		return wrapper;
 			
-	}
+	};
 	
 })());
 
@@ -627,6 +565,8 @@ Cufon.registerEngine('vml', (function() {
 	}
 
 	Cufon.set('engine', 'vml');	
+	
+	var typeIndex = 0;
 
 	// Original by Dean Edwards.
 	// Modified to work well with relative units (em, ex, %).
@@ -651,8 +591,6 @@ Cufon.registerEngine('vml', (function() {
 		el.runtimeStyle.left = runtimeStyle;
 		return result;
 	}
-	
-	var typeIndex = 0;
 
 	function createType(glyph, viewBox) {
 		var shapeType = document.createElement('cvml:shapetype');
@@ -666,18 +604,20 @@ Cufon.registerEngine('vml', (function() {
 		document.body.insertBefore(shapeType, document.body.firstChild);
 	}
 	
-	return function(font, text, style, options, node) {
+	return function(font, text, style, options, node, el) {
 	
-		// @todo letter-/word-spacing, text-decoration
+		// @todo word-spacing, text-decoration
 	
 		var viewBox = font.viewBox, base = font.baseSize;
 		
-		var size = style.computedFontSize || (style.computedFontSize = new Cufon.CSS.Size(getFontSizeInPixels(node.parentNode, style.get('fontSize')) + 'px', base));
+		var size = style.computedFontSize || (style.computedFontSize = new Cufon.CSS.Size(getFontSizeInPixels(el, style.get('fontSize')) + 'px', base));
 		
-		var spacing = {
-			letter: 0,
-			word: 0
-		};
+		var letterSpacing = style.computedLSpacing;
+		
+		if (letterSpacing == undefined) {
+			letterSpacing = style.get('letterSpacing');
+			style.computedLSpacing = letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(getFontSizeInPixels(el, letterSpacing));
+		}
 		
 		var glyphWidth = Math.ceil(size.convert(viewBox.width));
 		var glyphHeight = Math.ceil(size.convert(viewBox.height));
@@ -696,6 +636,8 @@ Cufon.registerEngine('vml', (function() {
 		cStyle.left = size.convert(viewBox.minX);
 		
 		wStyle.height = size.convert(-font.ascent + font.descent) + 'px';
+		
+		var textDecoration = options.enableTextDecoration ? Cufon.CSS.textDecoration(el, style) : {};
 		
 		var color = style.get('color');
 		var chars = Cufon.CSS.textTransform(text, style).split('');
@@ -719,7 +661,7 @@ Cufon.registerEngine('vml', (function() {
 			shape.fillcolor = color;
 			canvas.appendChild(shape);
 			
-			advance = Number(glyph.w || font.w) + spacing.letter;
+			advance = Number(glyph.w || font.w) + letterSpacing;
 			
 			width += advance;
 			offsetX += advance;
@@ -740,6 +682,6 @@ Cufon.registerEngine('vml', (function() {
 				
 		return wrapper;
 		
-	}
+	};
 	
 })());
