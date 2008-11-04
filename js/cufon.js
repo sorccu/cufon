@@ -1,6 +1,6 @@
 /*!
- * Pre-release software. For now you may only use this script if given permission by the author.
- * Copyright (c) 2008 Simo Kinnunen. All rights reserved.
+ * Copyright (c) 2008 Simo Kinnunen.
+ * Licensed under the MIT license.
  */
  
 var Cufon = new function() {

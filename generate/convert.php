@@ -1,12 +1,18 @@
 <?php
 
-define('CUFON_FONTFORGE', '/opt/local/bin/fontforge');
+if (!is_readable('settings.ini'))
+{
+	echo 'settings.ini is missing';
+	exit(1);
+}
 
-date_default_timezone_set('Europe/Helsinki');
+$config = parse_ini_file('settings.ini', false);
+
+define('CUFON_FONTFORGE', $config['fontforge']);
 
 set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__));
 
-require 'Cufon.php';
+require 'lib/Cufon.php';
 
 switch ($_SERVER['REQUEST_METHOD'])
 {
@@ -82,7 +88,7 @@ $errors = array_diff_key($errors, array(
 if (!empty($errors))
 {
 	header('HTTP/1.1 303 See Other');
-	header('Location: /cufon/?fail=' . implode(',', array_keys($errors)));
+	header('Location: ./?fail=' . implode(',', array_keys($errors)));
 	exit(0);
 }
 
@@ -117,10 +123,12 @@ foreach ($_FILES['font']['error'] as $key => $error)
 		case UPLOAD_ERR_FORM_SIZE:
 			Cufon::log('Upload failed (too large): %s', $_FILES['font']['name'][$key]);
 			header('HTTP/1.1 413 Request Entity Too Large');
+			echo '413 Request Entity Too Large';
 			exit(0);
 		default:
 			Cufon::log('Upload failed (code: %d): %s', $error, $_FILES['font']['name'][$key]);
 			header('HTTP/1.1 500 Internal Server Error');
+			echo '500 Internal Server Error';
 			exit(0);
 	}
 	

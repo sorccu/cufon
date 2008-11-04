@@ -16,11 +16,6 @@ h1 {
 	font-weight: normal;
 	letter-spacing: -2px;
 	margin: 1em 0 0 0;
-	text-decoration: underline overline line-through;
-}
-
-h1 a {
-	border: 1px solid green;
 }
 
 ul, ol, p {
@@ -89,6 +84,10 @@ input {
 	font-weight: bold;
 }
 
+.bug {
+	color: red;
+}
+
 #nav {
 	list-style: none;
 	text-align: center;
@@ -119,6 +118,7 @@ html>/**/body button {
 
 #nav a:link, #nav a:visited {
 	font: bold 140%/2em Arial, Verdana, Helvetica, sans-serif;
+	margin: 0 4px;
 	padding: 0.41em 1.5em 0.4em;
 }
 

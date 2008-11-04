@@ -11,10 +11,9 @@
 		
 		<style type="text/css"> @import url(css/style.css); </style>
 		
-		<script src="js/cufon.js" type="text/javascript"></script>
+		<script src="../js/cufon.js" type="text/javascript"></script>
 		
-		<script src="fonts/Frutiger_LT_Std_300-Frutiger_LT_Std_700.font.js" type="text/javascript"></script>
-		<script src="fonts/Affair_400.font.js"></script>
+		<script src="../fonts/Frutiger_LT_Std_300-Frutiger_LT_Std_700.font.js" type="text/javascript"></script>
 		
 		<script type="text/javascript">
 
@@ -23,19 +22,7 @@
 					separateWords: false,
 					enableTextDecoration: true
 				})
-				.replace('h3')
-				.replace('button');
-
-			// Had we included a selector framework, such as jQuery, MooTools or Prototype
-			// before cufon.js, we would have been able to replace the code below this
-			// comment with just:
-			// Cufon.replace('#nav a', { enableTextDecoration: true });
-			
-			Cufon.DOM.ready(function() {
-				Cufon.replace(document.getElementById('nav').getElementsByTagName('a'), {
-					enableTextDecoration: true
-				});
-			});
+				.replace('h3');
 		
 		</script>
 	
@@ -56,36 +43,35 @@
 				<div id="nav">
 				
 					<ul class="nav">
-						<li><a href="js/cufon-yui.js">Download</a></li>
+						<li><a href="../js/cufon-yui.js">Download</a></li>
 						<li class="current"><a href=".">Generator</a></li>
-						<li><a href="documentation.html">Documentation</a></li>
+						<li><a href="http://groups.google.com/group/cufon/web/documentation" class="external">Documentation</a></li>
 						<li><a href="http://groups.google.com/group/cufon" class="external">Community</a></li>
-						<li><a href="about.html">About</a></li>
+						<li><a href="http://groups.google.com/group/cufon/web/about" class="external">About</a></li>
 					</ul>
 					
 				</div>
 				
 				<div id="content">
 										
-					<form action="generate/" method="post" enctype="multipart/form-data">
+					<form action="convert.php" method="post" enctype="multipart/form-data">
 						
 						<div class="section">
 							
-							<h3>The Font</h3>
+							<h3>Select the font you'd like to use</h3>
 						
 							<dl>
-								<dt><label for="ifontfile">Select the font you'd like to use</label></dt>
-								<dd>
-									<ul>
-										<dt><label for="ifont_0">Regular typeface</label></dt>
-										<dd><input type="file" name="font[]" id="ifont_0" size="70" /></dd>
-										<dt><label for="ifont_1">Bold typeface (optional)</label></dt>
-										<dd><input type="file" name="font[]" id="ifont_1" size="70" /></dd>
-										<dt><label for="ifont_2">Italic typeface (optional)</label></dt>
-										<dd><input type="file" name="font[]" id="ifont_2" size="70" /></dd>
-									</ul>
-									<p class="info">For now only fonts in the following formats are supported: TrueType (TTF), OpenType (OTF) and Printer Font Binary (PFB).</p>
-								</dd>
+								<dt><label for="ifont_0">Regular typeface</label></dt>
+								<dd><input type="file" name="font[]" id="ifont_0" size="70" /></dd>
+								<dt><label for="ifont_1">Bold typeface (optional)</label></dt>
+								<dd><input type="file" name="font[]" id="ifont_1" size="70" /></dd>
+								<dt><label for="ifont_2">Italic typeface (optional)</label></dt>
+								<dd><input type="file" name="font[]" id="ifont_2" size="70" /></dd>
+							</dl>
+							
+							<p class="info">For now only fonts in the following formats are supported: TrueType (TTF), OpenType (OTF) and Printer Font Binary (PFB).</p>
+							
+							<dl>
 								<dt><label for="ipermission" class="important"><input type="checkbox" name="permission" id="ipermission" value="yes" /> The EULA of this font/fonts allows Web Embedding (without <a href="http://www.adobe.com/products/flashplayer/" class="external">Adobe Flash</a>)</label></dt>
 								<dd>
 									<p class="info">See <a href="http://www.fontembedding.com/fonts-and-the-law/" class="external">Fonts and the Law</a> at <a href="http://www.fontembedding.com" class="external">fontembedding.com</a> for more information.
@@ -102,40 +88,35 @@
 						
 						<div class="section">
 							
-							<h3>Glyphs</h3>
+							<h3>Include the following glyphs (if available)</h3>
 						
 							<dl>
-								<dt><label for="idomains">Include the following glyphs (if available)</label></dt>
-								<dd>
-									<dl>
-										<dt><label for="iglyphs_all"><input type="checkbox" name="glyphs[]" id="iglyphs_all" value="0x0-0xFFFF" /> All</label></dt>
-										<dd>Includes all available glyphs. Highly unrecommended.</dd>
-										<dt><label for="iglyphs_uc"><input type="checkbox" name="glyphs[]" id="iglyphs_uc" value="0x41-0x5A" /> Uppercase</label></dt>
-										<dd>Basic Latin uppercase letters (A-Z). (26 glyphs)</dd>
-										<dt><label for="iglyphs_lc"><input type="checkbox" name="glyphs[]" id="iglyphs_lc" value="0x61-0x7A" /> Lowercase</label></dt>
-										<dd>Basic Latin lowercase letters (a-z). (26 glyphs)</dd>
-										<dt><label for="iglyphs_n"><input type="checkbox" name="glyphs[]" id="iglyphs_n" value="0x30-0x39" /> Numerals</label></dt>
-										<dd>Basic Latin digits (0-9). (10 glyphs)</dd>
-										<dt><label for="iglyphs_p"><input type="checkbox" name="glyphs[]" id="iglyphs_p" value="0x20-0x2F,0x3A-0x40,0x5B-0x60,0x7B-0x7E" /> Punctuation</label></dt>
-										<dd>Basic Latin punctuation (!@#%...). (33 glyphs)</dd>
-										<dt><label for="iglyphs_bl"><input type="checkbox" name="glyphs[]" id="iglyphs_bl" value="0x20-0x7E" checked="checked" /> Basic Latin</label></dt>
-										<dd>Basic Latin glyphs within the Unicode range 0x0020 to 0x007E. (95 glyphs)</dd>
-										<dt><label for="iglyphs_l1s"><input type="checkbox" name="glyphs[]" id="iglyphs_l1s" value="0xA0-0xFF" /> Latin-1 Supplement</label></dt>
-										<dd>Latin glyphs within the Unicode range 0x00A0 to 0x00FF. Includes punctuation, currency symbols, numerals and common accented characters. (96 glyphs)</dd>
-										<dt><label for="iglyphs_l1ea"><input type="checkbox" name="glyphs[]" id="iglyphs_l1ea" value="0x100-0x17F" /> Latin Extended-A</label></dt>
-										<dd>Extended Latin glyphs within the Unicode range 0x0100 to 0x017F. (128 glyphs)</dd>
-										<dt><label for="iglyphs_l1eb"><input type="checkbox" name="glyphs[]" id="iglyphs_l1eb" value="0x180-0x24F" /> Latin Extended-B</label></dt>
-										<dd>Extended Latin glyphs within the Unicode range 0x0180 to 0x024F. (208 glyphs)</dd>
-										<dt><label for="iligatures"><input type="checkbox" name="ligatures" id="iligatures" value="yes" disabled="disabled" /> Ligatures</label></dt>
-										<dd>Combined glyphs, such as ffi and ch. <em>For performance reasons this feature is currently unsupported.</em> <a href="notes.html#ligatures">More information</a></dd>
-										<dt><label for="icustomGlyphs"> .. and also these</label></dt>
-										<dd><input type="text" name="customGlyphs" id="icustomGlyphs" size="50" maxlength="250" />
-											<p class="info">Note: due to a bug in FontForge, certain glyphs such as "hyphen" or "space" cannot be selected using this method. We are looking for a workaround.</p>
-										</dd>
-									</dl>
-								</dd>
+								<dt><label for="iglyphs_all"><input type="checkbox" name="glyphs[]" id="iglyphs_all" value="0x0-0xFFFF" /> All</label></dt>
+								<dd>Includes all available glyphs. Highly unrecommended.</dd>
+								<dt><label for="iglyphs_uc"><input type="checkbox" name="glyphs[]" id="iglyphs_uc" value="0x41-0x5A" /> Uppercase</label></dt>
+								<dd>Basic Latin uppercase letters (A-Z). (26 glyphs)</dd>
+								<dt><label for="iglyphs_lc"><input type="checkbox" name="glyphs[]" id="iglyphs_lc" value="0x61-0x7A" /> Lowercase</label></dt>
+								<dd>Basic Latin lowercase letters (a-z). (26 glyphs)</dd>
+								<dt><label for="iglyphs_n"><input type="checkbox" name="glyphs[]" id="iglyphs_n" value="0x30-0x39" /> Numerals</label></dt>
+								<dd>Basic Latin digits (0-9). (10 glyphs)</dd>
+								<dt><label for="iglyphs_p"><input type="checkbox" name="glyphs[]" id="iglyphs_p" value="0x20-0x2F,0x3A-0x40,0x5B-0x60,0x7B-0x7E" /> Punctuation</label></dt>
+								<dd>Basic Latin punctuation (!@#%...). (33 glyphs)</dd>
+								<dt><label for="iglyphs_bl"><input type="checkbox" name="glyphs[]" id="iglyphs_bl" value="0x20-0x7E" checked="checked" /> Basic Latin</label></dt>
+								<dd>Basic Latin glyphs within the Unicode range 0x0020 to 0x007E. (95 glyphs)</dd>
+								<dt><label for="iglyphs_l1s"><input type="checkbox" name="glyphs[]" id="iglyphs_l1s" value="0xA0-0xFF" /> Latin-1 Supplement</label></dt>
+								<dd>Latin glyphs within the Unicode range 0x00A0 to 0x00FF. Includes punctuation, currency symbols, numerals and common accented characters. (96 glyphs)</dd>
+								<dt><label for="iglyphs_l1ea"><input type="checkbox" name="glyphs[]" id="iglyphs_l1ea" value="0x100-0x17F" /> Latin Extended-A</label></dt>
+								<dd>Extended Latin glyphs within the Unicode range 0x0100 to 0x017F. (128 glyphs)</dd>
+								<dt><label for="iglyphs_l1eb"><input type="checkbox" name="glyphs[]" id="iglyphs_l1eb" value="0x180-0x24F" /> Latin Extended-B</label></dt>
+								<dd>Extended Latin glyphs within the Unicode range 0x0180 to 0x024F. (208 glyphs)</dd>
+								<dt><label for="iligatures"><input type="checkbox" name="ligatures" id="iligatures" value="yes" disabled="disabled" /> Ligatures</label></dt>
+								<dd>Combined glyphs, such as ffi and ch. <em>For performance reasons this feature is currently unsupported.</em></dd>
+								<dt><label for="icustomGlyphs"> .. and also these</label></dt>
+								<dd><input type="text" name="customGlyphs" id="icustomGlyphs" size="50" maxlength="250" /></dd>
 							</dl>
 							
+							<p class="info bug">Depending on the font you're using, <em>some glyphs might not be selected correctly</em>. This is a known bug and we are working on it. So far, we've only had problems with "-" (hyphen) and " " (space).</p> 
+						
 						</div>
 						
 						<div class="section">
@@ -168,13 +149,13 @@
 						
 						<div class="section">
 						
-							<h3>Performance</h3>
+							<h3>Performance &amp; file size</h3>
 							
 							<dl>
 								<dt><label for="iemSize">Scale the font to the following size</label></dt>
 								<dd>
 									<label for="iemSize"><input type="text" name="emSize" id="iemSize" value="360" maxlength="4" size="4" /> units per em</label>
-									<label for="idisableScaling"><input type="checkbox" name="disableScaling" id="idisableScaling" value="yes" /> Use native value</label>
+									<label for="idisableScaling"><input type="checkbox" name="disableScaling" id="idisableScaling" value="yes" /> Disallow scaling, use native value instead</label>
 									<p class="info">A lower value (64 at minimum) results in slightly better performance and smaller file size at the cost of accuracy. Values lower than 256 are not recommended unless you are OK with visible loss of detail. The native values in quality fonts are usually either 1000 or 2048.</p>
 								</dd>
 								<dt><label>If allowed, optimized paths may differ from the original by at most</label></dt>
@@ -185,7 +166,7 @@
 								</dd>
 							</dl>
 							
-							<p>Also, try to make sure your server serves gzipped JavaScript. 70% drops in file size are not unheard of.</p>
+							<p>Also, try to make sure your server serves gzipped JavaScript. 70-80% drops in file size are not unheard of.</p>
 						
 						</div>
 						
@@ -193,14 +174,12 @@
 						
 							<h3>Terms</h3>
 							
-							<p>You are free to use cufón in any way you want, for both personal and commercial use.
-							You may freely modify and/or redistribute cufón, but the original copyright notice should be
-							left intact.
-							Should you require help you may ask for it at <a href="http://groups.google.com/group/cufon" class="external">our Google Group</a> but keep
+							<p>Cufón is distributed under the <a href="http://en.wikipedia.org/wiki/MIT_License" class="external">MIT license</a>. By using this tool you agree to its terms.</p>
+							
+							<p>Should you require help you may ask for it at <a href="http://groups.google.com/group/cufon" class="external">our Google Group</a>, but keep
 							in mind that you are in no way entitled to support, which means that even if you do not
 							get a satisfactory answer you may not complain about it. Nice people are more likely to
-							get helpful answers. Also, under no circumstance
-							will you be able to hold us responsible for any possible damages of any kind.</p>
+							get helpful answers.</p>
 							
 							<p><label for="iterms" class="important"><input type="checkbox" name="terms" id="iterms" value="yes" /> I acknowledge and accept these terms</label></p>
 						
