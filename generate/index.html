@@ -7,21 +7,17 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta http-equiv="imagetoolbar" content="no" />
 	
-		<title>cufón</title>
+		<title>cufón - fonts for the people</title>
 		
 		<style type="text/css"> @import url(css/style.css); </style>
 		
 		<script src="../js/cufon.js" type="text/javascript"></script>
-		
-		<script src="../fonts/Frutiger_LT_Std_300-Frutiger_LT_Std_700.font.js" type="text/javascript"></script>
+		<script src="../fonts/Frutiger_LT_Std.font.js" type="text/javascript"></script>
 		
 		<script type="text/javascript">
-
+		
 			Cufon.set('fontFamily', 'Frutiger LT Std')
-				.replace('h1', {
-					separateWords: false,
-					enableTextDecoration: true
-				})
+				.replace('h1')
 				.replace('h3');
 		
 		</script>
@@ -43,11 +39,11 @@
 				<div id="nav">
 				
 					<ul class="nav">
-						<li><a href="../js/cufon-yui.js">Download</a></li>
+						<li><a href="http://cufon.shoqolate.com/js/cufon-yui.js">Download</a></li>
 						<li class="current"><a href=".">Generator</a></li>
 						<li><a href="http://groups.google.com/group/cufon/web/documentation" class="external">Documentation</a></li>
 						<li><a href="http://groups.google.com/group/cufon" class="external">Community</a></li>
-						<li><a href="http://groups.google.com/group/cufon/web/about" class="external">About</a></li>
+						<li><a href="http://github.com/sorccu/cufon/tree/master">Source</a></li>
 					</ul>
 					
 				</div>
@@ -155,7 +151,7 @@
 								<dt><label for="iemSize">Scale the font to the following size</label></dt>
 								<dd>
 									<label for="iemSize"><input type="text" name="emSize" id="iemSize" value="360" maxlength="4" size="4" /> units per em</label>
-									<label for="idisableScaling"><input type="checkbox" name="disableScaling" id="idisableScaling" value="yes" /> Disallow scaling, use native value instead</label>
+									<label for="idisableScaling"><input type="checkbox" name="disableScaling" id="idisableScaling" value="yes" /> No thanks, use the font's own value</label>
 									<p class="info">A lower value (64 at minimum) results in slightly better performance and smaller file size at the cost of accuracy. Values lower than 256 are not recommended unless you are OK with visible loss of detail. The native values in quality fonts are usually either 1000 or 2048.</p>
 								</dd>
 								<dt><label>If allowed, optimized paths may differ from the original by at most</label></dt>

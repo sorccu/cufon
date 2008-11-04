@@ -452,19 +452,19 @@ Cufon.registerEngine('canvas', (function() {
 
 	return function(font, text, style, options, node, el) {
 		
-		var viewBox = font.viewBox, base = font.baseSize;
+		var viewBox = font.viewBox;
 		
-		var size = style.getSize('fontSize', base);
+		var size = style.getSize('fontSize', font.baseSize);
 		
 		var letterSpacing = style.get('letterSpacing');
 		letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(parseInt(letterSpacing, 10));
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
-		var width = -letterSpacing;
+		var width = 0;
 		var height = size.convert(viewBox.height);
 		
-		var lastWidth;
+		var lastWidth = null;
 		
 		for (var j = 0, k = chars.length; j < k; ++j) {
 			var glyph = font.glyphs[chars[j]] || font.missingGlyph;
@@ -472,7 +472,7 @@ Cufon.registerEngine('canvas', (function() {
 			width += lastWidth = Number(glyph.w || font.w) + letterSpacing;
 		}
 		
-		if (!lastWidth) return null; // there's nothing to render
+		if (lastWidth === null) return null; // there's nothing to render
 		
 		var adjust = viewBox.width - lastWidth;
 		var scale = height / viewBox.height;
@@ -605,9 +605,9 @@ Cufon.registerEngine('vml', (function() {
 	
 		// @todo word-spacing, text-decoration
 	
-		var viewBox = font.viewBox, base = font.baseSize;
+		var viewBox = font.viewBox;
 		
-		var size = style.computedFontSize || (style.computedFontSize = new Cufon.CSS.Size(getFontSizeInPixels(el, style.get('fontSize')) + 'px', base));
+		var size = style.computedFontSize || (style.computedFontSize = new Cufon.CSS.Size(getFontSizeInPixels(el, style.get('fontSize')) + 'px', font.baseSize));
 		
 		var letterSpacing = style.computedLSpacing;
 		
@@ -625,8 +625,8 @@ Cufon.registerEngine('vml', (function() {
 		
 		var canvas = document.createElement('cvml:group');
 		
-		var cStyle = canvas.runtimeStyle;
 		var wStyle = wrapper.runtimeStyle;
+		var cStyle = canvas.runtimeStyle;
 		
 		cStyle.height = glyphHeight;
 		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent));
