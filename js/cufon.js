@@ -358,7 +358,7 @@ var Cufon = new function() {
 		var font = new Font(data);
 		if (!fonts[font.family]) fonts[font.family] = new FontFamily(font.family);
 		fonts[font.family].add(font);
-		return this;
+		return this.set('fontFamily', font.family);
 	};
 	
 	this.replace = function(elements, options) {
