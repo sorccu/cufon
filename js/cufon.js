@@ -4,71 +4,14 @@
  */
  
 var Cufon = new function() {
-
-	this.CSS = {
 	
-		Size: function(value, base) {
-		
-			this.value = parseFloat(value, 10);
-			this.unit = String(value).match(/[a-z%]+$/)[0] || 'px';
-		
-			this.convert = function(value) {
-				return value / base * this.value;
-			};
-			
-			this.convertFrom = function(value) {
-				return value / this.value * base;
-			};
-			
-			this.toString = function() {
-				return this.value + this.unit;
-			};
-
-		},
-	
-		getStyle: function(el) {
-			var view = document.defaultView;
-			if (view && view.getComputedStyle) return new Style(view.getComputedStyle(el, null));
-			if (el.currentStyle) return new Style(el.currentStyle);
-			return new Style(el.style);
-		},
-		
-		textDecoration: function(el, style) {
-			if (!style) style = this.getStyle(el);
-			var types = {
-				underline: null,
-				overline: null,
-				'line-through': null
-			};
-			for (var search = el; search.parentNode && search.parentNode.nodeType == 1; ) {
-				var foundAll = true;
-				for (var type in types) {
-					if (types[type]) continue;
-					if (style.get('textDecoration').indexOf(type) != -1) types[type] = style.get('color');
-					foundAll = false;
-				}
-				if (foundAll) break; // this is rather unlikely to happen
-				style = this.getStyle(search = search.parentNode);
-			}
-			return types;
-		},
-		
-		textTransform: function(text, style) {
-			return text[{
-				uppercase: 'toUpperCase',
-				lowercase: 'toLowerCase'
-			}[style.get('textTransform')] || 'toString']();
-		}
-		
-	};
-	
-	this.DOM = {
+	var DOM = this.DOM = {
 			
 		ready: (function() {
 		
 			var complete = false, readyStatus = { loaded: 1, complete: 1 };
 		
-			var queue = [], perform = function(id) {
+			var queue = [], perform = function() {
 				if (complete) return;
 				complete = true;
 				for (var fn; fn = queue.shift(); fn());
@@ -107,6 +50,94 @@ var Cufon = new function() {
 			};
 			
 		})()
+		
+	};
+
+	var CSS = this.CSS = {
+	
+		Size: function(value, base) {
+		
+			this.value = parseFloat(value, 10);
+			this.unit = String(value).match(/[a-z%]+$/)[0] || 'px';
+		
+			this.convert = function(value) {
+				return value / base * this.value;
+			};
+			
+			this.convertFrom = function(value) {
+				return value / this.value * base;
+			};
+			
+			this.toString = function() {
+				return this.value + this.unit;
+			};
+
+		},
+	
+		getStyle: function(el) {
+			var view = document.defaultView;
+			if (view && view.getComputedStyle) return new Style(view.getComputedStyle(el, null));
+			if (el.currentStyle) return new Style(el.currentStyle);
+			return new Style(el.style);
+		},
+		
+		ready: (function() {
+			
+			var complete = false;
+			
+			var queue = [], perform = function() {
+				complete = true;
+				for (var fn; fn = queue.shift(); fn());
+			};
+			
+			var styleElements = document.getElementsByTagName('style');
+			var linkElements = document.getElementsByTagName('link');
+			
+			DOM.ready(function() {
+				var linkStyles = 0;
+				for (var i = 0, l = linkElements.length; i < l; ++i) {
+					if (/stylesheet/i.test(linkElements[i].type)) ++linkStyles;
+				}
+				if (document.styleSheets.length >= styleElements.length + linkStyles) {
+					perform();
+					return;
+				}
+				setTimeout(arguments.callee, 1);
+			});
+			
+			return function(listener) {
+				if (complete) listener();
+				else queue.push(listener);
+			};
+			
+		})(),
+		
+		textDecoration: function(el, style) {
+			if (!style) style = this.getStyle(el);
+			var types = {
+				underline: null,
+				overline: null,
+				'line-through': null
+			};
+			for (var search = el; search.parentNode && search.parentNode.nodeType == 1; ) {
+				var foundAll = true;
+				for (var type in types) {
+					if (types[type]) continue;
+					if (style.get('textDecoration').indexOf(type) != -1) types[type] = style.get('color');
+					foundAll = false;
+				}
+				if (foundAll) break; // this is rather unlikely to happen
+				style = this.getStyle(search = search.parentNode);
+			}
+			return types;
+		},
+		
+		textTransform: function(text, style) {
+			return text[{
+				uppercase: 'toUpperCase',
+				lowercase: 'toLowerCase'
+			}[style.get('textTransform')] || 'toString']();
+		}
 		
 	};
 	
@@ -331,24 +362,6 @@ var Cufon = new function() {
 		separateWords: true
 	};
 	
-	this.loadFont = function(src, onLoad) {
-		var loader = document.createElement('script');
-		loader.type = 'text/javascript';
-		if (onLoad) {
-			var loaded = false, dispatch = function() {
-				if (!loaded) Cufon.DOM.ready(onLoad);
-				loaded = true;
-			};
-			addEvent(loader, 'load', dispatch);
-			addEvent(loader, 'readystatechange', function() {
-				if ({ loaded: 1, complete: 1 }[loader.readyState]) dispatch();
-			});
-		}
-		loader.src = src;
-		document.getElementsByTagName('head')[0].appendChild(loader);	
-		return this;
-	};
-	
 	this.registerEngine = function(id, engine) {
 		if (engine) engines[id] = engine;
 		return this;
@@ -372,7 +385,7 @@ var Cufon = new function() {
 			});
 		};
 		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
-		this.DOM.ready(function() {
+		CSS.ready(function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
 				var el = elements[i];
 				if (typeof el == 'string') Cufon.replace(options.selector(el), options);
