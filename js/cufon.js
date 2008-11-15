@@ -459,10 +459,6 @@ Cufon.registerEngine('canvas', (function() {
 		}
 	}
 	
-	function radians(degrees) {
-		return Math.PI / 180 * degrees;	
-	}
-
 	return function(font, text, style, options, node, el) {
 		
 		var viewBox = font.viewBox;
