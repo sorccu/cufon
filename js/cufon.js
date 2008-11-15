@@ -579,16 +579,24 @@ Cufon.registerEngine('vml', (function() {
 	if (!Cufon.hasVmlSupport) return null;
 	
 	if (document.namespaces['cvml'] == null) {
-		var styleSheet = document.createStyleSheet();
-		styleSheet.addRule('cvml\\:*', 'behavior: url(#default#VML); display: inline-block; antialias: true; position: absolute;');
-		styleSheet.addRule('.cufon-vml', 'display: inline-block; position: relative; vertical-align: middle;');
-		styleSheet.addRule('a .cufon-vml', 'cursor: pointer;');
 		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
+		var styleSheet = document.createStyleSheet();
+		styleSheet.cssText =
+			'@media screen{' + 
+				'cvml\\:*{behavior:url(#default#VML);display:inline-block;antialias:true;position:absolute}' +
+				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
+				'.cufon-vml .cufon-alt{display:none}' +
+				'a .cufon-vml{cursor:pointer}' +
+			'}' +
+			'@media print{' + 
+				'.cufon-vml cvml\\:*{display:none}' +
+				'.cufon-vml .cufon-alt{display:inline}' +
+			'}';
 	}
 
 	Cufon.set('engine', 'vml');	
 	
-	var typeIndex = 0;
+	var typeIndex = 0; // this is used to reference VML ShapeTypes
 
 	// Original by Dean Edwards.
 	// Modified to work well with relative units (em, ex, %).
@@ -701,6 +709,13 @@ Cufon.registerEngine('vml', (function() {
 		wStyle.width = Math.max(Math.ceil(size.convert(width)), 0);
 		
 		wrapper.appendChild(canvas);
+	
+		if (options.printable) {
+			var print = document.createElement('span');
+			print.className = 'cufon-alt';
+			print.innerText = text;
+			wrapper.appendChild(print);
+		}
 				
 		return wrapper;
 		
