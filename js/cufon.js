@@ -350,6 +350,7 @@ var Cufon = new function() {
 		fontScale: 1,
 		fontScaling: false,
 		//hover: false,
+		printable: true,
 		responsive: false,
 		//rotation: 0,
 		//selectable: false,
@@ -411,8 +412,16 @@ Cufon.registerEngine('canvas', (function() {
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
-		'.cufon-canvas { display: inline; display: inline-block; position: relative; vertical-align: middle; font-size: 1px; line-height: 1px }' +
-		'.cufon-canvas canvas { position: absolute; }'
+		'@media screen,projection{' +
+			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle;font-size:1px;line-height:1px}' +
+			'.cufon-canvas canvas{position:absolute}' +
+			'.cufon-canvas .cufon-alt{display:none}' +
+		'}' +
+		'@media print{' +
+			'.cufon-canvas{padding:0 !important}' +
+			'.cufon-canvas canvas{display:none}' +
+			'.cufon-canvas .cufon-alt{display:inline}' +
+		'}'
 	));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
 
@@ -547,6 +556,13 @@ Cufon.registerEngine('canvas', (function() {
 		if (textDecoration['line-through']) line(font.face['descent'], textDecoration['line-through']);
 		
 		wrapper.appendChild(canvas);
+		
+		if (options.printable) {
+			var print = document.createElement('span');
+			print.className = 'cufon-alt';
+			print.appendChild(document.createTextNode(text));
+			wrapper.appendChild(print);
+		}
 		
 		return wrapper;
 			
