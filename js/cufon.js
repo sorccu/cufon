@@ -112,6 +112,13 @@ var Cufon = new function() {
 			
 		})(),
 		
+		supports: function(property, value) {
+			var checker = document.createElement('span').style;
+			if (checker[property] === undefined) return false;
+			checker[property] = value;
+			return checker[property] === value;
+		},
+		
 		textDecoration: function(el, style) {
 			if (!style) style = this.getStyle(el);
 			var types = {
@@ -409,12 +416,16 @@ Cufon.registerEngine('canvas', (function() {
 	if (!check || !check.getContext) return null;
 	check = null;
 	
+	var HAS_INLINE_BLOCK = Cufon.CSS.supports('display', 'inline-block');
+	
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
 		'@media screen,projection{' +
 			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle;font-size:1px;line-height:1px}' +
-			'.cufon-canvas canvas{position:absolute}' +
+			(HAS_INLINE_BLOCK
+				? '.cufon-canvas canvas{position:relative}'
+				: '.cufon-canvas canvas{position:absolute}') +
 			'.cufon-canvas .cufon-alt{display:none}' +
 		'}' +
 		'@media print{' +
@@ -426,13 +437,6 @@ Cufon.registerEngine('canvas', (function() {
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
 
 	Cufon.set('engine', 'canvas');
-
-	var HAS_INLINE_BLOCK = (function() {
-		var style = document.createElement('span').style;
-		style.display = 'inline';
-		style.display = 'inline-block';
-		return style.display == 'inline-block';
-	})();
 
 	function generateFromVML(path, context) {
 		var atX = 0, atY = 0, cpX = 0, cpY = 0;
@@ -506,8 +510,16 @@ Cufon.registerEngine('canvas', (function() {
 		
 		canvas.width = Math.ceil(size.convert(-viewBox.minX + width + adjust));
 		canvas.height = Math.ceil(height);
-		wStyle.paddingLeft = Math.ceil(size.convert(width)) + 'px';
-		wStyle.paddingBottom = (size.convert(font.height) - 1 + HAS_INLINE_BLOCK) + 'px';
+		
+		if (HAS_INLINE_BLOCK) {
+			wStyle.width = Math.ceil(size.convert(width)) + 'px';
+			wStyle.height = size.convert(font.height) + 'px';
+		}
+		else {
+			wStyle.paddingLeft = Math.ceil(size.convert(width)) + 'px';
+			wStyle.paddingBottom = (size.convert(font.height) - 1) + 'px';
+		}
+		
 		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
 		cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
 		
