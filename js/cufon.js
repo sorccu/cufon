@@ -620,10 +620,8 @@ Cufon.registerEngine('vml', (function() {
 		switch (unit) {
 			case '%':
 			case 'em':
-				el.style.left = '1em';
-				break;
 			case 'ex':
-				el.style.left = '2ex';
+				el.style.left = '1em';
 				break;
 			default:
 				el.style.left = value + unit;
