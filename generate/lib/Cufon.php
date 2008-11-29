@@ -24,7 +24,7 @@ class Cufon {
 		
 		array_shift($args);
 		
-		error_log(sprintf("[cufon] %s: %s\n", date('Y-m-d H:i:s'), vsprintf($message, $args)), 0);
+		error_log(sprintf("[cufon]: %s", vsprintf($message, $args)), 0);
 	}
 	
 	/**
