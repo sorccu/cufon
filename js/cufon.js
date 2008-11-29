@@ -610,23 +610,19 @@ Cufon.registerEngine('vml', (function() {
 	
 	var typeIndex = 0; // this is used to reference VML ShapeTypes
 
-	// Original by Dean Edwards.
-	// Modified to work well with relative units (em, ex, %).
 	function getFontSizeInPixels(el, value) {
-		var unit = (value.match(/[a-z%]+$/)[0] || '').toLowerCase(), value = parseFloat(value, 10), result;
-		if (unit == 'px') return value;
+		if (/(?:em|ex|%)$/i.test(value)) return getSizeInPixels(el, '1em');
+		return getSizeInPixels(el, value);
+	}
+	
+	// Original by Dead Edwards.
+	// Combined with getFontSizeInPixels it also works with relative units.
+	function getSizeInPixels(el, value) {
+		if (/px$/i.test(value)) return parseFloat(value, 10);
 		var style = el.style.left, runtimeStyle = el.runtimeStyle.left;
 		el.runtimeStyle.left = el.currentStyle.left;
-		switch (unit) {
-			case '%':
-			case 'em':
-			case 'ex':
-				el.style.left = '1em';
-				break;
-			default:
-				el.style.left = value + unit;
-		}
-		result = el.style.pixelLeft;
+		el.style.left = value;
+		var result = el.style.pixelLeft;
 		el.style.left = style;
 		el.runtimeStyle.left = runtimeStyle;
 		return result;
@@ -656,7 +652,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		if (letterSpacing == undefined) {
 			letterSpacing = style.get('letterSpacing');
-			style.computedLSpacing = letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(getFontSizeInPixels(el, letterSpacing));
+			style.computedLSpacing = letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(getSizeInPixels(el, letterSpacing));
 		}
 		
 		var glyphWidth = Math.ceil(size.convert(viewBox.width));
