@@ -329,9 +329,12 @@ var Cufon = new function() {
 		var font, style, nextNode;
 		for (var node = el.firstChild; node; node = nextNode) {
 			nextNode = node.nextSibling;
-			if (node.firstChild && !/cufon/.test(node.className)) {
-				arguments.callee(node, options);
-				continue;
+			if (node.nodeType == 1) {
+				if (!node.firstChild) continue;
+				if (!/cufon/.test(node.className)) {
+					arguments.callee(node, options);
+					continue;
+				}
 			}
 			var text = node.nodeType == 3 ? node.data : node.alt;
 			if (text === '') continue;
