@@ -350,12 +350,13 @@ var Cufon = new function() {
 	var HAS_BROKEN_REGEXP = ' '.split(/\s+/).length == 0;
 	
 	var sharedQueue = new ExecutionQueue(this), sharedStorage = new Storage();
+	var replaceHistory = [];
 	
 	var engines = {}, fonts = {}, defaultOptions = {
 		enableTextDecoration: false,
 		engine: null,
-		fontScale: 1,
-		fontScaling: false,
+		//fontScale: 1,
+		//fontScaling: false,
 		//hover: false,
 		printable: true,
 		responsive: false,
@@ -382,9 +383,18 @@ var Cufon = new function() {
 		return this.set('fontFamily', font.family);
 	};
 	
-	this.replace = function(elements, options) {
+	this.refresh = function() {
+		var currentHistory = replaceHistory.splice(0, replaceHistory.length);
+		for (var i = 0, l = currentHistory.length; i < l; ++i) {
+			this.replace.apply(this, currentHistory[i]);
+		}
+		return this;
+	};
+	
+	this.replace = function(elements, options, ignoreHistory) {
 		options = merge(defaultOptions, options);
 		if (!options.engine) return this; // there's no browser support so we'll just stop here
+		if (!ignoreHistory) replaceHistory.push(arguments);
 		var dispatch = function() {
 			if (!options.responsive) return replaceElement.apply(null, arguments);
 			var args = arguments;
@@ -396,7 +406,7 @@ var Cufon = new function() {
 		CSS.ready(function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
 				var el = elements[i];
-				if (typeof el == 'string') Cufon.replace(options.selector(el), options);
+				if (typeof el == 'string') Cufon.replace(options.selector(el), options, true);
 				else dispatch(el, options);
 			}
 		});
