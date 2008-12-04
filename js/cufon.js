@@ -2,7 +2,7 @@
  * Copyright (c) 2008 Simo Kinnunen.
  * Licensed under the MIT license.
  */
- 
+
 var Cufon = new function() {
 	
 	var DOM = this.DOM = {
@@ -58,7 +58,7 @@ var Cufon = new function() {
 		Size: function(value, base) {
 		
 			this.value = parseFloat(value);
-			this.unit = String(value).match(/[a-z%]+$/)[0] || 'px';
+			this.unit = String(value).match(/[a-z%]*$/)[0] || 'px';
 		
 			this.convert = function(value) {
 				return value / base * this.value;
@@ -98,11 +98,8 @@ var Cufon = new function() {
 				for (var i = 0, l = linkElements.length; i < l; ++i) {
 					if (/stylesheet/i.test(linkElements[i].type)) ++linkStyles;
 				}
-				if (document.styleSheets.length >= styleElements.length + linkStyles) {
-					perform();
-					return;
-				}
-				setTimeout(arguments.callee, 1);
+				if (document.styleSheets.length >= styleElements.length + linkStyles) perform();
+				else setTimeout(arguments.callee, 10);
 			});
 			
 			return function(listener) {
