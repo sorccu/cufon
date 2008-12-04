@@ -497,7 +497,6 @@ Cufon.registerEngine('canvas', (function() {
 		if (lastWidth === null) return null; // there's nothing to render
 		
 		var adjust = viewBox.width - lastWidth;
-		var scale = height / viewBox.height;
 		
 		var wrapper = document.createElement('span');
 		wrapper.className = 'cufon cufon-canvas';
@@ -523,7 +522,7 @@ Cufon.registerEngine('canvas', (function() {
 		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
 		cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
 		
-		var g = canvas.getContext('2d');
+		var g = canvas.getContext('2d'), scale = canvas.height / viewBox.height;
 		
 		g.scale(scale, scale);
 		g.translate(-viewBox.minX, -viewBox.minY);
@@ -655,9 +654,6 @@ Cufon.registerEngine('vml', (function() {
 			style.computedLSpacing = letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(getSizeInPixels(el, letterSpacing));
 		}
 		
-		var glyphWidth = Math.ceil(size.convert(viewBox.width));
-		var glyphHeight = Math.ceil(size.convert(viewBox.height));
-		
 		var wrapper = document.createElement('span');
 		wrapper.className = 'cufon cufon-vml';
 		wrapper.alt = text;
@@ -667,7 +663,7 @@ Cufon.registerEngine('vml', (function() {
 		var wStyle = wrapper.runtimeStyle;
 		var cStyle = canvas.runtimeStyle;
 		
-		cStyle.height = glyphHeight;
+		cStyle.height = Math.ceil(size.convert(viewBox.height));
 		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent));
 		cStyle.left = size.convert(viewBox.minX);
 		
