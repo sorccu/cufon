@@ -57,7 +57,7 @@ var Cufon = new function() {
 	
 		Size: function(value, base) {
 		
-			this.value = parseFloat(value, 10);
+			this.value = parseFloat(value);
 			this.unit = String(value).match(/[a-z%]+$/)[0] || 'px';
 		
 			this.convert = function(value) {
@@ -621,7 +621,7 @@ Cufon.registerEngine('vml', (function() {
 	// Original by Dead Edwards.
 	// Combined with getFontSizeInPixels it also works with relative units.
 	function getSizeInPixels(el, value) {
-		if (/px$/i.test(value)) return parseFloat(value, 10);
+		if (/px$/i.test(value)) return parseFloat(value);
 		var style = el.style.left, runtimeStyle = el.runtimeStyle.left;
 		el.runtimeStyle.left = el.currentStyle.left;
 		el.style.left = value;
