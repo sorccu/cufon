@@ -533,8 +533,8 @@ Cufon.registerEngine('canvas', (function() {
 			wStyle.paddingBottom = (size.convert(font.height) - 1) + 'px';
 		}
 		
-		cStyle.top = parseInt(size.convert(viewBox.minY - font.ascent), 10) + 'px';
-		cStyle.left = parseInt(size.convert(viewBox.minX), 10) + 'px';
+		cStyle.top = Math.round(size.convert(viewBox.minY - font.ascent)) + 'px';
+		cStyle.left = Math.round(size.convert(viewBox.minX)) + 'px';
 		
 		var g = canvas.getContext('2d'), scale = canvas.height / viewBox.height;
 		
@@ -680,8 +680,8 @@ Cufon.registerEngine('vml', (function() {
 		var height = size.convert(viewBox.height);
 		
 		cStyle.height = Math.ceil(height);
-		cStyle.top = parseInt(size.convert(viewBox.minY - font.ascent), 10);
-		cStyle.left = parseInt(size.convert(viewBox.minX), 10);
+		cStyle.top = Math.round(size.convert(viewBox.minY - font.ascent));
+		cStyle.left = Math.round(size.convert(viewBox.minX));
 		
 		var roundingFactor = parseInt(cStyle.height, 10) / height;
 		
