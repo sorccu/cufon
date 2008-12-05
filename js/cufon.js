@@ -520,17 +520,20 @@ Cufon.registerEngine('canvas', (function() {
 		canvas.width = Math.ceil(size.convert(-viewBox.minX + width + adjust));
 		canvas.height = Math.ceil(height);
 		
+		var roundingFactor = canvas.height / height;
+		var wrapperWidth = Math.ceil(size.convert(width * roundingFactor)) + 'px';
+		
 		if (HAS_INLINE_BLOCK) {
-			wStyle.width = Math.ceil(size.convert(width)) + 'px';
+			wStyle.width = wrapperWidth;
 			wStyle.height = size.convert(font.height) + 'px';
 		}
 		else {
-			wStyle.paddingLeft = Math.ceil(size.convert(width)) + 'px';
+			wStyle.paddingLeft = wrapperWidth;
 			wStyle.paddingBottom = (size.convert(font.height) - 1) + 'px';
 		}
 		
-		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent)) + 'px';
-		cStyle.left = Math.floor(size.convert(viewBox.minX)) + 'px';
+		cStyle.top = parseInt(size.convert(viewBox.minY - font.ascent), 10) + 'px';
+		cStyle.left = parseInt(size.convert(viewBox.minX), 10) + 'px';
 		
 		var g = canvas.getContext('2d'), scale = canvas.height / viewBox.height;
 		
@@ -673,9 +676,13 @@ Cufon.registerEngine('vml', (function() {
 		var wStyle = wrapper.runtimeStyle;
 		var cStyle = canvas.runtimeStyle;
 		
-		cStyle.height = Math.ceil(size.convert(viewBox.height));
-		cStyle.top = Math.floor(size.convert(viewBox.minY - font.ascent));
-		cStyle.left = size.convert(viewBox.minX);
+		var height = size.convert(viewBox.height);
+		
+		cStyle.height = Math.ceil(height);
+		cStyle.top = parseInt(size.convert(viewBox.minY - font.ascent), 10);
+		cStyle.left = parseInt(size.convert(viewBox.minX), 10);
+		
+		var roundingFactor = parseInt(cStyle.height, 10) / height;
 		
 		wStyle.height = size.convert(-font.ascent + font.descent) + 'px';
 		
@@ -716,9 +723,9 @@ Cufon.registerEngine('vml', (function() {
 		
 		canvas.coordsize = fullWidth + ',' + viewBox.height;
 		
-		cStyle.width = size.convert(fullWidth);
+		cStyle.width = size.convert(fullWidth * roundingFactor);
 		
-		wStyle.width = Math.max(Math.ceil(size.convert(width)), 0);
+		wStyle.width = Math.max(Math.ceil(size.convert(width * roundingFactor)), 0);
 		
 		wrapper.appendChild(canvas);
 	
