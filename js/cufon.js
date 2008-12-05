@@ -363,7 +363,8 @@ var Cufon = new function() {
 		//rotation: 0,
 		//selectable: false,
 		selector: (
-				(window.$$ && function(query) { return $$(query); })
+				window.Sizzle
+			||	(window.$$ && function(query) { return $$(query); })
 			||	window.$
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
 			||	function(query) { return document.getElementsByTagName(query); }
