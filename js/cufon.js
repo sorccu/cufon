@@ -600,13 +600,12 @@ Cufon.registerEngine('vml', (function() {
 	if (!document.namespaces) return;
 
 	// isn't undocumented stuff great?
-	document.write('<!--[if vml]><script type="text/javascript"> Cufon.hasVmlSupport = true; </script><![endif]-->');
-	if (!Cufon.hasVmlSupport) return null;
+	document.write('<!--[if vml]><script type="text/javascript">Cufon.vmlEnabled=true;</script><![endif]-->');
+	if (!Cufon.vmlEnabled) return null;
 	
 	if (document.namespaces['cvml'] == null) {
 		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
-		var styleSheet = document.createStyleSheet();
-		styleSheet.cssText =
+		document.write('<style type="text/css">' +
 			'@media screen{' + 
 				'cvml\\:*{behavior:url(#default#VML);display:inline-block;antialias:true;position:absolute}' +
 				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
@@ -616,7 +615,8 @@ Cufon.registerEngine('vml', (function() {
 			'@media print{' + 
 				'.cufon-vml cvml\\:*{display:none}' +
 				'.cufon-vml .cufon-alt{display:inline}' +
-			'}';
+			'}' +
+		'</style>');
 	}
 
 	Cufon.set('engine', 'vml');	
