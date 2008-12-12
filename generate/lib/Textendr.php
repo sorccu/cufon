@@ -3,11 +3,11 @@
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'FontForgeScript.php';
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFontContainer.php';
 
-class Cufon {
+class Textendr {
 	
 	public static function getUnusedFilename($suffix)
 	{
-		$filename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'cufon_';
+		$filename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'textendr_';
 		
 		do
 		{
@@ -24,7 +24,7 @@ class Cufon {
 		
 		array_shift($args);
 		
-		error_log(sprintf("[cufon]: %s", vsprintf($message, $args)), 0);
+		error_log(sprintf("[textendr]: %s", vsprintf($message, $args)), 0);
 	}
 	
 	/**
@@ -34,7 +34,7 @@ class Cufon {
 	 */
 	public static function generate($file, array $options)
 	{
-		Cufon::log('Processing %s', $file);
+		Textendr::log('Processing %s', $file);
 		
 		$script = new FontForgeScript();
 		
@@ -97,9 +97,9 @@ class Cufon {
 			$script->simplify($options['simplifyDelta']);
 		}
 		
-		$svgFile = Cufon::getUnusedFilename('.svg');
+		$svgFile = Textendr::getUnusedFilename('.svg');
 		
-		Cufon::log('Converting to SVG with filename %s', $svgFile);
+		Textendr::log('Converting to SVG with filename %s', $svgFile);
 		
 		$script->generate($svgFile);
 		
