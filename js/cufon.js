@@ -183,17 +183,17 @@ var Cufon = new function() {
 	
 	function Font(data) {
 		
-		this.face = data.face;
+		var face = this.face = data.face;
 		this.glyphs = data.glyphs;
 		this.w = data.w;
-		this.baseSize = parseInt(data.face['units-per-em'], 10);
+		this.baseSize = parseInt(face['units-per-em'], 10);
 		
-		this.family = data.face['font-family'].toLowerCase();
-		this.weight = data.face['font-weight'];
-		this.style = data.face['font-style'] || 'normal';
+		this.family = face['font-family'].toLowerCase();
+		this.weight = face['font-weight'];
+		this.style = face['font-style'] || 'normal';
 		
 		this.viewBox = (function () {
-			var parts = data.face.bbox.split(/\s+/);
+			var parts = face.bbox.split(/\s+/);
 			return {
 				minX: parseInt(parts[0], 10),
 				minY: parseInt(parts[1], 10),
@@ -205,8 +205,8 @@ var Cufon = new function() {
 			};
 		})();
 		
-		this.ascent = -parseInt(data.face['ascent'], 10);
-		this.descent = -parseInt(data.face['descent'], 10);
+		this.ascent = -parseInt(face.ascent, 10);
+		this.descent = -parseInt(face.descent, 10);
 		
 		this.height = -this.ascent + this.descent;
 		
@@ -317,7 +317,7 @@ var Cufon = new function() {
 			}
 			return fragment;
 		}
-		return engines[options.engine](font, text, style, options, node, el);
+		return engines[options.engine].apply(null, arguments);
 	}
 	
 	function replaceElement(el, options) {
@@ -559,7 +559,7 @@ Cufon.registerEngine('canvas', (function() {
 		var textDecoration = options.enableTextDecoration ? Cufon.CSS.textDecoration(el, style) : {};
 		
 		if (textDecoration.underline) line(-font.face['underline-position'], textDecoration.underline);
-		if (textDecoration.overline) line(-font.face['ascent'], textDecoration.overline);
+		if (textDecoration.overline) line(font.ascent, textDecoration.overline);
 		
 		g.fillStyle = style.get('color');
 		
@@ -578,7 +578,7 @@ Cufon.registerEngine('canvas', (function() {
 		
 		g.restore();
 		
-		if (textDecoration['line-through']) line(font.face['descent'], textDecoration['line-through']);
+		if (textDecoration['line-through']) line(-font.descent, textDecoration['line-through']);
 		
 		wrapper.appendChild(canvas);
 		
