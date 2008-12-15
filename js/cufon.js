@@ -335,7 +335,7 @@ var Cufon = new function() {
 			}
 			var text = node.nodeType == 3 ? node.data : node.alt;
 			if (text === '') continue;
-			if (!style) style = Cufon.CSS.getStyle(el).extend(options);
+			if (!style) style = CSS.getStyle(el).extend(options);
 			if (!font) font = getFont(el, style);
 			if (!font) continue;
 			var processed = process(font, text, style, options, node, el);
