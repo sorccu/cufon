@@ -8,11 +8,11 @@ if (!is_readable('settings.ini'))
 
 $config = parse_ini_file('settings.ini', false);
 
-define('TEXTENDR_FONTFORGE', $config['fontforge']);
+define('CUFON_FONTFORGE', $config['fontforge']);
 
 set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__));
 
-require 'lib/Textendr.php';
+require 'lib/Cufon.php';
 
 switch ($_SERVER['REQUEST_METHOD'])
 {
@@ -115,24 +115,24 @@ foreach ($_FILES['font']['error'] as $key => $error)
 	switch ($error)
 	{
 		case UPLOAD_ERR_OK:
-			Textendr::log('Uploaded %s', $_FILES['font']['name'][$key]);
+			Cufon::log('Uploaded %s', $_FILES['font']['name'][$key]);
 			break;
 		case UPLOAD_ERR_NO_FILE:
 			continue 2;
 		case UPLOAD_ERR_INI_SIZE:
 		case UPLOAD_ERR_FORM_SIZE:
-			Textendr::log('Upload failed (too large): %s', $_FILES['font']['name'][$key]);
+			Cufon::log('Upload failed (too large): %s', $_FILES['font']['name'][$key]);
 			header('HTTP/1.1 413 Request Entity Too Large');
 			echo '413 Request Entity Too Large';
 			exit(0);
 		default:
-			Textendr::log('Upload failed (code: %d): %s', $error, $_FILES['font']['name'][$key]);
+			Cufon::log('Upload failed (code: %d): %s', $error, $_FILES['font']['name'][$key]);
 			header('HTTP/1.1 500 Internal Server Error');
 			echo '500 Internal Server Error';
 			exit(0);
 	}
 	
-	foreach (Textendr::generate($_FILES['font']['tmp_name'][$key], $options) as $id => $json)
+	foreach (Cufon::generate($_FILES['font']['tmp_name'][$key], $options) as $id => $json)
 	{
 		echo $json;
 		
@@ -149,7 +149,7 @@ $filename = preg_replace(
 		'_',
 		''
 	),
-	empty($fonts) ? 'Textendr Font' : implode('-', $fonts)) . '.font.js';
+	empty($fonts) ? 'Cufon Font' : implode('-', $fonts)) . '.font.js';
 
 header(sprintf('Content-Disposition: attachment; filename=%s', $filename));
 header('Content-Type: text/javascript');

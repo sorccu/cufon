@@ -48,15 +48,15 @@ class FontForgeScript {
 	 */
 	public function execute()
 	{
-		$filename = Textendr::getUnusedFilename('.pe');
+		$filename = Cufon::getUnusedFilename('.pe');
 		
 		file_put_contents($filename, $this->__toString());
 		
 		chmod($filename, 0777);
 		
-		$command = sprintf('env %s -script %s 2>&1', TEXTENDR_FONTFORGE, escapeshellarg($filename));
+		$command = sprintf('env %s -script %s 2>&1', CUFON_FONTFORGE, escapeshellarg($filename));
 		
-		Textendr::log('Executing command: %s', $command);
+		Cufon::log('Executing command: %s', $command);
 		
 		$status = 0;
 		
@@ -64,7 +64,7 @@ class FontForgeScript {
 		
 		exec($command, $output, $status);
 		
-		Textendr::log('Exited with status %d', $status);
+		Cufon::log('Exited with status %d', $status);
 		
 		unlink($filename);
 		

@@ -3,7 +3,7 @@
  * Licensed under the MIT license.
  */
 
-var Textendr = new function() {
+var Cufon = new function() {
 	
 	var DOM = this.DOM = {
 			
@@ -262,7 +262,7 @@ var Textendr = new function() {
 		};
 		
 		this.getSize = function(property, base) {
-			return sizes[property] || (sizes[property] = new CSS.Size(this.get(property), base));
+			return sizes[property] || (sizes[property] = new Cufon.CSS.Size(this.get(property), base));
 		};
 		
 		this.extend = function(styles) {
@@ -328,14 +328,14 @@ var Textendr = new function() {
 			nextNode = node.nextSibling;
 			if (node.nodeType == 1) {
 				if (!node.firstChild) continue;
-				if (!/txnd/.test(node.className)) {
+				if (!/cufon/.test(node.className)) {
 					arguments.callee(node, options);
 					continue;
 				}
 			}
 			var text = node.nodeType == 3 ? node.data : node.alt;
 			if (text === '') continue;
-			if (!style) style = Textendr.CSS.getStyle(el).extend(options);
+			if (!style) style = Cufon.CSS.getStyle(el).extend(options);
 			if (!font) font = getFont(el, style);
 			if (!font) continue;
 			var processed = process(font, text, style, options, node, el);
@@ -407,7 +407,7 @@ var Textendr = new function() {
 		CSS.ready(function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
 				var el = elements[i];
-				if (typeof el == 'string') Textendr.replace(options.selector(el), options, true);
+				if (typeof el == 'string') Cufon.replace(options.selector(el), options, true);
 				else dispatch(el, options);
 			}
 		});
@@ -421,37 +421,37 @@ var Textendr = new function() {
 	
 };
 
-Textendr.registerEngine('canvas', (function() {
+Cufon.registerEngine('canvas', (function() {
 
 	var check = document.createElement('canvas');
 	if (!check || !check.getContext) return null;
 	check = null;
 	
-	var HAS_INLINE_BLOCK = Textendr.CSS.supports('display', 'inline-block');
+	var HAS_INLINE_BLOCK = Cufon.CSS.supports('display', 'inline-block');
 	
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
 		'@media screen,projection{' +
-			'.txnd-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle;font-size:1px;line-height:1px}' +
+			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle;font-size:1px;line-height:1px}' +
 			(HAS_INLINE_BLOCK
-				? '.txnd-canvas canvas{position:relative}'
-				: '.txnd-canvas canvas{position:absolute}') +
-			'.txnd-canvas .txnd-alt{display:none}' +
+				? '.cufon-canvas canvas{position:relative}'
+				: '.cufon-canvas canvas{position:absolute}') +
+			'.cufon-canvas .cufon-alt{display:none}' +
 		'}' +
 		'@media print{' +
-			'.txnd-canvas{padding:0 !important}' +
-			'.txnd-canvas canvas{display:none}' +
-			'.txnd-canvas .txnd-alt{display:inline}' +
+			'.cufon-canvas{padding:0 !important}' +
+			'.cufon-canvas canvas{display:none}' +
+			'.cufon-canvas .cufon-alt{display:inline}' +
 		'}'
 	));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
 
-	Textendr.set('engine', 'canvas');
+	Cufon.set('engine', 'canvas');
 
 	function generateFromVML(path, context) {
 		var atX = 0, atY = 0, cpX = 0, cpY = 0;
-		var cmds = Textendr.VML.parsePath(path);
+		var cmds = Cufon.VML.parsePath(path);
 		var code = new Array(cmds.length - 1);
 		generate: for (var i = 0, l = cmds.length; i < l; ++i) {
 			var c = cmds[i].coords;
@@ -492,7 +492,7 @@ Textendr.registerEngine('canvas', (function() {
 		var letterSpacing = style.get('letterSpacing');
 		letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(parseInt(letterSpacing, 10));
 		
-		var chars = Textendr.CSS.textTransform(text, style).split('');
+		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
 		var width = 0;
 		var height = size.convert(viewBox.height);
@@ -510,7 +510,7 @@ Textendr.registerEngine('canvas', (function() {
 		var adjust = viewBox.width - lastWidth;
 		
 		var wrapper = document.createElement('span');
-		wrapper.className = 'txnd txnd-canvas';
+		wrapper.className = 'cufon cufon-canvas';
 		wrapper.alt = text;
 		
 		var canvas = document.createElement('canvas');
@@ -556,7 +556,7 @@ Textendr.registerEngine('canvas', (function() {
 			g.stroke();
 		}
 		
-		var textDecoration = options.enableTextDecoration ? Textendr.CSS.textDecoration(el, style) : {};
+		var textDecoration = options.enableTextDecoration ? Cufon.CSS.textDecoration(el, style) : {};
 		
 		if (textDecoration.underline) line(-font.face['underline-position'], textDecoration.underline);
 		if (textDecoration.overline) line(-font.face['ascent'], textDecoration.overline);
@@ -584,7 +584,7 @@ Textendr.registerEngine('canvas', (function() {
 		
 		if (options.printable) {
 			var print = document.createElement('span');
-			print.className = 'txnd-alt';
+			print.className = 'cufon-alt';
 			print.appendChild(document.createTextNode(text));
 			wrapper.appendChild(print);
 		}
@@ -595,31 +595,31 @@ Textendr.registerEngine('canvas', (function() {
 	
 })());
 
-Textendr.registerEngine('vml', (function() {
+Cufon.registerEngine('vml', (function() {
 
 	if (!document.namespaces) return;
 
 	// isn't undocumented stuff great?
-	document.write('<!--[if vml]><script type="text/javascript">Textendr.vmlEnabled=true;</script><![endif]-->');
-	if (!Textendr.vmlEnabled) return null;
+	document.write('<!--[if vml]><script type="text/javascript">Cufon.vmlEnabled=true;</script><![endif]-->');
+	if (!Cufon.vmlEnabled) return null;
 	
-	if (document.namespaces['tvml'] == null) {
-		document.namespaces.add('tvml', 'urn:schemas-microsoft-com:vml');
+	if (document.namespaces['cvml'] == null) {
+		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
 		document.write('<style type="text/css">' +
 			'@media screen{' + 
-				'tvml\\:*{behavior:url(#default#VML);display:inline-block;antialias:true;position:absolute}' +
-				'.txnd-vml{display:inline-block;position:relative;vertical-align:middle}' +
-				'.txnd-vml .txnd-alt{display:none}' +
-				'a .txnd-vml{cursor:pointer}' +
+				'cvml\\:*{behavior:url(#default#VML);display:inline-block;antialias:true;position:absolute}' +
+				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
+				'.cufon-vml .cufon-alt{display:none}' +
+				'a .cufon-vml{cursor:pointer}' +
 			'}' +
 			'@media print{' + 
-				'.txnd-vml tvml\\:*{display:none}' +
-				'.txnd-vml .txnd-alt{display:inline}' +
+				'.cufon-vml cvml\\:*{display:none}' +
+				'.cufon-vml .cufon-alt{display:inline}' +
 			'}' +
 		'</style>');
 	}
 
-	Textendr.set('engine', 'vml');	
+	Cufon.set('engine', 'vml');	
 	
 	var typeIndex = 0; // this is used to reference VML ShapeTypes
 
@@ -642,8 +642,8 @@ Textendr.registerEngine('vml', (function() {
 	}
 
 	function createType(glyph, viewBox) {
-		var shapeType = document.createElement('tvml:shapetype');
-		shapeType.id = 'txnd-glyph-' + typeIndex++;
+		var shapeType = document.createElement('cvml:shapetype');
+		shapeType.id = 'cufon-glyph-' + typeIndex++;
 		glyph.typeRef = '#' + shapeType.id;
 		shapeType.stroked = 'f';
 		shapeType.coordsize = viewBox.width + ',' + viewBox.height;
@@ -659,7 +659,7 @@ Textendr.registerEngine('vml', (function() {
 	
 		var viewBox = font.viewBox;
 		
-		var size = style.computedFontSize || (style.computedFontSize = new Textendr.CSS.Size(getFontSizeInPixels(el, style.get('fontSize')) + 'px', font.baseSize));
+		var size = style.computedFontSize || (style.computedFontSize = new Cufon.CSS.Size(getFontSizeInPixels(el, style.get('fontSize')) + 'px', font.baseSize));
 		
 		var letterSpacing = style.computedLSpacing;
 		
@@ -669,10 +669,10 @@ Textendr.registerEngine('vml', (function() {
 		}
 		
 		var wrapper = document.createElement('span');
-		wrapper.className = 'txnd txnd-vml';
+		wrapper.className = 'cufon cufon-vml';
 		wrapper.alt = text;
 		
-		var canvas = document.createElement('tvml:group');
+		var canvas = document.createElement('cvml:group');
 		
 		var wStyle = wrapper.runtimeStyle;
 		var cStyle = canvas.runtimeStyle;
@@ -687,10 +687,10 @@ Textendr.registerEngine('vml', (function() {
 		
 		wStyle.height = size.convert(-font.ascent + font.descent) + 'px';
 		
-		var textDecoration = options.enableTextDecoration ? Textendr.CSS.textDecoration(el, style) : {};
+		var textDecoration = options.enableTextDecoration ? Cufon.CSS.textDecoration(el, style) : {};
 		
 		var color = style.get('color');
-		var chars = Textendr.CSS.textTransform(text, style).split('');
+		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
 		var width = 0, offsetX = 0, advance = null;
 		
@@ -701,7 +701,7 @@ Textendr.registerEngine('vml', (function() {
 			
 			if (!glyph.typeRef) createType(glyph, viewBox);
 			
-			var shape = document.createElement('tvml:shape');
+			var shape = document.createElement('cvml:shape');
 			shape.type = glyph.typeRef;
 			var sStyle = shape.runtimeStyle;
 			sStyle.width = viewBox.width;
@@ -732,7 +732,7 @@ Textendr.registerEngine('vml', (function() {
 	
 		if (options.printable) {
 			var print = document.createElement('span');
-			print.className = 'txnd-alt';
+			print.className = 'cufon-alt';
 			print.innerText = text;
 			wrapper.appendChild(print);
 		}
@@ -742,5 +742,3 @@ Textendr.registerEngine('vml', (function() {
 	};
 	
 })());
-
-var Cufon = Textendr; // For compatibility between earlier versions
