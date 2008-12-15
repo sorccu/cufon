@@ -262,7 +262,7 @@ var Cufon = new function() {
 		};
 		
 		this.getSize = function(property, base) {
-			return sizes[property] || (sizes[property] = new Cufon.CSS.Size(this.get(property), base));
+			return sizes[property] || (sizes[property] = new CSS.Size(this.get(property), base));
 		};
 		
 		this.extend = function(styles) {
@@ -284,7 +284,7 @@ var Cufon = new function() {
 	}
 	
 	function getFont(el, style) {
-		if (!style) style = this.CSS.getStyle(el);
+		if (!style) style = CSS.getStyle(el);
 		var families = style.get('fontFamily').split(/\s*,\s*/), family;
 		for (var i = 0, l = families.length; i < l; ++i) {
 			family = families[i].toLowerCase();
