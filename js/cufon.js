@@ -433,10 +433,8 @@ Cufon.registerEngine('canvas', (function() {
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
 		'@media screen,projection{' +
-			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle;font-size:1px;line-height:1px}' +
-			(HAS_INLINE_BLOCK
-				? '.cufon-canvas canvas{position:relative}'
-				: '.cufon-canvas canvas{position:absolute}') +
+			'.cufon-canvas{display:-moz-inline-box;display:inline-block;position:relative;vertical-align:middle;font-size:1px;line-height:1px}' +
+			'.cufon-canvas canvas{position:relative}' +
 			'.cufon-canvas .cufon-alt{display:none}' +
 		'}' +
 		'@media print{' +
@@ -524,17 +522,21 @@ Cufon.registerEngine('canvas', (function() {
 		var roundingFactor = canvas.height / height;
 		var wrapperWidth = Math.ceil(size.convert(width * roundingFactor)) + 'px';
 		
+		wStyle.width = wrapperWidth;
+		wStyle.height = size.convert(font.height) + 'px';
+		
+		var offsetY = Math.round(size.convert(viewBox.minY - font.ascent)) + 'px';
+		var offsetX = Math.round(size.convert(viewBox.minX)) + 'px';
+		
 		if (HAS_INLINE_BLOCK) {
-			wStyle.width = wrapperWidth;
-			wStyle.height = size.convert(font.height) + 'px';
+			cStyle.top = offsetY;
+			cStyle.left = offsetX;
 		}
 		else {
-			wStyle.paddingLeft = wrapperWidth;
-			wStyle.paddingBottom = (size.convert(font.height) - 1) + 'px';
+			// Firefox 2
+			cStyle.marginTop = offsetY;
+			cStyle.marginLeft = offsetX;
 		}
-		
-		cStyle.top = Math.round(size.convert(viewBox.minY - font.ascent)) + 'px';
-		cStyle.left = Math.round(size.convert(viewBox.minX)) + 'px';
 		
 		var g = canvas.getContext('2d'), scale = canvas.height / viewBox.height;
 		
