@@ -90,8 +90,8 @@ var Cufon = new function() {
 				for (var fn; fn = queue.shift(); fn());
 			};
 			
-			var styleElements = document.getElementsByTagName('style');
-			var linkElements = document.getElementsByTagName('link');
+			var styleElements = elementsByTagName('style');
+			var linkElements = elementsByTagName('link');
 			
 			DOM.ready(function() {
 				var linkStyles = 0;
@@ -294,6 +294,10 @@ var Cufon = new function() {
 		return null;
 	}
 	
+	function elementsByTagName(query) {
+		return document.getElementsByTagName(query);
+	}
+	
 	function merge() {
 		var merged = {}, key;
 		for (var i = 0, l = arguments.length; i < l; ++i) {
@@ -367,7 +371,7 @@ var Cufon = new function() {
 			||	(window.$$ && function(query) { return $$(query); })
 			||	window.$
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
-			||	function(query) { return document.getElementsByTagName(query); }
+			||	elementsByTagName
 		),
 		separateWords: true
 	};
