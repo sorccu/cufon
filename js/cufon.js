@@ -577,7 +577,6 @@ Cufon.registerEngine('canvas', (function() {
 			}
 			g.fill();
 			g.translate(Number(glyph.w || font.w) + letterSpacing, 0);
-			g.beginPath();
 		}
 		
 		g.restore();
