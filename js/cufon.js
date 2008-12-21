@@ -108,7 +108,7 @@ var Cufon = new function() {
 			};
 			
 		})(),
-		
+
 		supports: function(property, value) {
 			var checker = document.createElement('span').style;
 			if (checker[property] === undefined) return false;
@@ -135,6 +135,35 @@ var Cufon = new function() {
 			}
 			return types;
 		},
+		
+		textShadow: cached(function(value) {
+			if (value == 'none') return null;
+			var shadows = [], currentShadow = {}, result, offCount = 0;
+			var re = /(#[a-f0-9]+|[a-z]+\(.*?\)|[a-z]+)|(-?[\d.]+[a-z%]*)|,/ig;
+			while (result = re.exec(value)) {
+				if (result[0] == ',') {
+					shadows.push(currentShadow);
+					currentShadow = {}, offCount = 0;
+				}
+				else if (result[1]) {
+					currentShadow.color = result[1];
+				}
+				else {
+					currentShadow[[ 'offX', 'offY', 'blur' ][offCount++]] = result[2];
+				}
+			}
+			shadows.push(currentShadow);
+			return shadows;
+		}),
+		
+		color: cached(function(value) {
+			var parsed = {};
+			parsed.color = value.replace(/^rgba\((.*?),\s*([\d.]+)\)/, function($0, $1, $2) {
+				parsed.opacity = parseFloat($2);
+				return 'rgb(' + $1 + ')';
+			});
+			return parsed;
+		}),
 		
 		textTransform: function(text, style) {
 			return text[{
@@ -254,7 +283,7 @@ var Cufon = new function() {
 	}
 	
 	function Style(style) {
-	
+		
 		var custom = {}, sizes = {};
 		
 		this.get = function(property) {
@@ -272,6 +301,10 @@ var Cufon = new function() {
 		
 	}
 	
+	function asArray(mixed) {
+		return mixed == null || mixed instanceof Array ? mixed : [ mixed ];
+	}
+	
 	function addEvent(el, type, listener) {
 		if (el.addEventListener) {
 			el.addEventListener(type, listener, false);
@@ -281,6 +314,14 @@ var Cufon = new function() {
 				return listener.apply(el, arguments);
 			});
 		}
+	}
+	
+	function cached(fun) {
+		var cache = {};
+		return function(key) {
+			if (!cache.hasOwnProperty(key)) cache[key] = fun.apply(null, arguments);
+			return cache[key];
+		};	
 	}
 	
 	function getFont(el, style) {
@@ -373,7 +414,8 @@ var Cufon = new function() {
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
 			||	elementsByTagName
 		),
-		separateWords: true
+		separateWords: true,
+		textShadow: 'none'
 	};
 	
 	this.registerEngine = function(id, engine) {
@@ -398,6 +440,7 @@ var Cufon = new function() {
 	
 	this.replace = function(elements, options, ignoreHistory) {
 		options = merge(defaultOptions, options);
+		if (typeof options.textShadow == 'string') options.textShadow = CSS.textShadow(options.textShadow);
 		if (!options.engine) return this; // there's no browser support so we'll just stop here
 		if (!ignoreHistory) replaceHistory.push(arguments);
 		var dispatch = function() {
@@ -496,22 +539,39 @@ Cufon.registerEngine('canvas', (function() {
 		var letterSpacing = style.get('letterSpacing');
 		letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(parseInt(letterSpacing, 10));
 		
+		var expandTop = 0, expandRight = 0, expandBottom = 0, expandLeft = 0;
+		var shadows = options.textShadow, shadowOffsets = [];
+		if (shadows) {
+			for (var i = 0, l = shadows.length; i < l; ++i) {
+				var shadow = shadows[i];
+				var x = size.convertFrom(parseFloat(shadow.offX));
+				var y = size.convertFrom(parseFloat(shadow.offY));
+				shadowOffsets[i] = [ x, y ];
+				if (y < expandTop) expandTop = y;
+				if (x > expandRight) expandRight = x;
+				if (y > expandBottom) expandBottom = y;
+				if (x < expandLeft) expandLeft = x;
+			}
+		}
+		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
 		var width = 0;
 		var height = size.convert(viewBox.height);
+		var roundedHeight = Math.ceil(height);
 		
 		var lastWidth = null;
 		
-		for (var j = 0, k = chars.length; j < k; ++j) {
-			var glyph = font.glyphs[chars[j]] || font.missingGlyph;
+		for (var i = 0, l = chars.length; i < l; ++i) {
+			var glyph = font.glyphs[chars[i]] || font.missingGlyph;
 			if (!glyph) continue;
 			width += lastWidth = Number(glyph.w || font.w) + letterSpacing;
 		}
 		
 		if (lastWidth === null) return null; // there's nothing to render
 		
-		var adjust = viewBox.width - lastWidth;
+		expandRight += (viewBox.width - lastWidth);
+		expandLeft += viewBox.minX;
 		
 		var wrapper = document.createElement('span');
 		wrapper.className = 'cufon cufon-canvas';
@@ -522,10 +582,16 @@ Cufon.registerEngine('canvas', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 		
-		canvas.width = Math.ceil(size.convert(-viewBox.minX + width + adjust));
-		canvas.height = Math.ceil(height);
+		canvas.width = Math.ceil(size.convert(width + expandRight - expandLeft));
+		canvas.height = Math.ceil(size.convert(viewBox.height - expandTop + expandBottom));
 		
-		var roundingFactor = canvas.height / height;
+		// minY has no part in canvas.height
+		expandTop += viewBox.minY;
+		
+		cStyle.top = Math.round(size.convert(expandTop - font.ascent)) + 'px';
+		cStyle.left = Math.round(size.convert(expandLeft)) + 'px';
+		
+		var roundingFactor = roundedHeight / height;
 		var wrapperWidth = Math.ceil(size.convert(width * roundingFactor)) + 'px';
 		
 		if (HAS_INLINE_BLOCK) {
@@ -537,13 +603,10 @@ Cufon.registerEngine('canvas', (function() {
 			wStyle.paddingBottom = (size.convert(font.height) - 1) + 'px';
 		}
 		
-		cStyle.top = Math.round(size.convert(viewBox.minY - font.ascent)) + 'px';
-		cStyle.left = Math.round(size.convert(viewBox.minX)) + 'px';
-		
-		var g = canvas.getContext('2d'), scale = canvas.height / viewBox.height;
+		var g = canvas.getContext('2d'), scale = roundedHeight / viewBox.height;
 		
 		g.scale(scale, scale);
-		g.translate(-viewBox.minX, -viewBox.minY);
+		g.translate(-expandLeft, -expandTop);
 		
 		g.lineWidth = font.face['underline-thickness'];
 		
@@ -567,17 +630,32 @@ Cufon.registerEngine('canvas', (function() {
 		
 		g.fillStyle = style.get('color');
 		
-		for (var j = 0, k = chars.length; j < k; ++j) {
-			var glyph = font.glyphs[chars[j]] || font.missingGlyph;
-			if (!glyph) continue;
-			g.beginPath();
-			if (glyph.d) {
-				if (glyph.code) interpret(glyph.code, g);
-				else glyph.code = generateFromVML('m' + glyph.d, g);
+		function renderText() {
+			for (var i = 0, l = chars.length; i < l; ++i) {
+				var glyph = font.glyphs[chars[i]] || font.missingGlyph;
+				if (!glyph) continue;
+				g.beginPath();
+				if (glyph.d) {
+					if (glyph.code) interpret(glyph.code, g);
+					else glyph.code = generateFromVML('m' + glyph.d, g);
+				}
+				g.fill();
+				g.translate(Number(glyph.w || font.w) + letterSpacing, 0);
 			}
-			g.fill();
-			g.translate(Number(glyph.w || font.w) + letterSpacing, 0);
 		}
+		
+		if (shadows) {
+			for (var i = 0, l = shadows.length; i < l; ++i) {
+				var shadow = shadows[i];
+				g.save();
+				g.fillStyle = shadow.color;
+				g.translate.apply(g, shadowOffsets[i]);
+				renderText();
+				g.restore();
+			}
+		}
+		
+		renderText();
 		
 		g.restore();
 		
@@ -643,7 +721,7 @@ Cufon.registerEngine('vml', (function() {
 		el.runtimeStyle.left = runtimeStyle;
 		return result;
 	}
-
+	
 	function createType(glyph, viewBox) {
 		var shapeType = document.createElement('cvml:shapetype');
 		shapeType.id = 'cufon-glyph-' + typeIndex++;
@@ -697,6 +775,8 @@ Cufon.registerEngine('vml', (function() {
 		
 		var width = 0, offsetX = 0, advance = null;
 		
+		var shadows = options.textShadow;
+		
 		for (var i = 0, l = chars.length; i < l; ++i) {
 		
 			var glyph = font.glyphs[chars[i]] || font.missingGlyph;
@@ -713,6 +793,26 @@ Cufon.registerEngine('vml', (function() {
 			sStyle.left = offsetX;
 			shape.fillcolor = color;
 			canvas.appendChild(shape);
+			
+			if (shadows) {
+				// the VML shadow element is not used because it can only support
+				// up to 2 shadows. and it breaks text selection.
+				for (var z = 0, p = shadows.length; z < p; ++z) {
+					var shadow = shadows[z];
+					var shadowColor = Cufon.CSS.color(shadow.color);
+					var shadowNode = shape.cloneNode(false), zStyle = shadowNode.runtimeStyle;
+					zStyle.top = size.convertFrom(parseFloat(shadow.offY));
+					zStyle.left = offsetX + size.convertFrom(parseFloat(shadow.offX));
+					zStyle.zIndex = -1;
+					shadowNode.fillcolor = shadowColor.color;
+					if (shadowColor.opacity) {
+						var shadowFill = document.createElement('cvml:fill');
+						shadowFill.opacity = shadowColor.opacity;
+						shadowNode.appendChild(shadowFill);
+					}
+					canvas.appendChild(shadowNode);
+				}
+			}
 			
 			advance = Number(glyph.w || font.w) + letterSpacing;
 			

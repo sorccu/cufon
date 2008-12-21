@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+	
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		
+		<title>cufón / examples / text-shadow</title>
+		<script src="../js/cufon.js" type="text/javascript"></script>
+		<script src="../fonts/Frutiger_LT_Std.font.js" type="text/javascript"></script>
+		
+		<style type="text/css">
+		
+			body {
+				background: #fff;
+				color: #000;
+			}
+		
+			h1, h2, h3, h4, h5, h6 {
+				background: #CCCCCC;
+				color: #D1D1D1;
+				font-size: 30pt;
+				line-height: 30pt;
+				margin: 1em 0;
+				padding: 20px;
+			}
+			
+			h3 {
+				background: #CCCCFF;
+				color: #fff;
+			}
+			
+			h4 {
+				background: #CCCCFF;
+				color: #ffa800;
+			}
+		
+		</style>
+		
+		<script type="text/javascript">
+
+			Cufon.replace('h1', {
+				textShadow: '#333 1px 1px, #fff -1px -1px'
+			});
+			
+			Cufon.replace('h2', {
+				textShadow: '#333 -1px -1px, #fff 1px 1px'
+			});
+
+			Cufon.replace('h3', {
+				textShadow: '#333 1px 1px'
+			});
+
+			Cufon.replace('h4', {
+				textShadow: '-1px -1px rgba(51, 51, 51, 0.6)'
+			});
+			
+		</script>
+	
+	</head>
+	
+	<body>
+	
+		<p>These examples are based on <a href="http://www.w3.org/Style/Examples/007/text-shadow">CSS: text shadows</a> by Bert Bos. See the <a href="http://www.w3.org/TR/CSS2/text.html#text-shadow-props">CSS2 text-shadow specification</a> for syntax. Please note that offsets can only be defined in pixels and blur is not supported at all.</p>
+	
+		<h1>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</h1>
+		
+		<h2>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</h2>
+		
+		<h3>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</h3>
+		
+		<h4>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</h4>
+		
+	</body>
+	
+</html>
