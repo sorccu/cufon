@@ -681,7 +681,7 @@ Cufon.registerEngine('vml', (function() {
 
 	// isn't undocumented stuff great?
 	document.write('<!--[if vml]><script type="text/javascript">Cufon.vmlEnabled=true;</script><![endif]-->');
-	if (!Cufon.vmlEnabled) return null;
+	if (!Cufon.vmlEnabled) return;
 	
 	if (document.namespaces['cvml'] == null) {
 		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
@@ -704,8 +704,7 @@ Cufon.registerEngine('vml', (function() {
 	var typeIndex = 0; // this is used to reference VML ShapeTypes
 
 	function getFontSizeInPixels(el, value) {
-		if (/(?:em|ex|%)$/i.test(value)) return getSizeInPixels(el, '1em');
-		return getSizeInPixels(el, value);
+		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
 	}
 	
 	// Original by Dead Edwards.
