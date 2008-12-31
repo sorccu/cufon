@@ -241,13 +241,12 @@ var Cufon = new function() {
 		
 	}
 	
-	function FontFamily(name) {
+	function FontFamily() {
 
 		this.styles = {};
 		
 		this.add = function(font) {
-			if (!this.styles[font.style]) this.styles[font.style] = {};
-			this.styles[font.style][font.weight] = font;
+			(this.styles[font.style] || (this.styles[font.style] = {}))[font.weight] = font;
 		}
 		
 		this.get = function(style, weight) {
@@ -424,10 +423,10 @@ var Cufon = new function() {
 	};
 	
 	this.registerFont = function(data) {
-		var font = new Font(data);
-		if (!fonts[font.family]) fonts[font.family] = new FontFamily(font.family);
-		fonts[font.family].add(font);
-		return this.set('fontFamily', font.family);
+		var font = new Font(data), family = font.family;
+		if (!fonts[family]) fonts[family] = new FontFamily();
+		fonts[family].add(font);
+		return this.set('fontFamily', family);
 	};
 	
 	this.refresh = function() {
@@ -497,14 +496,14 @@ Cufon.registerEngine('canvas', (function() {
 	Cufon.set('engine', 'canvas');
 
 	function generateFromVML(path, context) {
-		var atX = 0, atY = 0, cpX = 0, cpY = 0;
+		var atX = 0, atY = 0;
 		var cmds = Cufon.VML.parsePath(path);
 		var code = new Array(cmds.length - 1);
 		generate: for (var i = 0, l = cmds.length; i < l; ++i) {
 			var c = cmds[i].coords;
 			switch (cmds[i].type) {
 				case 'v':
-					code[i] = { m: 'bezierCurveTo', a: [ atX + Number(c[0]), atY + Number(c[1]), cpX = atX + Number(c[2]), cpY = atY + Number(c[3]), atX += Number(c[4]), atY += Number(c[5]) ] };
+					code[i] = { m: 'bezierCurveTo', a: [ atX + Number(c[0]), atY + Number(c[1]), atX + Number(c[2]), atY + Number(c[3]), atX += Number(c[4]), atY += Number(c[5]) ] };
 					break;
 				case 'r':
 					code[i] = { m: 'lineTo', a: [ atX += Number(c[0]), atY += Number(c[1]) ] };
