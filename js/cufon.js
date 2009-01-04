@@ -90,13 +90,18 @@ var Cufon = new function() {
 				for (var fn; fn = queue.shift(); fn());
 			};
 			
-			var styleElements = elementsByTagName('style');
+			// Safari 2 does not include <style> elements in document.styleSheets.
+			// Safari 2 also does not support Object.prototype.propertyIsEnumerable.
+			
+			var styleElements = Object.prototype.propertyIsEnumerable ? elementsByTagName('style') : { length: 0 };
 			var linkElements = elementsByTagName('link');
 			
 			DOM.ready(function() {
-				var linkStyles = 0;
-				for (var i = 0, l = linkElements.length; i < l; ++i) {
-					if (/stylesheet/i.test(linkElements[i].type)) ++linkStyles;
+				// These checks are actually only needed for WebKit-based browsers, but don't really hurt other browsers.
+				var linkStyles = 0, link;
+				for (var i = 0, l = linkElements.length; link = linkElements[i], i < l; ++i) {
+					// WebKit does not load alternate stylesheets.
+					if (!link.disabled && link.rel.toLowerCase() == 'stylesheet') ++linkStyles;
 				}
 				if (document.styleSheets.length >= styleElements.length + linkStyles) perform();
 				else setTimeout(arguments.callee, 10);
