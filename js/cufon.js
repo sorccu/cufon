@@ -474,8 +474,10 @@ var Cufon = new function() {
 
 Cufon.registerEngine('canvas', (function() {
 
+	// Safari 2 doesn't support .apply() on native methods
+	
 	var check = document.createElement('canvas');
-	if (!check || !check.getContext) return null;
+	if (!check || !check.getContext || !check.getContext.apply) return null;
 	check = null;
 	
 	var HAS_INLINE_BLOCK = Cufon.CSS.supports('display', 'inline-block');
