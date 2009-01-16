@@ -231,7 +231,7 @@ var Cufon = new function() {
 			return {
 				minX: parseInt(parts[0], 10),
 				minY: parseInt(parts[1], 10),
-				width: parseInt(parts[2]) - parseInt(parts[0]),
+				width: parseInt(parts[2], 10) - parseInt(parts[0], 10),
 				height: parseInt(parts[3], 10) - parseInt(parts[1], 10),
 				toString: function() {
 					return [ this.minX, this.minY, this.width, this.height ].join(' ');
@@ -252,7 +252,7 @@ var Cufon = new function() {
 		
 		this.add = function(font) {
 			(this.styles[font.style] || (this.styles[font.style] = {}))[font.weight] = font;
-		}
+		};
 		
 		this.get = function(style, weight) {
 			var weights = this.styles[style], closest;
@@ -267,7 +267,7 @@ var Cufon = new function() {
 				if (!closest || (alt < weight && alt > closest)) closest = alt;
 			}
 			return weights[closest];
-		}
+		};
 	
 	}
 	
