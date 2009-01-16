@@ -423,8 +423,9 @@ var Cufon = new function() {
 	};
 	
 	this.registerEngine = function(id, engine) {
-		if (engine) engines[id] = engine;
-		return this;
+		if (!engine) return this;
+		engines[id] = engine;
+		return this.set('engine', id);
 	};
 	
 	this.registerFont = function(data) {
@@ -499,8 +500,6 @@ Cufon.registerEngine('canvas', (function() {
 		'}'
 	));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
-
-	Cufon.set('engine', 'canvas');
 
 	function generateFromVML(path, context) {
 		var atX = 0, atY = 0;
@@ -706,8 +705,6 @@ Cufon.registerEngine('vml', (function() {
 		'</style>');
 	}
 
-	Cufon.set('engine', 'vml');	
-	
 	var typeIndex = 0; // this is used to reference VML ShapeTypes
 
 	function getFontSizeInPixels(el, value) {
