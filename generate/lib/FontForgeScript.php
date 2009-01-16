@@ -140,6 +140,19 @@ class FontForgeScript {
 	}
 	
 	/**
+	 * http://fontforge.sourceforge.net/scripting-alpha.html#RoundToInt
+	 *
+	 * @param int $factor
+	 * @return unknown
+	 */
+	public function roundToInt($factor = 1)
+	{
+		$this->commands[] = sprintf('RoundToInt(%d)', $factor);
+	
+		return $this;
+	}
+	
+	/**
 	 * @param int $emSize
 	 * @return FontForgeScript
 	 */
@@ -202,6 +215,8 @@ class FontForgeScript {
 	}
 	
 	/**
+	 * http://fontforge.sourceforge.net/scripting-alpha.html#Simplify
+	 * 
 	 * @return FontForgeScript
 	 */
 	public function simplify($error = 3)

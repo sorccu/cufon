@@ -97,12 +97,13 @@ class Cufon {
 			$script->simplify($options['simplifyDelta']);
 		}
 		
+		$script->roundToInt(1);
+		
 		$svgFile = Cufon::getUnusedFilename('.svg');
 		
 		Cufon::log('Converting to SVG with filename %s', $svgFile);
 		
 		$script->generate($svgFile);
-		
 		$script->execute();
 		
 		$fonts = array();
