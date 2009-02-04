@@ -419,8 +419,9 @@ var Cufon = (function(api) {
 	
 	api.replace = function(elements, options, ignoreHistory) {
 		options = merge(defaultOptions, options);
-		if (typeof options.textShadow == 'string') options.textShadow = CSS.textShadow(options.textShadow);
 		if (!options.engine) return api; // there's no browser support so we'll just stop here
+		if (typeof options.textShadow == 'string')
+			options.textShadow = CSS.textShadow(options.textShadow);
 		if (!ignoreHistory) replaceHistory.push(arguments);
 		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
 		CSS.ready(function() {
