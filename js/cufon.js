@@ -305,10 +305,6 @@ var Cufon = (function(api) {
 		
 	}
 	
-	function asArray(mixed) {
-		return mixed == null || mixed instanceof Array ? mixed : [ mixed ];
-	}
-	
 	function addEvent(el, type, listener) {
 		if (el.addEventListener) {
 			el.addEventListener(type, listener, false);
