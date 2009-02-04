@@ -194,27 +194,6 @@ var Cufon = (function(api) {
 			
 	};
 	
-	function ExecutionQueue() {
-	
-		var items = [], active = false;
-		
-		function next() {
-			if (active || !items.length) return;
-			active = true;
-			setTimeout(function() {
-				items.shift()();
-				active = false;
-				next();
-			}, 1);
-		}
-		
-		this.add = function(fn) {
-			items.push(fn);
-			next();
-		};
-	
-	}
-	
 	function Font(data) {
 		
 		var face = this.face = data.face;
@@ -394,7 +373,7 @@ var Cufon = (function(api) {
 	
 	var HAS_BROKEN_REGEXP = ' '.split(/\s+/).length == 0;
 	
-	var sharedQueue = new ExecutionQueue(), sharedStorage = new Storage();
+	var sharedStorage = new Storage();
 	var replaceHistory = [];
 	
 	var engines = {}, fonts = {}, defaultOptions = {
@@ -404,7 +383,6 @@ var Cufon = (function(api) {
 		//fontScaling: false,
 		//hover: false,
 		printable: true,
-		responsive: false,
 		//rotation: 0,
 		//selectable: false,
 		selector: (
@@ -444,19 +422,12 @@ var Cufon = (function(api) {
 		if (typeof options.textShadow == 'string') options.textShadow = CSS.textShadow(options.textShadow);
 		if (!options.engine) return api; // there's no browser support so we'll just stop here
 		if (!ignoreHistory) replaceHistory.push(arguments);
-		var dispatch = function() {
-			if (!options.responsive) return replaceElement.apply(null, arguments);
-			var args = arguments;
-			sharedQueue.add(function() {
-				replaceElement.apply(null, args);
-			});
-		};
 		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
 		CSS.ready(function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
 				var el = elements[i];
 				if (typeof el == 'string') api.replace(options.selector(el), options, true);
-				else dispatch(el, options);
+				else replaceElement(el, options);
 			}
 		});
 		return api;
