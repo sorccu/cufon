@@ -3,9 +3,9 @@
  * Licensed under the MIT license.
  */
 
-var Cufon = new function() {
+var Cufon = (function(api) {
 	
-	var DOM = this.DOM = {
+	var DOM = api.DOM = {
 			
 		ready: (function() {
 		
@@ -53,7 +53,7 @@ var Cufon = new function() {
 		
 	};
 
-	var CSS = this.CSS = {
+	var CSS = api.CSS = {
 	
 		Size: function(value, base) {
 		
@@ -179,7 +179,7 @@ var Cufon = new function() {
 		
 	};
 	
-	this.VML = {
+	api.VML = {
 	
 		parsePath: function(path) {
 			var cmds = [], re = /([mrvxe])([^a-z]*)/g, match;
@@ -194,7 +194,7 @@ var Cufon = new function() {
 			
 	};
 	
-	function ExecutionQueue(context) {
+	function ExecutionQueue() {
 	
 		var items = [], active = false;
 		
@@ -202,7 +202,7 @@ var Cufon = new function() {
 			if (active || !items.length) return;
 			active = true;
 			setTimeout(function() {
-				items.shift().call(context);
+				items.shift()();
 				active = false;
 				next();
 			}, 1);
@@ -398,7 +398,7 @@ var Cufon = new function() {
 	
 	var HAS_BROKEN_REGEXP = ' '.split(/\s+/).length == 0;
 	
-	var sharedQueue = new ExecutionQueue(this), sharedStorage = new Storage();
+	var sharedQueue = new ExecutionQueue(), sharedStorage = new Storage();
 	var replaceHistory = [];
 	
 	var engines = {}, fonts = {}, defaultOptions = {
@@ -422,31 +422,31 @@ var Cufon = new function() {
 		textShadow: 'none'
 	};
 	
-	this.registerEngine = function(id, engine) {
-		if (!engine) return this;
+	api.registerEngine = function(id, engine) {
+		if (!engine) return api;
 		engines[id] = engine;
-		return this.set('engine', id);
+		return api.set('engine', id);
 	};
 	
-	this.registerFont = function(data) {
+	api.registerFont = function(data) {
 		var font = new Font(data), family = font.family;
 		if (!fonts[family]) fonts[family] = new FontFamily();
 		fonts[family].add(font);
-		return this.set('fontFamily', family);
+		return api.set('fontFamily', family);
 	};
 	
-	this.refresh = function() {
+	api.refresh = function() {
 		var currentHistory = replaceHistory.splice(0, replaceHistory.length);
 		for (var i = 0, l = currentHistory.length; i < l; ++i) {
-			this.replace.apply(this, currentHistory[i]);
+			api.replace.apply(null, currentHistory[i]);
 		}
-		return this;
+		return api;
 	};
 	
-	this.replace = function(elements, options, ignoreHistory) {
+	api.replace = function(elements, options, ignoreHistory) {
 		options = merge(defaultOptions, options);
 		if (typeof options.textShadow == 'string') options.textShadow = CSS.textShadow(options.textShadow);
-		if (!options.engine) return this; // there's no browser support so we'll just stop here
+		if (!options.engine) return api; // there's no browser support so we'll just stop here
 		if (!ignoreHistory) replaceHistory.push(arguments);
 		var dispatch = function() {
 			if (!options.responsive) return replaceElement.apply(null, arguments);
@@ -459,19 +459,21 @@ var Cufon = new function() {
 		CSS.ready(function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
 				var el = elements[i];
-				if (typeof el == 'string') Cufon.replace(options.selector(el), options, true);
+				if (typeof el == 'string') api.replace(options.selector(el), options, true);
 				else dispatch(el, options);
 			}
 		});
-		return this;
+		return api;
 	};
 	
-	this.set = function(option, value) {
+	api.set = function(option, value) {
 		defaultOptions[option] = value;
-		return this;
+		return api;
 	};
 	
-};
+	return api;
+	
+})({});
 
 Cufon.registerEngine('canvas', (function() {
 
