@@ -329,14 +329,15 @@ var Cufon = (function(api) {
 	function process(font, text, style, options, node, el) {
 		if (options.separateWords) {
 			var fragment = document.createDocumentFragment(), processed;
-			var words = text.split(/\s+/);
+			var words = text.split(/\s+/), hasNext;
 			if (HAS_BROKEN_REGEXP) {
 				// @todo figure out a better way to do this
 				if (/^\s/.test(text)) words.unshift('');
 				if (/\s$/.test(text)) words.push('');
 			}
 			for (var i = 0, l = words.length; i < l; ++i) {
-				processed = engines[options.engine](font, words[i] + (i < l - 1 ? ' ' : ''), style, options, node, el);
+				hasNext = (i < l - 1);
+				processed = engines[options.engine](font, words[i] + (hasNext ? ' ' : ''), style, options, node, el, hasNext);
 				if (processed) fragment.appendChild(processed);
 			}
 			return fragment;
@@ -706,7 +707,7 @@ Cufon.registerEngine('vml', (function() {
 		document.body.insertBefore(shapeType, document.body.firstChild);
 	}
 	
-	return function(font, text, style, options, node, el) {
+	return function(font, text, style, options, node, el, hasNext) {
 	
 		// @todo word-spacing, text-decoration
 	
@@ -811,7 +812,12 @@ Cufon.registerEngine('vml', (function() {
 			print.innerText = text;
 			wrapper.appendChild(print);
 		}
-				
+		
+		// ie6, for some reason, has trouble rendering the last VML element in the document.
+		// we can work around this by injecting a dummy element where needed.
+		// @todo find a better solution
+		if (!hasNext) wrapper.appendChild(document.createElement('cvml:group'));
+		
 		return wrapper;
 		
 	};
