@@ -541,11 +541,7 @@ Cufon.registerEngine('canvas', (function() {
 		
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
-		var width = 0;
-		var height = size.convert(viewBox.height);
-		var roundedHeight = Math.ceil(height);
-		
-		var lastWidth = null;
+		var width = 0, lastWidth = null;
 		
 		for (var i = 0, l = chars.length; i < l; ++i) {
 			var glyph = font.glyphs[chars[i]] || font.missingGlyph;
@@ -567,8 +563,12 @@ Cufon.registerEngine('canvas', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 		
-		canvas.width = Math.ceil(size.convert(width + expandRight - expandLeft));
-		canvas.height = Math.ceil(size.convert(viewBox.height - expandTop + expandBottom));
+		var height = size.convert(viewBox.height - expandTop + expandBottom);
+		var roundedHeight = Math.ceil(height);
+		var roundingFactor = roundedHeight / height;
+		
+		canvas.width = Math.ceil(size.convert(width + expandRight - expandLeft) * roundingFactor);
+		canvas.height = roundedHeight;
 		
 		// minY has no part in canvas.height
 		expandTop += viewBox.minY;
@@ -576,7 +576,6 @@ Cufon.registerEngine('canvas', (function() {
 		cStyle.top = Math.round(size.convert(expandTop - font.ascent)) + 'px';
 		cStyle.left = Math.round(size.convert(expandLeft)) + 'px';
 		
-		var roundingFactor = roundedHeight / height;
 		var wrapperWidth = Math.ceil(size.convert(width * roundingFactor)) + 'px';
 		
 		if (HAS_INLINE_BLOCK) {
