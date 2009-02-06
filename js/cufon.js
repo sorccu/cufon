@@ -121,6 +121,14 @@ var Cufon = (function(api) {
 			return checker[property] === value;
 		},
 		
+		textAlign: function(word, style, position, wordCount) {
+			if (style.get('textAlign') == 'right') {
+				if (position > 0) word = ' ' + word;
+			}
+			else if (position < wordCount - 1) word += ' ';
+			return word;
+		},
+		
 		textDecoration: function(el, style) {
 			if (!style) style = this.getStyle(el);
 			var types = {
@@ -329,15 +337,16 @@ var Cufon = (function(api) {
 	function process(font, text, style, options, node, el) {
 		if (options.separateWords) {
 			var fragment = document.createDocumentFragment(), processed;
-			var words = text.split(/\s+/), hasNext;
+			var words = text.split(/\s+/);
 			if (HAS_BROKEN_REGEXP) {
 				// @todo figure out a better way to do this
 				if (/^\s/.test(text)) words.unshift('');
 				if (/\s$/.test(text)) words.push('');
 			}
 			for (var i = 0, l = words.length; i < l; ++i) {
-				hasNext = (i < l - 1);
-				processed = engines[options.engine](font, words[i] + (hasNext ? ' ' : ''), style, options, node, el, hasNext);
+				processed = engines[options.engine](font,
+					CSS.textAlign(words[i], style, i, l),
+					style, options, node, el, i < l - 1);
 				if (processed) fragment.appendChild(processed);
 			}
 			return fragment;
