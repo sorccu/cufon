@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'ConversionException.php';
+
 class FontForgeScript {
 	
 	/**
@@ -65,6 +67,11 @@ class FontForgeScript {
 		exec($command, $output, $status);
 		
 		Cufon::log('Exited with status %d', $status);
+		
+		if ($status > 0)
+		{
+			throw new ConversionException('Conversion failed');
+		}
 		
 		unlink($filename);
 		

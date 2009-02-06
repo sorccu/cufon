@@ -23,19 +23,23 @@ ul, ol, p {
 	padding: 0;
 }
 
+ul, ol {
+	padding-left: 2em;
+}
+
 a:link, a:visited {
 	color: #2e99d7;
 	text-decoration: none;
 }
 
-form .section {
+.section {
 	background: #fff;
 	border: 1px solid #d6dee7;
 	margin: 1em 0;
 	padding: 1em;
 }
 
-form .section h3 {
+.section h3 {
 	border-bottom: 1px solid #efd6aa;
 	color: #fea202;
 	font-size: 200%;
@@ -93,6 +97,10 @@ input {
 	text-align: center;
 }
 
+#nav ul {
+	padding: 0;
+}
+
 #nav li {
 	display: inline;
 }
@@ -101,7 +109,7 @@ input {
 	text-decoration: underline;
 }
 
-button, #nav a:link, #nav a:visited {
+button, #nav a:link, #nav a:visited, .actions a:link, .actions a:visited {
 	background: #34bfec;
 	border: 1px solid #02aae0;
 	color: #fff;
@@ -116,13 +124,13 @@ html>/**/body button {
 	padding: 0.3em 1em;
 }
 
-#nav a:link, #nav a:visited {
+#nav a:link, #nav a:visited, .actions a:link, .actions a:visited {
 	font: bold 140%/2em Arial, Verdana, Helvetica, sans-serif;
 	margin: 0 4px;
 	padding: 0.41em 1.5em 0.4em;
 }
 
-button:hover, #nav a:hover, #nav a:active {
+button:hover, #nav a:hover, #nav a:active, .actions a:hover, .actions a:active {
 	background: #4cc9f2;
 }
 
