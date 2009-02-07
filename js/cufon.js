@@ -3,7 +3,11 @@
  * Licensed under the MIT license.
  */
 
-var Cufon = (function(api) {
+var Cufon = (function() {
+	
+	var api = function() {	
+		return api.replace.apply(null, arguments);
+	};
 	
 	var DOM = api.DOM = {
 			
@@ -406,6 +410,19 @@ var Cufon = (function(api) {
 		textShadow: 'none'
 	};
 	
+	api.now = function() {
+		DOM.ready();
+		return api;
+	};
+	
+	api.refresh = function() {
+		var currentHistory = replaceHistory.splice(0, replaceHistory.length);
+		for (var i = 0, l = currentHistory.length; i < l; ++i) {
+			api.replace.apply(null, currentHistory[i]);
+		}
+		return api;
+	};
+	
 	api.registerEngine = function(id, engine) {
 		if (!engine) return api;
 		engines[id] = engine;
@@ -417,14 +434,6 @@ var Cufon = (function(api) {
 		if (!fonts[family]) fonts[family] = new FontFamily();
 		fonts[family].add(font);
 		return api.set('fontFamily', family);
-	};
-	
-	api.refresh = function() {
-		var currentHistory = replaceHistory.splice(0, replaceHistory.length);
-		for (var i = 0, l = currentHistory.length; i < l; ++i) {
-			api.replace.apply(null, currentHistory[i]);
-		}
-		return api;
 	};
 	
 	api.replace = function(elements, options, ignoreHistory) {
@@ -451,7 +460,7 @@ var Cufon = (function(api) {
 	
 	return api;
 	
-})({});
+})();
 
 Cufon.registerEngine('canvas', (function() {
 
