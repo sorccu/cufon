@@ -781,6 +781,7 @@ Cufon.registerEngine('vml', (function() {
 			sStyle.height = viewBox.height;
 			sStyle.top = 0;
 			sStyle.left = offsetX;
+			sStyle.zIndex = 1;
 			shape.fillcolor = color;
 			canvas.appendChild(shape);
 			
@@ -793,7 +794,7 @@ Cufon.registerEngine('vml', (function() {
 					var shadowNode = shape.cloneNode(false), zStyle = shadowNode.runtimeStyle;
 					zStyle.top = size.convertFrom(parseFloat(shadow.offY));
 					zStyle.left = offsetX + size.convertFrom(parseFloat(shadow.offX));
-					zStyle.zIndex = -1;
+					zStyle.zIndex = 0;
 					shadowNode.fillcolor = shadowColor.color;
 					if (shadowColor.opacity) {
 						var shadowFill = document.createElement('cvml:fill');
