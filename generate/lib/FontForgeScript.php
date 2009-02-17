@@ -126,7 +126,7 @@ class FontForgeScript {
 		return $this;
 	}
 	
-/**
+	/**
 	 * @param int $point
 	 * @return FontForgeScript
 	 */
