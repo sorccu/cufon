@@ -4,6 +4,9 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'ConversionException.php'
 
 class FontForgeScript {
 	
+	const ORDER_QUADRATIC = 2;
+	const ORDER_CUBIC = 3;
+	
 	/**
 	 * @var array
 	 */
@@ -217,6 +220,17 @@ class FontForgeScript {
 	public function selectUnicodeRange($from, $to)
 	{
 		$this->commands[] = sprintf('SelectMore(0u%X, 0u%X)', $from, $to);
+		
+		return $this;
+	}
+	
+	/**
+	 * @param int $order
+	 * @return FontForgeScript
+	 */
+	public function setFontOrder($order)
+	{
+		$this->commands[] = sprintf('SetFontOrder(%d)', $order);
 		
 		return $this;
 	}

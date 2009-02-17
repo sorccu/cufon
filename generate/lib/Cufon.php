@@ -83,6 +83,8 @@ class Cufon {
 		$script->selectInvert();
 		$script->clear();
 		
+		$script->setFontOrder(FontForgeScript::ORDER_CUBIC);
+		
 		if (!$options['disableScaling'])
 		{
 			$script->scaleToEm($options['emSize']);
