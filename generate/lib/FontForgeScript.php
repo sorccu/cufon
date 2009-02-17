@@ -49,6 +49,16 @@ class FontForgeScript {
 	}
 	
 	/**
+	 * @return FontForgeScript
+	 */
+	public function detachAndRemoveGlyphs()
+	{
+		$this->commands[] = 'DetachAndRemoveGlyphs()';
+		
+		return $this;
+	}
+	
+	/**
 	 * @return void
 	 */
 	public function execute()

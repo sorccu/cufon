@@ -81,7 +81,7 @@ class Cufon {
 		}
 		
 		$script->selectInvert();
-		$script->clear();
+		$script->detachAndRemoveGlyphs();
 		
 		$script->setFontOrder(FontForgeScript::ORDER_CUBIC);
 		
