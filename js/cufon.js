@@ -681,13 +681,13 @@ Cufon.registerEngine('vml', (function() {
 		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
 		document.write('<style type="text/css">' +
 			'@media screen{' + 
-				'cvml\\:*{behavior:url(#default#VML);display:inline-block;antialias:true;position:absolute}' +
+				'cvml\\:shape,cvml\\:group,cvml\\:shapetype,cvml\\:fill{behavior:url(#default#VML);display:inline-block;antialias:true;position:absolute}' +
 				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
 				'.cufon-vml .cufon-alt{display:none}' +
 				'a .cufon-vml{cursor:pointer}' +
 			'}' +
 			'@media print{' + 
-				'.cufon-vml cvml\\:*{display:none}' +
+				'.cufon-vml *{display:none}' +
 				'.cufon-vml .cufon-alt{display:inline}' +
 			'}' +
 		'</style>');
@@ -781,6 +781,7 @@ Cufon.registerEngine('vml', (function() {
 			sStyle.height = viewBox.height;
 			sStyle.top = 0;
 			sStyle.left = offsetX;
+			sStyle.zIndex = 1;
 			shape.fillcolor = color;
 			canvas.appendChild(shape);
 			
@@ -793,7 +794,7 @@ Cufon.registerEngine('vml', (function() {
 					var shadowNode = shape.cloneNode(false), zStyle = shadowNode.runtimeStyle;
 					zStyle.top = size.convertFrom(parseFloat(shadow.offY));
 					zStyle.left = offsetX + size.convertFrom(parseFloat(shadow.offX));
-					zStyle.zIndex = -1;
+					zStyle.zIndex = 0;
 					shadowNode.fillcolor = shadowColor.color;
 					if (shadowColor.opacity) {
 						var shadowFill = document.createElement('cvml:fill');
