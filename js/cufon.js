@@ -472,15 +472,21 @@ Cufon.registerEngine('canvas', (function() {
 	
 	var HAS_INLINE_BLOCK = Cufon.CSS.supports('display', 'inline-block');
 	
+	// Firefox 2 w/ non-strict doctype (almost standards mode)
+	var HAS_BROKEN_LINEHEIGHT = !HAS_INLINE_BLOCK && (document.compatMode == 'BackCompat' || /frameset|transitional/i.test(document.doctype.publicId));
+	
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
 		'@media screen,projection{' +
-			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle;font-size:1px;line-height:1px}' +
+			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle' + 
+			(HAS_BROKEN_LINEHEIGHT
+				? ''
+				: ';font-size:1px;line-height:1px') +
+			'}.cufon-canvas .cufon-alt{display:none}' +
 			(HAS_INLINE_BLOCK
 				? '.cufon-canvas canvas{position:relative}'
 				: '.cufon-canvas canvas{position:absolute}') +
-			'.cufon-canvas .cufon-alt{display:none}' +
 		'}' +
 		'@media print{' +
 			'.cufon-canvas{padding:0 !important}' +
