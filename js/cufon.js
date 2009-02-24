@@ -339,23 +339,22 @@ var Cufon = (function() {
 	}
 	
 	function process(font, text, style, options, node, el) {
-		if (options.separateWords) {
-			var fragment = document.createDocumentFragment(), processed;
-			var words = text.split(/\s+/);
-			if (HAS_BROKEN_REGEXP) {
-				// @todo figure out a better way to do this
-				if (/^\s/.test(text)) words.unshift('');
-				if (/\s$/.test(text)) words.push('');
-			}
-			for (var i = 0, l = words.length; i < l; ++i) {
-				processed = engines[options.engine](font,
-					CSS.textAlign(words[i], style, i, l),
-					style, options, node, el, i < l - 1);
-				if (processed) fragment.appendChild(processed);
-			}
-			return fragment;
+		var separate = options.separate;
+		if (separate == 'none') return engines[options.engine].apply(null, arguments);
+		var fragment = document.createDocumentFragment(), processed;
+		var parts = text.split(separators[separate]), needsAligning = (separate == 'words');
+		if (needsAligning && HAS_BROKEN_REGEXP) {
+			// @todo figure out a better way to do this
+			if (/^\s/.test(text)) parts.unshift('');
+			if (/\s$/.test(text)) parts.push('');
 		}
-		return engines[options.engine].apply(null, arguments);
+		for (var i = 0, l = parts.length; i < l; ++i) {
+			processed = engines[options.engine](font,
+				needsAligning ? CSS.textAlign(parts[i], style, i, l) : parts[i],
+				style, options, node, el, i < l - 1);
+			if (processed) fragment.appendChild(processed);
+		}
+		return fragment;
 	}
 	
 	function replaceElement(el, options) {
@@ -406,8 +405,13 @@ var Cufon = (function() {
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
 			||	elementsByTagName
 		),
-		separateWords: true,
+		separate: 'words', // 'none' and 'characters' are also accepted
 		textShadow: 'none'
+	};
+	
+	var separators = {
+		words: /\s+/,
+		characters: ''
 	};
 	
 	api.now = function() {
