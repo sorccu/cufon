@@ -39,6 +39,7 @@ class Cufon {
 		$script = new FontForgeScript();
 		
 		$script->open($file);
+		$script->reEncode('unicode');
 		$script->selectNone();
 		
 		if (!empty($options['glyphs']))

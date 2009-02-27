@@ -150,6 +150,17 @@ class FontForgeScript {
 	}
 	
 	/**
+	 * @param string $encoding
+	 * @return FontForgeScript
+	 */
+	public function reEncode($encoding)
+	{
+		$this->commands[] = sprintf('Reencode("%s")', $encoding);
+		
+		return $this;
+	}
+	
+	/**
 	 * @return FontForgeScript
 	 */
 	public function removeAllKerns()
