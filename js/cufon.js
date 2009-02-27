@@ -286,6 +286,25 @@ var Cufon = (function() {
 	
 	}
 	
+	function HoverHandler() {
+		
+		function contains(node, anotherNode) {
+			return (node.compareDocumentPosition(anotherNode) & 16);
+		}
+		
+		function onOverOut(e) {
+			var related = e.relatedTarget;
+			if (!related || contains(this, related)) return;
+			Cufon.replace(this, sharedStorage.get(this).options, true);
+		}
+		
+		this.attach = function(el) {
+			addEvent(el, 'mouseover', onOverOut);
+			addEvent(el, 'mouseout', onOverOut);
+		};
+		
+	}
+	
 	function Storage() {
 		
 		var map = {}, at = 0;
@@ -326,9 +345,17 @@ var Cufon = (function() {
 		}
 		else if (el.attachEvent) {
 			el.attachEvent('on' + type, function() {
-				return listener.apply(el, arguments);
+				return listener.call(el, window.event);
 			});
 		}
+	}
+	
+	function attach(el, options) {
+		var storage = sharedStorage.get(el);
+		if (storage.options) return el;
+		if (options.hover) hoverHandler.attach(el);
+		storage.options = options;
+		return el;
 	}
 	
 	function cached(fun) {
@@ -381,35 +408,36 @@ var Cufon = (function() {
 	}
 	
 	function replaceElement(el, options) {
-		var storage = sharedStorage.get(el);
-		if (!options) options = storage.options;
-		var font, style, nextNode;
+		var font, style, nextNode, redraw;
 		for (var node = el.firstChild; node; node = nextNode) {
 			nextNode = node.nextSibling;
+			redraw = false;
 			if (node.nodeType == 1) {
 				if (!node.firstChild) continue;
 				if (!/cufon/.test(node.className)) {
 					arguments.callee(node, options);
 					continue;
 				}
+				else redraw = true;
 			}
-			var text = node.nodeType == 3 ? node.data : node.alt;
-			if (text === '') continue;
 			if (!style) style = CSS.getStyle(el).extend(options);
 			if (!font) font = getFont(el, style);
 			if (!font) continue;
+			if (redraw) {
+				continue;
+			}
+			var text = node.data;
+			if (text === '') continue;
 			var processed = process(font, text, style, options, node, el);
 			if (processed) node.parentNode.replaceChild(processed, node);
 			else node.parentNode.removeChild(node);
-		}
-		if (!storage.options) {
-			storage.options = options;
 		}
 	}
 	
 	var HAS_BROKEN_REGEXP = ' '.split(/\s+/).length == 0;
 	
 	var sharedStorage = new Storage();
+	var hoverHandler = new HoverHandler();
 	var replaceHistory = [];
 	
 	var engines = {}, fonts = {}, defaultOptions = {
@@ -417,7 +445,7 @@ var Cufon = (function() {
 		engine: null,
 		//fontScale: 1,
 		//fontScaling: false,
-		//hover: false,
+		hover: false,
 		printable: true,
 		//rotation: 0,
 		//selectable: false,
@@ -476,7 +504,7 @@ var Cufon = (function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
 				var el = elements[i];
 				if (typeof el == 'string') api.replace(options.selector(el), options, true);
-				else replaceElement(el, options);
+				else replaceElement(attach(el, options), options);
 			}
 		});
 		return api;
