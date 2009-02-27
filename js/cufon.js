@@ -293,9 +293,14 @@ var Cufon = (function() {
 		}
 		
 		function onOverOut(e) {
-			var related = e.relatedTarget;
-			if (!related || contains(this, related)) return;
-			Cufon.replace(this, sharedStorage.get(this).options, true);
+			var el = this, related = e.relatedTarget;
+			if (!related || contains(el, related)) return;
+			// A timeout is needed so that the event can actually "happen"
+			// before replace is triggered. This ensures that styles are up
+			// to date.
+			setTimeout(function() {
+				Cufon.replace(el, sharedStorage.get(el).options, true);
+			}, 10);
 		}
 		
 		this.attach = function(el) {
@@ -424,6 +429,7 @@ var Cufon = (function() {
 			if (!font) font = getFont(el, style);
 			if (!font) continue;
 			if (redraw) {
+				engines[options.engine](font, null, style, options, node, el);
 				continue;
 			}
 			var text = node.data;
@@ -589,6 +595,8 @@ Cufon.registerEngine('canvas', (function() {
 	
 	return function(font, text, style, options, node, el) {
 		
+		var redraw = (text === null);
+		
 		var viewBox = font.viewBox;
 		
 		var size = style.getSize('fontSize', font.baseSize);
@@ -611,7 +619,7 @@ Cufon.registerEngine('canvas', (function() {
 			}
 		}
 		
-		var chars = Cufon.CSS.textTransform(text, style).split('');
+		var chars = Cufon.CSS.textTransform(redraw ? node.alt : text, style).split('');
 		
 		var width = 0, lastWidth = null;
 		
@@ -626,11 +634,27 @@ Cufon.registerEngine('canvas', (function() {
 		expandRight += (viewBox.width - lastWidth);
 		expandLeft += viewBox.minX;
 		
-		var wrapper = document.createElement('span');
-		wrapper.className = 'cufon cufon-canvas';
-		wrapper.alt = text;
+		var wrapper, canvas;
 		
-		var canvas = document.createElement('canvas');
+		if (redraw) {
+			wrapper = node;
+			canvas = node.firstChild;
+		}
+		else {
+			wrapper = document.createElement('span');
+			wrapper.className = 'cufon cufon-canvas';
+			wrapper.alt = text;
+			
+			canvas = document.createElement('canvas');
+			wrapper.appendChild(canvas);
+			
+			if (options.printable) {
+				var print = document.createElement('span');
+				print.className = 'cufon-alt';
+				print.appendChild(document.createTextNode(text));
+				wrapper.appendChild(print);
+			}
+		}
 		
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
@@ -716,15 +740,6 @@ Cufon.registerEngine('canvas', (function() {
 		g.restore();
 		
 		if (textDecoration['line-through']) line(-font.descent, textDecoration['line-through']);
-		
-		wrapper.appendChild(canvas);
-		
-		if (options.printable) {
-			var print = document.createElement('span');
-			print.className = 'cufon-alt';
-			print.appendChild(document.createTextNode(text));
-			wrapper.appendChild(print);
-		}
 		
 		return wrapper;
 			
