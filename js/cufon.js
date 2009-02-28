@@ -239,14 +239,17 @@ var Cufon = (function() {
 	
 	function FontFamily() {
 
-		this.styles = {};
+		var styles = {}, mapping = {
+			oblique: 'italic',
+			italic: 'oblique'
+		};
 		
 		this.add = function(font) {
-			(this.styles[font.style] || (this.styles[font.style] = {}))[font.weight] = font;
+			(styles[font.style] || (styles[font.style] = {}))[font.weight] = font;
 		};
 		
 		this.get = function(style, weight) {
-			var weights = this.styles[style], closest;
+			var weights = styles[style] || styles[mapping[style]] || styles.normal, closest;
 			if (!weights) return null;
 			weight = {
 				normal: 400,
