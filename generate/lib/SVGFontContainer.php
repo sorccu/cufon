@@ -10,7 +10,12 @@ class SVGFontContainer implements IteratorAggregate {
 	 */
 	public static function fromFile($file)
 	{
-		return new SVGFontContainer(simplexml_load_file($file));
+		$xml = file_get_contents($file);
+		
+		// Get rid of unwanted control characters
+		$xml = preg_replace('/[\x0E-\x1F]/', '', $xml);
+		
+		return new SVGFontContainer(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_COMPACT));
 	}
 
 	/**
