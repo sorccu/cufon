@@ -39,7 +39,7 @@ class SVGFont {
 			{
 				if (isset($face[$attribute]))
 				{
-					$parts[] = (string) $face[$attribute];
+					$parts[] = $this->getSanitizedFaceValue($attribute, (string) $face[$attribute]);
 				}
 			}
 			
@@ -47,6 +47,29 @@ class SVGFont {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * @param string $key
+	 * @param string $value
+	 */
+	private function getSanitizedFaceValue($key, $value)
+	{
+		switch ($key)
+		{
+			case 'font-weight':
+				
+				$weight = intval($value);
+				
+				if ($weight < 100)
+				{
+					$weight *= 100;
+				}
+				
+				return max(100, min($weight, 900));
+		}
+		
+		return $value;
 	}
 	
 	/**
@@ -71,7 +94,7 @@ class SVGFont {
 		
 		foreach ($face[0]->attributes() as $key => $val)
 		{
-			$fontJSON['face'][$key] = (string) $val;
+			$fontJSON['face'][$key] = $this->getSanitizedFaceValue($key, (string) $val);
 		}
 		
 		foreach ($font->xpath('glyph') as $glyph)
