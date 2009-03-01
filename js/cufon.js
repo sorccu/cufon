@@ -322,8 +322,7 @@ var Cufon = (function() {
 		if (!style) style = CSS.getStyle(el);
 		var families = style.get('fontFamily').split(/\s*,\s*/), family;
 		for (var i = 0, l = families.length; i < l; ++i) {
-			family = families[i].toLowerCase();
-			if (family[0] == '"' || family[0] == "'") family = family.substring(1, family.length - 1);
+			family = families[i].replace(/^(["'])(.*?)\1$/, '$2').toLowerCase();
 			if (fonts[family]) return fonts[family].get(style.get('fontStyle'), style.get('fontWeight'));
 		}
 		return null;
