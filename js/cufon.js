@@ -422,6 +422,7 @@ var Cufon = (function() {
 		//selectable: false,
 		selector: (
 				window.Sizzle
+			||	(window.dojo && dojo.query)
 			||	(window.$$ && function(query) { return $$(query); })
 			||	window.$
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
