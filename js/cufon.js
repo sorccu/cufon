@@ -249,18 +249,38 @@ var Cufon = (function() {
 		};
 		
 		this.get = function(style, weight) {
-			var weights = styles[style] || styles[mapping[style]] || styles.normal, closest;
+			var weights = styles[style] || styles[mapping[style]] || styles.normal;
 			if (!weights) return null;
+			// we don't have to worry about "bolder" and "lighter"
+			// because IE's currentStyle returns a numeric value for it,
+			// and other browsers use the computed value anyway
 			weight = {
 				normal: 400,
 				bold: 700
 			}[weight] || parseInt(weight, 10);
 			if (weights[weight]) return weights[weight];
+			// http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight
+			// Gecko uses x99/x01 for lighter/bolder
+			var up = {
+				1: 1,
+				99: 0
+			}[weight % 100], alts = [], min, max;
+			if (up === undefined) up = weight > 400;
+			if (weight == 500) weight = 400;
 			for (var alt in weights) {
 				alt = parseInt(alt, 10);
-				if (!closest || (alt < weight && alt > closest)) closest = alt;
+				if (!min || alt < min) min = alt;
+				if (!max || alt > max) max = alt;
+				alts.push(alt);
 			}
-			return weights[closest];
+			if (weight < min) weight = min;
+			if (weight > max) weight = max;
+			alts.sort(function(a, b) {
+				return (up
+					? (a > weight && b > weight) ? a < b : a > b
+					: (a < weight && b < weight) ? a > b : a < b) ? -1 : 1;
+			});
+			return weights[alts[0]];
 		};
 	
 	}
