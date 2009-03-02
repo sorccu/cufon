@@ -249,7 +249,8 @@ var Cufon = (function() {
 		};
 		
 		this.get = function(style, weight) {
-			var weights = styles[style] || styles[mapping[style]] || styles.normal;
+			var weights = styles[style] || styles[mapping[style]]
+				|| styles.normal || styles.italic || styles.oblique;
 			if (!weights) return null;
 			// we don't have to worry about "bolder" and "lighter"
 			// because IE's currentStyle returns a numeric value for it,
