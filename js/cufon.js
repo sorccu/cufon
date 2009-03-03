@@ -425,7 +425,7 @@ var Cufon = (function() {
 				window.Sizzle
 			||	(window.dojo && dojo.query)
 			||	(window.$$ && function(query) { return $$(query); })
-			||	window.$
+			||	(window.$ && function(query) { return $(query); })
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
 			||	elementsByTagName
 		),
