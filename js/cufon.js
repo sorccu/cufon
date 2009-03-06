@@ -289,7 +289,8 @@ var Cufon = (function() {
 	function HoverHandler() {
 		
 		function contains(node, anotherNode) {
-			return (node.compareDocumentPosition(anotherNode) & 16);
+			if (node.contains) return node.contains(anotherNode);
+			return node.compareDocumentPosition(anotherNode) & 16;
 		}
 		
 		function onOverOut(e) {
