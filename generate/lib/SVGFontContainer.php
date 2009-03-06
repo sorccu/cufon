@@ -13,7 +13,8 @@ class SVGFontContainer implements IteratorAggregate {
 		$xml = file_get_contents($file);
 		
 		// Get rid of unwanted control characters
-		$xml = preg_replace('/[\x0E-\x1F]/', '', $xml);
+		// (only allow Tab, LF and CR)
+		$xml = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $xml);
 		
 		return new SVGFontContainer(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_COMPACT));
 	}
