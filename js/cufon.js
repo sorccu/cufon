@@ -294,8 +294,17 @@ var Cufon = (function() {
 		}
 		
 		function onOverOut(e) {
-			var el = this, related = e.relatedTarget;
-			if (!related || contains(el, related)) return;
+			var related = e.relatedTarget || e.toElement;
+			if (!related || contains(this, related)) return;
+			trigger(this);
+		}
+		
+		function onEnterLeave(e) {
+			console.log('triggered', e.type, e.fromElement.nodeName, e.toElement.nodeName);
+			trigger(this);
+		}
+		
+		function trigger(el) {
 			// A timeout is needed so that the event can actually "happen"
 			// before replace is triggered. This ensures that styles are up
 			// to date.
@@ -305,8 +314,14 @@ var Cufon = (function() {
 		}
 		
 		this.attach = function(el) {
-			addEvent(el, 'mouseover', onOverOut);
-			addEvent(el, 'mouseout', onOverOut);
+			if (el.onmouseenter === undefined) {
+				addEvent(el, 'mouseover', onOverOut);
+				addEvent(el, 'mouseout', onOverOut);
+			}
+			else {
+				addEvent(el, 'mouseenter', onEnterLeave);
+				addEvent(el, 'mouseleave', onEnterLeave);
+			}
 		};
 		
 	}
@@ -804,7 +819,11 @@ Cufon.registerEngine('vml', (function() {
 	}
 	
 	return function(font, text, style, options, node, el, hasNext) {
-	
+		
+		var redraw = (text === null);
+		
+		if (redraw) text = node.alt;
+		
 		// @todo word-spacing, text-decoration
 	
 		var viewBox = font.viewBox;
@@ -818,11 +837,32 @@ Cufon.registerEngine('vml', (function() {
 			style.computedLSpacing = letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(getSizeInPixels(el, letterSpacing));
 		}
 		
-		var wrapper = document.createElement('span');
-		wrapper.className = 'cufon cufon-vml';
-		wrapper.alt = text;
+		var wrapper, canvas;
 		
-		var canvas = document.createElement('cvml:group');
+		if (redraw) {
+			wrapper = node;
+			canvas = node.firstChild;
+		}
+		else {
+			wrapper = document.createElement('span');
+			wrapper.className = 'cufon cufon-vml';
+			wrapper.alt = text;
+			
+			canvas = document.createElement('cvml:group');
+			wrapper.appendChild(canvas);
+			
+			if (options.printable) {
+				var print = document.createElement('span');
+				print.className = 'cufon-alt';
+				print.innerText = text;
+				wrapper.appendChild(print);
+			}
+			
+			// ie6, for some reason, has trouble rendering the last VML element in the document.
+			// we can work around this by injecting a dummy element where needed.
+			// @todo find a better solution
+			if (!hasNext) wrapper.appendChild(document.createElement('cvml:group'));
+		}
 		
 		var wStyle = wrapper.runtimeStyle;
 		var cStyle = canvas.runtimeStyle;
@@ -853,16 +893,24 @@ Cufon.registerEngine('vml', (function() {
 			
 			if (!glyph.typeRef) createType(glyph, viewBox);
 			
-			var shape = document.createElement('cvml:shape');
+			var shape;
+			
+			if (redraw) {
+				shape = canvas.childNodes[i];
+			}
+			else { 
+				shape = document.createElement('cvml:shape');
+				canvas.appendChild(shape);
+			}
+			
 			shape.type = glyph.typeRef;
-			var sStyle = shape.runtimeStyle;
+			var sStyle = shape.style;
 			sStyle.width = viewBox.width;
 			sStyle.height = viewBox.height;
 			sStyle.top = 0;
 			sStyle.left = offsetX;
 			sStyle.zIndex = 1;
 			shape.fillcolor = color;
-			canvas.appendChild(shape);
 			
 			if (shadows) {
 				// the VML shadow element is not used because it can only support
@@ -900,20 +948,6 @@ Cufon.registerEngine('vml', (function() {
 		cStyle.width = size.convert(fullWidth * roundingFactor);
 		
 		wStyle.width = Math.max(Math.ceil(size.convert(width * roundingFactor)), 0);
-		
-		wrapper.appendChild(canvas);
-	
-		if (options.printable) {
-			var print = document.createElement('span');
-			print.className = 'cufon-alt';
-			print.innerText = text;
-			wrapper.appendChild(print);
-		}
-		
-		// ie6, for some reason, has trouble rendering the last VML element in the document.
-		// we can work around this by injecting a dummy element where needed.
-		// @todo find a better solution
-		if (!hasNext) wrapper.appendChild(document.createElement('cvml:group'));
 		
 		return wrapper;
 		
