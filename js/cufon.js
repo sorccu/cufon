@@ -423,6 +423,7 @@ var Cufon = (function() {
 		//selectable: false,
 		selector: (
 				window.Sizzle
+			||	window.jQuery // avoid noConflict issues
 			||	(window.dojo && dojo.query)
 			||	(window.$$ && function(query) { return $$(query); })
 			||	(window.$ && function(query) { return $(query); })
