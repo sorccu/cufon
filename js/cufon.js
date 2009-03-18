@@ -890,17 +890,16 @@ Cufon.registerEngine('vml', (function() {
 		
 		var shadows = options.textShadow;
 		
-		for (var i = 0, l = chars.length; i < l; ++i) {
+		for (var i = 0, k = -1, l = chars.length; i < l; ++i) {
 		
-			var glyph = font.glyphs[chars[i]] || font.missingGlyph;
+			var glyph = font.glyphs[chars[i]] || font.missingGlyph, shape;
 			if (!glyph) continue;
 			
 			if (!glyph.typeRef) createType(glyph, viewBox);
 			
-			var shape;
-			
 			if (redraw) {
-				shape = canvas.childNodes[i];
+				// some glyphs may be missing so we can't use i
+				shape = canvas.childNodes[++k];
 			}
 			else { 
 				shape = document.createElement('cvml:shape');
@@ -934,6 +933,8 @@ Cufon.registerEngine('vml', (function() {
 					}
 					canvas.appendChild(shadowNode);
 				}
+				
+				++k;
 			}
 			
 			advance = Number(glyph.w || font.w) + letterSpacing;
