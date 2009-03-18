@@ -294,22 +294,21 @@ var Cufon = (function() {
 		}
 		
 		function onOverOut(e) {
-			var related = e.relatedTarget || e.toElement;
+			var related = e.relatedTarget;
 			if (!related || contains(this, related)) return;
 			trigger(this);
 		}
 		
 		function onEnterLeave(e) {
-			console.log('triggered', e.type, e.fromElement.nodeName, e.toElement.nodeName);
 			trigger(this);
 		}
-		
+
 		function trigger(el) {
 			// A timeout is needed so that the event can actually "happen"
 			// before replace is triggered. This ensures that styles are up
 			// to date.
 			setTimeout(function() {
-				Cufon.replace(el, sharedStorage.get(el).options, true);
+				api.replace(el, sharedStorage.get(el).options, true);
 			}, 10);
 		}
 		
@@ -374,7 +373,9 @@ var Cufon = (function() {
 	function attach(el, options) {
 		var storage = sharedStorage.get(el);
 		if (storage.options) return el;
-		if (options.hover) hoverHandler.attach(el);
+		if (options.hover && options.hoverables[el.nodeName.toLowerCase()]) {
+			hoverHandler.attach(el);
+		}
 		storage.options = options;
 		return el;
 	}
@@ -430,7 +431,7 @@ var Cufon = (function() {
 	
 	function replaceElement(el, options) {
 		var font, style, nextNode, redraw;
-		for (var node = el.firstChild; node; node = nextNode) {
+		for (var node = attach(el, options).firstChild; node; node = nextNode) {
 			nextNode = node.nextSibling;
 			redraw = false;
 			if (node.nodeType == 1) {
@@ -468,6 +469,9 @@ var Cufon = (function() {
 		//fontScale: 1,
 		//fontScaling: false,
 		hover: false,
+		hoverables: {
+			a: true
+		},
 		printable: true,
 		//rotation: 0,
 		//selectable: false,
@@ -526,7 +530,7 @@ var Cufon = (function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
 				var el = elements[i];
 				if (typeof el == 'string') api.replace(options.selector(el), options, true);
-				else replaceElement(attach(el, options), options);
+				else replaceElement(el, options);
 			}
 		});
 		return api;
@@ -864,8 +868,8 @@ Cufon.registerEngine('vml', (function() {
 			if (!hasNext) wrapper.appendChild(document.createElement('cvml:group'));
 		}
 		
-		var wStyle = wrapper.runtimeStyle;
-		var cStyle = canvas.runtimeStyle;
+		var wStyle = wrapper.style;
+		var cStyle = canvas.style;
 		
 		var height = size.convert(viewBox.height);
 		
