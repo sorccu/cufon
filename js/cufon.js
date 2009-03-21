@@ -905,7 +905,7 @@ Cufon.registerEngine('vml', (function() {
 			if (shadows) {
 				// the VML shadow element is not used because it can only support
 				// up to 2 shadows. and it breaks text selection.
-				for (var z = 0, p = shadows.length; z < p; ++z) {
+				for (var z = 0, p = shadows.length; z < p; ++z, ++k) {
 					var shadow = shadows[z];
 					var shadowColor = Cufon.CSS.color(shadow.color);
 					var shadowNode = shape.cloneNode(false), zStyle = shadowNode.runtimeStyle;
@@ -920,8 +920,6 @@ Cufon.registerEngine('vml', (function() {
 					}
 					canvas.appendChild(shadowNode);
 				}
-				
-				++k;
 			}
 			
 			advance = Number(glyph.w || font.w) + letterSpacing;
