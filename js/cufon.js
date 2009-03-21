@@ -204,15 +204,18 @@ var Cufon = (function() {
 		
 		this.viewBox = (function () {
 			var parts = face.bbox.split(/\s+/);
-			return {
+			var box = {
 				minX: parseInt(parts[0], 10),
 				minY: parseInt(parts[1], 10),
-				width: parseInt(parts[2], 10) - parseInt(parts[0], 10),
-				height: parseInt(parts[3], 10) - parseInt(parts[1], 10),
-				toString: function() {
-					return [ this.minX, this.minY, this.width, this.height ].join(' ');
-				}
+				maxX: parseInt(parts[2], 10),
+				maxY: parseInt(parts[3], 10)
 			};
+			box.width = box.maxX - box.minX,
+			box.height = box.maxY - box.minY;
+			box.toString = function() {
+				return [ this.minX, this.minY, this.width, this.height ].join(' ');
+			};
+			return box;
 		})();
 		
 		this.ascent = -parseInt(face.ascent, 10);
