@@ -191,21 +191,6 @@ var Cufon = (function() {
 		
 	};
 	
-	api.VML = {
-	
-		parsePath: function(path) {
-			var cmds = [], re = /([mrvxe])([^a-z]*)/g, match;
-			while (match = re.exec(path)) {
-				cmds.push({
-					type: match[1],
-					coords: match[2].split(',')
-				});
-			}
-			return cmds;
-		}
-			
-	};
-	
 	function Font(data) {
 		
 		var face = this.face = data.face;
@@ -581,19 +566,18 @@ Cufon.registerEngine('canvas', (function() {
 
 	function generateFromVML(path, context) {
 		var atX = 0, atY = 0;
-		var cmds = Cufon.VML.parsePath(path);
-		var code = new Array(cmds.length - 1);
-		generate: for (var i = 0, l = cmds.length; i < l; ++i) {
-			var c = cmds[i].coords;
-			switch (cmds[i].type) {
+		var code = [], re = /([mrvxe])([^a-z]*)/g, match;
+		generate: for (var i = 0; match = re.exec(path); ++i) {
+			var c = match[2].split(',');
+			switch (match[1]) {
 				case 'v':
-					code[i] = { m: 'bezierCurveTo', a: [ atX + Number(c[0]), atY + Number(c[1]), atX + Number(c[2]), atY + Number(c[3]), atX += Number(c[4]), atY += Number(c[5]) ] };
+					code[i] = { m: 'bezierCurveTo', a: [ atX + ~~c[0], atY + ~~c[1], atX + ~~c[2], atY + ~~c[3], atX += ~~c[4], atY += ~~c[5] ] };
 					break;
 				case 'r':
-					code[i] = { m: 'lineTo', a: [ atX += Number(c[0]), atY += Number(c[1]) ] };
+					code[i] = { m: 'lineTo', a: [ atX += ~~c[0], atY += ~~c[1] ] };
 					break;
 				case 'm':
-					code[i] = { m: 'moveTo', a: [ atX = Number(c[0]), atY = Number(c[1]) ] };
+					code[i] = { m: 'moveTo', a: [ atX = ~~c[0], atY = ~~c[1] ] };
 					break;
 				case 'x':
 					code[i] = { m: 'closePath' };
