@@ -766,7 +766,7 @@ Cufon.registerEngine('vml', (function() {
 		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
 		document.write('<style type="text/css">' +
 			'@media screen{' + 
-				'cvml\\:shape,cvml\\:group,cvml\\:shapetype,cvml\\:fill{behavior:url(#default#VML);display:inline-block;antialias:true;position:absolute}' +
+				'cvml\\:shape,cvml\\:group,cvml\\:fill{behavior:url(#default#VML);display:inline-block;antialias:true;position:absolute}' +
 				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
 				'.cufon-vml .cufon-alt{display:none}' +
 				'a .cufon-vml{cursor:pointer}' +
@@ -777,8 +777,6 @@ Cufon.registerEngine('vml', (function() {
 			'}' +
 		'</style>');
 	}
-
-	var typeIndex = 0; // this is used to reference VML ShapeTypes
 
 	function getFontSizeInPixels(el, value) {
 		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
@@ -795,18 +793,6 @@ Cufon.registerEngine('vml', (function() {
 		el.style.left = style;
 		el.runtimeStyle.left = runtimeStyle;
 		return result;
-	}
-	
-	function createType(glyph, viewBox) {
-		var shapeType = document.createElement('cvml:shapetype');
-		shapeType.id = 'cufon-glyph-' + typeIndex++;
-		glyph.typeRef = '#' + shapeType.id;
-		shapeType.stroked = 'f';
-		shapeType.coordsize = viewBox.width + ',' + viewBox.height;
-		shapeType.coordorigin = viewBox.minX + ',' + viewBox.minY;
-		var ensureSize = 'm' + viewBox.minX + ',' + viewBox.minY + ' r' + viewBox.width + ',' + viewBox.height;
-		shapeType.path = (glyph.d ? 'm' + glyph.d + 'x' : '') + ensureSize;
-		document.body.insertBefore(shapeType, document.body.firstChild);
 	}
 	
 	return function(font, text, style, options, node, el, hasNext) {
@@ -874,6 +860,7 @@ Cufon.registerEngine('vml', (function() {
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
 		var width = 0, offsetX = 0, advance = null;
+		var stretch = 'm' + viewBox.minX + ',' + viewBox.minY + ' r' + viewBox.width + ',' + viewBox.height;
 		
 		var shadows = options.textShadow;
 		
@@ -881,8 +868,6 @@ Cufon.registerEngine('vml', (function() {
 		
 			var glyph = font.glyphs[chars[i]] || font.missingGlyph, shape;
 			if (!glyph) continue;
-			
-			if (!glyph.typeRef) createType(glyph, viewBox);
 			
 			if (redraw) {
 				// some glyphs may be missing so we can't use i
@@ -893,14 +878,18 @@ Cufon.registerEngine('vml', (function() {
 				canvas.appendChild(shape);
 			}
 			
-			shape.type = glyph.typeRef;
+			shape.stroked = 'f';
+			shape.coordsize = viewBox.width + ',' + viewBox.height;
+			shape.coordorigin = viewBox.minX + ',' + viewBox.minY;
+			shape.path = (glyph.d ? 'm' + glyph.d + 'x' : '') + stretch;
+			shape.fillcolor = color;
+			
 			var sStyle = shape.style;
 			sStyle.width = viewBox.width;
 			sStyle.height = viewBox.height;
 			sStyle.top = 0;
 			sStyle.left = offsetX;
 			sStyle.zIndex = 1;
-			shape.fillcolor = color;
 			
 			if (shadows) {
 				// the VML shadow element is not used because it can only support
