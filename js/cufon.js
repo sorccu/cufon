@@ -863,7 +863,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		var roundingFactor = parseInt(cStyle.height, 10) / height;
 		
-		wStyle.height = size.convert(-font.ascent + font.descent) + 'px';
+		wStyle.height = size.convert(font.height) + 'px';
 		
 		var textDecoration = options.enableTextDecoration ? Cufon.CSS.textDecoration(el, style) : {};
 		
