@@ -767,7 +767,7 @@ Cufon.registerEngine('vml', (function() {
 		document.write('<style type="text/css">' +
 			'@media screen{' + 
 				'cvml\\:shape,cvml\\:group,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
-				'.cufon-vml-canvas{position:absolute}' +
+				'.cufon-vml-canvas{overflow:hidden;position:absolute;text-align:left}' +
 				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
 				'.cufon-vml .cufon-alt{display:none}' +
 				'a .cufon-vml{cursor:pointer}' +
