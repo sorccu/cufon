@@ -766,7 +766,8 @@ Cufon.registerEngine('vml', (function() {
 		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
 		document.write('<style type="text/css">' +
 			'@media screen{' + 
-				'cvml\\:shape,cvml\\:group,cvml\\:fill{behavior:url(#default#VML);display:inline-block;antialias:true;position:absolute}' +
+				'cvml\\:shape,cvml\\:group,cvml\\:fill{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
+				'.cufon-vml-canvas{position:absolute}' +
 				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
 				'.cufon-vml .cufon-alt{display:none}' +
 				'a .cufon-vml{cursor:pointer}' +
@@ -825,7 +826,8 @@ Cufon.registerEngine('vml', (function() {
 			wrapper.className = 'cufon cufon-vml';
 			wrapper.alt = text;
 			
-			canvas = document.createElement('cvml:group');
+			canvas = document.createElement('span');
+			canvas.className = 'cufon-vml-canvas';
 			wrapper.appendChild(canvas);
 			
 			if (options.printable) {
@@ -844,13 +846,15 @@ Cufon.registerEngine('vml', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 		
-		var height = size.convert(viewBox.height);
+		var unitsPerPixel = size.convertFrom(1);
 		
-		cStyle.height = Math.ceil(height);
+		var height = size.convert(viewBox.height), roundedHeight = Math.ceil(height);
+		var textHeight = Math.round(unitsPerPixel * roundedHeight);
+		var roundingFactor = roundedHeight / height;
+		
+		cStyle.height = roundedHeight;
 		cStyle.top = Math.round(size.convert(viewBox.minY - font.ascent));
 		cStyle.left = Math.round(size.convert(viewBox.minX));
-		
-		var roundingFactor = parseInt(cStyle.height, 10) / height;
 		
 		wStyle.height = size.convert(font.height) + 'px';
 		
@@ -860,18 +864,26 @@ Cufon.registerEngine('vml', (function() {
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
 		var width = 0, offsetX = 0, advance = null;
-		var stretch = 'm' + viewBox.minX + ',' + viewBox.minY + ' r' + viewBox.width + ',' + viewBox.height;
 		
 		var shadows = options.textShadow;
 		
-		for (var i = 0, k = -1, l = chars.length; i < l; ++i) {
+		var i = 0, k = 0, l = chars.length;
 		
+		// largest possible size for the word
+		var shapeWidth = size.convert(l * viewBox.width), roundedShapeWidth = Math.ceil(shapeWidth);
+		var textWidth = Math.round(unitsPerPixel * roundedShapeWidth);
+		
+		var coordSize = textWidth + ',' + textHeight, coordOrigin;
+		var stretch = 'r' + textWidth + ',' + textHeight + 'nsnf';
+		
+		for (; i < l; ++i) {
+			
 			var glyph = font.glyphs[chars[i]] || font.missingGlyph, shape;
 			if (!glyph) continue;
 			
 			if (redraw) {
 				// some glyphs may be missing so we can't use i
-				shape = canvas.childNodes[++k];
+				shape = canvas.childNodes[k];
 			}
 			else { 
 				shape = document.createElement('cvml:shape');
@@ -879,16 +891,15 @@ Cufon.registerEngine('vml', (function() {
 			}
 			
 			shape.stroked = 'f';
-			shape.coordsize = viewBox.width + ',' + viewBox.height;
-			shape.coordorigin = viewBox.minX + ',' + viewBox.minY;
-			shape.path = (glyph.d ? 'm' + glyph.d + 'x' : '') + stretch;
+			shape.coordsize = coordSize;
+			shape.coordorigin = coordOrigin = (viewBox.minX - offsetX) + ',' + viewBox.minY;
+			shape.path = (glyph.d ? 'm' + glyph.d + 'xe' : '') + 'm' + coordOrigin + stretch;
 			shape.fillcolor = color;
 			
+			// it's important to not set top/left or IE8 will grind to a halt
 			var sStyle = shape.style;
-			sStyle.width = viewBox.width;
-			sStyle.height = viewBox.height;
-			sStyle.top = 0;
-			sStyle.left = offsetX;
+			sStyle.width = roundedShapeWidth;
+			sStyle.height = roundedHeight;
 			sStyle.zIndex = 1;
 			
 			if (shadows) {
@@ -916,13 +927,13 @@ Cufon.registerEngine('vml', (function() {
 			width += advance;
 			offsetX += advance;
 			
+			++k;
+			
 		}
 		
 		if (advance === null) return null;
 		
 		var fullWidth = -viewBox.minX + width + (viewBox.width - advance);
-		
-		canvas.coordsize = fullWidth + ',' + viewBox.height;
 		
 		cStyle.width = size.convert(fullWidth * roundingFactor);
 		
