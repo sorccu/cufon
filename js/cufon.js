@@ -767,7 +767,7 @@ Cufon.registerEngine('vml', (function() {
 		document.write('<style type="text/css">' +
 			'@media screen{' + 
 				'cvml\\:shape,cvml\\:group,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
-				'.cufon-vml-canvas{overflow:hidden;position:absolute;text-align:left}' +
+				'.cufon-vml-canvas{position:absolute;text-align:left}' +
 				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
 				'.cufon-vml .cufon-alt{display:none}' +
 				'a .cufon-vml{cursor:pointer}' +
@@ -865,20 +865,20 @@ Cufon.registerEngine('vml', (function() {
 		
 		var width = 0, offsetX = 0, advance = null;
 		
-		var shadows = options.textShadow;
+		var glyph, shape, shadows = options.textShadow;
 		
-		var i = 0, k = 0, l = chars.length;
-		
-		// largest possible size for the word
-		var shapeWidth = size.convert(l * viewBox.width), roundedShapeWidth = Math.ceil(shapeWidth);
+		// avoid having to pre-calculate the width by relying on
+		// the fact that the shape will auto-expand.
+		var shapeWidth = size.convert(1), roundedShapeWidth = Math.ceil(shapeWidth);
 		var textWidth = Math.round(unitsPerPixel * roundedShapeWidth);
 		
 		var coordSize = textWidth + ',' + textHeight, coordOrigin;
 		var stretch = 'r' + textWidth + ',' + textHeight + 'nsnf';
+		var minX = Math.round(viewBox.minX / unitsPerPixel) * unitsPerPixel, minY = viewBox.minY;
 		
-		for (; i < l; ++i) {
+		for (var i = 0, k = 0, l = chars.length; i < l; ++i) {
 			
-			var glyph = font.glyphs[chars[i]] || font.missingGlyph, shape;
+			glyph = font.glyphs[chars[i]] || font.missingGlyph;
 			if (!glyph) continue;
 			
 			if (redraw) {
@@ -893,7 +893,7 @@ Cufon.registerEngine('vml', (function() {
 			
 			shape.stroked = 'f';
 			shape.coordsize = coordSize;
-			shape.coordorigin = coordOrigin = (viewBox.minX - offsetX) + ',' + viewBox.minY;
+			shape.coordorigin = coordOrigin = (minX - offsetX) + ',' + minY;
 			shape.path = (glyph.d ? 'm' + glyph.d + 'xe' : '') + 'm' + coordOrigin + stretch;
 			shape.fillcolor = color;
 			
@@ -901,7 +901,6 @@ Cufon.registerEngine('vml', (function() {
 			var sStyle = shape.style;
 			sStyle.width = roundedShapeWidth;
 			sStyle.height = roundedHeight;
-			sStyle.zIndex = 1;
 			
 			if (shadows) {
 				// due to the limitations of the VML shadow element there
@@ -923,7 +922,7 @@ Cufon.registerEngine('vml', (function() {
 				shape.appendChild(shadow);
 			}
 			
-			advance = Number(glyph.w || font.w) + letterSpacing;
+			advance = ~~(glyph.w || font.w) + letterSpacing;
 			
 			width += advance;
 			offsetX += advance;
@@ -933,10 +932,6 @@ Cufon.registerEngine('vml', (function() {
 		}
 		
 		if (advance === null) return null;
-		
-		var fullWidth = -viewBox.minX + width + (viewBox.width - advance);
-		
-		cStyle.width = size.convert(fullWidth * roundingFactor);
 		
 		wStyle.width = Math.max(Math.ceil(size.convert(width * roundingFactor)), 0);
 		
