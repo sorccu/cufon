@@ -766,7 +766,7 @@ Cufon.registerEngine('vml', (function() {
 		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
 		document.write('<style type="text/css">' +
 			'@media screen{' + 
-				'cvml\\:shape,cvml\\:group,cvml\\:fill{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
+				'cvml\\:shape,cvml\\:group,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
 				'.cufon-vml-canvas{position:absolute}' +
 				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
 				'.cufon-vml .cufon-alt{display:none}' +
@@ -903,23 +903,23 @@ Cufon.registerEngine('vml', (function() {
 			sStyle.zIndex = 1;
 			
 			if (shadows) {
-				// the VML shadow element is not used because it can only support
-				// up to 2 shadows. and it breaks text selection.
-				for (var z = 0, p = shadows.length; z < p; ++z, ++k) {
-					var shadow = shadows[z];
-					var shadowColor = Cufon.CSS.color(shadow.color);
-					var shadowNode = shape.cloneNode(false), zStyle = shadowNode.runtimeStyle;
-					zStyle.top = size.convertFrom(parseFloat(shadow.offY));
-					zStyle.left = offsetX + size.convertFrom(parseFloat(shadow.offX));
-					zStyle.zIndex = 0;
-					shadowNode.fillcolor = shadowColor.color;
-					if (shadowColor.opacity) {
-						var shadowFill = document.createElement('cvml:fill');
-						shadowFill.opacity = shadowColor.opacity;
-						shadowNode.appendChild(shadowFill);
-					}
-					canvas.appendChild(shadowNode);
+				// due to the limitations of the VML shadow element there
+				// can only be two visible shadows. opacity is shared
+				// for all shadows.
+				var shadow1 = shadows[0], shadow2 = shadows[1];
+				var color1 = Cufon.CSS.color(shadow1.color), color2;
+				var shadow = document.createElement('cvml:shadow');
+				shadow.on = 't';
+				shadow.color = color1.color;
+				shadow.offset = shadow1.offX + ',' + shadow1.offY;
+				if (shadow2) {
+					color2 = Cufon.CSS.color(shadow2.color);
+					shadow.type = 'double';
+					shadow.color2 = color2.color;
+					shadow.offset2 = shadow2.offX + ',' + shadow2.offY;
 				}
+				shadow.opacity = color1.opacity || (color2 && color2.opacity) || 1;
+				shape.appendChild(shadow);
 			}
 			
 			advance = Number(glyph.w || font.w) + letterSpacing;
