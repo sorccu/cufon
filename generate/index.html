@@ -132,20 +132,6 @@
 						
 						<div class="section">
 						
-							<h3>Customization (for developers only)</h3>
-							
-							<dl>
-								<dt><label for="icallback">I'd like to have the following function handle loaded fonts</label></dt>
-								<dd>
-									<input type="text" name="callback" id="icallback" size="30" maxlength="250" value="Cufon.registerFont" />
-									<p class="info">Unless you plan on heavily customizing cufón, you should leave this value as it is.</p>
-								</dd>
-							</dl>
-						
-						</div>
-						
-						<div class="section">
-						
 							<h3>Performance &amp; file size</h3>
 							
 							<dl>
@@ -185,6 +171,8 @@
 						<div class="actions">
 						
 							<input type="hidden" name="MAX_FILE_SIZE" value="6000" />
+							
+							<input type="hidden" name="callback" value="Cufon.registerFont" />
 							
 							<button type="submit">Let's do this!</button>
 						
