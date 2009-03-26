@@ -833,7 +833,7 @@ Cufon.registerEngine('vml', (function() {
 			if (options.printable) {
 				var print = document.createElement('span');
 				print.className = 'cufon-alt';
-				print.innerText = text;
+				print.appendChild(document.createTextNode(text));
 				wrapper.appendChild(print);
 			}
 			
