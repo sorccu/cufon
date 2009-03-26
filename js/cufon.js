@@ -554,7 +554,7 @@ Cufon.registerEngine('canvas', (function() {
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
 				: ';font-size:1px;line-height:1px') +
-			'}.cufon-canvas .cufon-alt{display:none}' +
+			'}.cufon-canvas .cufon-alt{position:absolute;left:-10000in;font-size:1px}' +
 			(HAS_INLINE_BLOCK
 				? '.cufon-canvas canvas{position:relative}'
 				: '.cufon-canvas canvas{position:absolute}') +
@@ -769,7 +769,7 @@ Cufon.registerEngine('vml', (function() {
 				'cvml\\:shape,cvml\\:group,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
 				'.cufon-vml-canvas{position:absolute;text-align:left}' +
 				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
-				'.cufon-vml .cufon-alt{display:none}' +
+				'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px}' +
 				'a .cufon-vml{cursor:pointer}' +
 			'}' +
 			'@media print{' + 
