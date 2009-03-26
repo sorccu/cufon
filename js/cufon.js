@@ -846,15 +846,13 @@ Cufon.registerEngine('vml', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 		
-		var unitsPerPixel = size.convertFrom(1);
-		
 		var height = size.convert(viewBox.height), roundedHeight = Math.ceil(height);
-		var textHeight = Math.round(unitsPerPixel * roundedHeight);
 		var roundingFactor = roundedHeight / height;
+		var minX = viewBox.minX, minY = viewBox.minY;
 		
 		cStyle.height = roundedHeight;
-		cStyle.top = Math.round(size.convert(viewBox.minY - font.ascent));
-		cStyle.left = Math.round(size.convert(viewBox.minX));
+		cStyle.top = Math.round(size.convert(minY - font.ascent));
+		cStyle.left = Math.round(size.convert(minX));
 		
 		wStyle.height = size.convert(font.height) + 'px';
 		
@@ -867,16 +865,22 @@ Cufon.registerEngine('vml', (function() {
 		
 		var glyph, shape, shadows = options.textShadow;
 		
-		// avoid having to pre-calculate the width by relying on
-		// the fact that the shape will auto-expand.
-		var shapeWidth = size.convert(1), roundedShapeWidth = Math.ceil(shapeWidth);
-		var textWidth = Math.round(unitsPerPixel * roundedShapeWidth);
-		
-		var coordSize = textWidth + ',' + textHeight, coordOrigin;
-		var stretch = 'r' + textWidth + ',' + textHeight + 'nsnf';
-		var minX = Math.round(viewBox.minX / unitsPerPixel) * unitsPerPixel, minY = viewBox.minY;
-		
+		// pre-calculate width
 		for (var i = 0, k = 0, l = chars.length; i < l; ++i) {
+			glyph = font.glyphs[chars[i]] || font.missingGlyph;
+			if (glyph) width += advance = ~~(glyph.w || font.w) + letterSpacing;
+		}
+		
+		if (advance === null) return null;
+		
+		var fullWidth = -minX + width + (viewBox.width - advance);
+	
+		var shapeWidth = size.convert(fullWidth * roundingFactor), roundedShapeWidth = Math.round(shapeWidth);
+		
+		var coordSize = fullWidth + ',' + viewBox.height, coordOrigin;
+		var stretch = 'r' + coordSize + 'nsnf';
+		
+		for (i = 0; i < l; ++i) {
 			
 			glyph = font.glyphs[chars[i]] || font.missingGlyph;
 			if (!glyph) continue;
@@ -922,16 +926,11 @@ Cufon.registerEngine('vml', (function() {
 				shape.appendChild(shadow);
 			}
 			
-			advance = ~~(glyph.w || font.w) + letterSpacing;
-			
-			width += advance;
-			offsetX += advance;
+			offsetX += ~~(glyph.w || font.w) + letterSpacing;
 			
 			++k;
 			
 		}
-		
-		if (advance === null) return null;
 		
 		wStyle.width = Math.max(Math.ceil(size.convert(width * roundingFactor)), 0);
 		
