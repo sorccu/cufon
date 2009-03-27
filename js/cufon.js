@@ -812,7 +812,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		if (letterSpacing == undefined) {
 			letterSpacing = style.get('letterSpacing');
-			style.computedLSpacing = letterSpacing = (letterSpacing == 'normal') ? 0 : size.convertFrom(getSizeInPixels(el, letterSpacing));
+			style.computedLSpacing = letterSpacing = (letterSpacing == 'normal') ? 0 : ~~size.convertFrom(getSizeInPixels(el, letterSpacing));
 		}
 		
 		var wrapper, canvas;
