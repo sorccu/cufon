@@ -82,7 +82,9 @@ class SVGFont {
 		$fontJSON = array(
 			'w' => (int) $font['horiz-adv-x'],
 			'face' => array(),
-			'glyphs' => array()
+			'glyphs' => array(
+				' ' => new stdClass() // some fonts do not contain a glyph for space
+			)
 		);
 		
 		$face = $font->xpath('font-face');
@@ -111,19 +113,26 @@ class SVGFont {
 				continue;
 			}
 			
-			$data = array();
+			$data = new stdClass();
 			
 			if (isset($glyph['d']))
 			{
-				$data['d'] = substr(VMLPath::fromSVG((string) $glyph['d']), 1, -2); // skip m and xe
+				$data->d = substr(VMLPath::fromSVG((string) $glyph['d']), 1, -2); // skip m and xe
 			}
 			
 			if (isset($glyph['horiz-adv-x']))
 			{
-				$data['w'] = (int) $glyph['horiz-adv-x'];
+				$data->w = (int) $glyph['horiz-adv-x'];
 			}
 			
 			$fontJSON['glyphs'][(string) $glyph['unicode']] = $data;
+		}
+		
+		$nbsp = utf8_encode(chr(0xa0));
+		
+		if (!isset($fontJSON['glyphs'][$nbsp]))
+		{
+			$fontJSON['glyphs'][$nbsp] = $fontJSON['glyphs'][' '];
 		}
 		
 		return json_encode($fontJSON);
