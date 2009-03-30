@@ -549,7 +549,7 @@ Cufon.registerEngine('canvas', (function() {
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
-		'.cufon-canvas {text-indent:0}' +
+		'.cufon-canvas{text-indent:0}' +
 		'@media screen,projection{' +
 			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle' + 
 			(HAS_BROKEN_LINEHEIGHT
@@ -766,7 +766,7 @@ Cufon.registerEngine('vml', (function() {
 	if (document.namespaces['cvml'] == null) {
 		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
 		document.write('<style type="text/css">' +
-			'.cufon-vml-canvas {text-indent:0}' +
+			'.cufon-vml-canvas{text-indent:0}' +
 			'@media screen{' + 
 				'cvml\\:shape,cvml\\:group,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
 				'.cufon-vml-canvas{position:absolute;text-align:left}' +
