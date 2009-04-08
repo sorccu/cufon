@@ -112,10 +112,17 @@ if (!empty($domains))
 	
 	foreach ($domains as $domain)
 	{
+		$domain = preg_replace('@^\w+://@', '', mb_strtolower($domain, 'utf-8'));
+		
 		$domainList[$domain] = 1;
+		
+		if (substr($domain, 0, 4) !== 'www.')
+		{
+			$domainList["www.{$domain}"] = 1;
+		}
 	}
 	
-	printf('if (!%s[location.host]) throw Error("Host not allowed");', json_encode($domainList));
+	printf('if (!%s[location.host]) throw Error("This font cannot be used with this domain");', json_encode($domainList));
 }
 
 $fonts = array();
