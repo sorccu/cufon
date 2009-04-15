@@ -538,7 +538,7 @@ Cufon.registerEngine('canvas', (function() {
 	// Safari 2 doesn't support .apply() on native methods
 	
 	var check = document.createElement('canvas');
-	if (!check || !check.getContext || !check.getContext.apply) return null;
+	if (!check || !check.getContext || !check.getContext.apply) return;
 	check = null;
 	
 	var HAS_INLINE_BLOCK = Cufon.CSS.supports('display', 'inline-block');
@@ -758,28 +758,30 @@ Cufon.registerEngine('canvas', (function() {
 Cufon.registerEngine('vml', (function() {
 
 	if (!document.namespaces) return;
-
-	// isn't undocumented stuff great?
-	document.write('<!--[if vml]><script type="text/javascript">Cufon.vmlEnabled=true;</script><![endif]-->');
-	if (!Cufon.vmlEnabled) return;
 	
-	if (document.namespaces['cvml'] == null) {
+	if (document.namespaces.cvml == null) {
 		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
-		document.write('<style type="text/css">' +
-			'.cufon-vml-canvas{text-indent:0}' +
-			'@media screen{' + 
-				'cvml\\:shape,cvml\\:group,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
-				'.cufon-vml-canvas{position:absolute;text-align:left}' +
-				'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
-				'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px}' +
-				'a .cufon-vml{cursor:pointer}' +
-			'}' +
-			'@media print{' + 
-				'.cufon-vml *{display:none}' +
-				'.cufon-vml .cufon-alt{display:inline}' +
-			'}' +
-		'</style>');
 	}
+	
+	var check = document.createElement('cvml:shape');
+	check.style.behavior = 'url(#default#VML)';
+	if (!check.coordsize) return; // VML isn't supported
+	check = null;
+	
+	document.write('<style type="text/css">' +
+		'.cufon-vml-canvas{text-indent:0}' +
+		'@media screen{' + 
+			'cvml\\:shape,cvml\\:group,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
+			'.cufon-vml-canvas{position:absolute;text-align:left}' +
+			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
+			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px}' +
+			'a .cufon-vml{cursor:pointer}' +
+		'}' +
+		'@media print{' + 
+			'.cufon-vml *{display:none}' +
+			'.cufon-vml .cufon-alt{display:inline}' +
+		'}' +
+	'</style>');
 
 	function getFontSizeInPixels(el, value) {
 		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
