@@ -85,6 +85,14 @@ var Cufon = (function() {
 			return new Style(el.style);
 		},
 		
+		quotedList: cached(function(value) {
+			// doesn't work properly with empty quoted strings (""), but
+			// it's not worth the extra code.
+			var list = [], re = /\s*((["'])([\s\S]*?[^\\])\2|[^,]+)\s*/g, match;
+			while (match = re.exec(value)) list.push(match[3] || match[1]);
+			return list;
+		}),
+		
 		ready: (function() {
 			
 			var complete = false;
@@ -378,9 +386,9 @@ var Cufon = (function() {
 	
 	function getFont(el, style) {
 		if (!style) style = CSS.getStyle(el);
-		var families = style.get('fontFamily').split(/\s*,\s*/), family;
+		var families = CSS.quotedList(style.get('fontFamily').toLowerCase()), family;
 		for (var i = 0, l = families.length; i < l; ++i) {
-			family = families[i].replace(/^(["'])(.*?)\1$/, '$2').toLowerCase();
+			family = families[i];
 			if (fonts[family]) return fonts[family].get(style.get('fontStyle'), style.get('fontWeight'));
 		}
 		return null;
@@ -504,7 +512,7 @@ var Cufon = (function() {
 		var font = new Font(data), family = font.family;
 		if (!fonts[family]) fonts[family] = new FontFamily();
 		fonts[family].add(font);
-		return api.set('fontFamily', family);
+		return api.set('fontFamily', '"' + family + '"');
 	};
 	
 	api.replace = function(elements, options, ignoreHistory) {
