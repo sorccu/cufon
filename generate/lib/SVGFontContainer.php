@@ -1,6 +1,6 @@
 <?php
 
-require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFont.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFont.php';
 
 class SVGFontContainer implements IteratorAggregate {
 	
@@ -8,7 +8,7 @@ class SVGFontContainer implements IteratorAggregate {
 	 * @param string $file
 	 * @return SVGFont
 	 */
-	public static function fromFile($file)
+	public static function fromFile($file, array $options)
 	{
 		$xml = file_get_contents($file);
 		
@@ -16,7 +16,7 @@ class SVGFontContainer implements IteratorAggregate {
 		// (only allow Tab, LF and CR)
 		$xml = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $xml);
 		
-		return new SVGFontContainer(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_COMPACT));
+		return new SVGFontContainer(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_COMPACT), $options);
 	}
 
 	/**
@@ -25,12 +25,19 @@ class SVGFontContainer implements IteratorAggregate {
 	private $document;
 	
 	/**
+	 * @var array
+	 */
+	private $options;
+	
+	/**
 	 * @param SimpleXMLElement $document
 	 * @return void
 	 */
-	public function __construct(SimpleXMLElement $document)
+	public function __construct(SimpleXMLElement $document, array $options)
 	{
 		$this->document = $document;
+		
+		$this->options = $options;
 	}
 	
 	/**
@@ -42,7 +49,7 @@ class SVGFontContainer implements IteratorAggregate {
 		
 		foreach ($this->document->xpath('//font') as $font)
 		{
-			$fonts[] = new SVGFont($font);
+			$fonts[] = new SVGFont($font, $this);
 		}
 		
 		return $fonts;
@@ -55,6 +62,14 @@ class SVGFontContainer implements IteratorAggregate {
 	public function getIterator()
 	{
 		return new ArrayIterator($this->getFonts());
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getOptions()
+	{
+		return $this->options;
 	}
 	
 }

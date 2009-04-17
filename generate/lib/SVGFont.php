@@ -1,6 +1,7 @@
 <?php
 
-require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'VMLPath.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFontContainer.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'VMLPath.php';
 
 class SVGFont {
 	
@@ -10,11 +11,18 @@ class SVGFont {
 	private $document;
 
 	/**
+	 * @var SVGFontContainer
+	 */
+	private $container;
+	
+	/**
 	 * @param string $file
 	 */
-	public function __construct(SimpleXMLElement $document)
-	{
+	public function __construct(SimpleXMLElement $document, SVGFontContainer $container)
+	{		
 		$this->document = $document;
+		
+		$this->container = $container;
 	}
 	
 	public function __toString()
@@ -57,6 +65,19 @@ class SVGFont {
 	{
 		switch ($key)
 		{
+			case 'font-family':
+				
+				$options = $this->container->getOptions();
+				
+				$family = $options['family'];
+				
+				if (!is_null($family) && $family !== '')
+				{
+					return $family;
+				}
+				
+				break;
+				
 			case 'font-weight':
 				
 				$weight = intval($value);

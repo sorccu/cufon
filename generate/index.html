@@ -66,6 +66,13 @@
 							<p class="info">Currently only TrueType (TTF), OpenType (OTF), Printer Font Binary (PFB) and PostScript fonts are supported. Files are disposed of immediately after conversion.</p>
 							
 							<dl>
+								<dt><label for="ifamily">Use the following value as the <code>font-family</code> of the generated font (optional)</label></dt>
+								<dd><input type="text" name="family" id="ifamily" size="70" maxlength="150" />
+									<p class="info">Useful if you're using multiple variants of the same font (bold, italic etc). Sometimes they may have slightly different family names, which may lead to unexpected behavior.</p>
+								</dd>
+							</dl>
+							
+							<dl>
 								<dt><label for="ipermission" class="important"><input type="checkbox" name="permission" id="ipermission" value="yes" /> The EULAs of these fonts allow Web Embedding (without <a href="http://www.adobe.com/products/flashplayer/" class="external">Adobe Flash</a>)</label></dt>
 								<dd>
 									<p class="info">See <a href="http://www.fontembedding.com/fonts-and-the-law/" class="external">Fonts and the Law</a> at <a href="http://www.fontembedding.com" class="external">fontembedding.com</a> for more information.
@@ -113,7 +120,7 @@
 								<dt><label for="iglyphs_greek"><input type="checkbox" name="glyphs[]" id="iglyphs_greek" value="0x370-0x3FF" /> Greek and Coptic</label></dt>
 								<dd>The whole Greek and Coptic Unicode block. For more information, see <a href="http://en.wikipedia.org/wiki/Greek_alphabet#Greek_in_Unicode" class="external">Greek in Unicode</a>. (up to 144 glyphs)</dd>
 								<dt><label for="icustomGlyphs"> .. and also these single characters</label></dt>
-								<dd><input type="text" name="customGlyphs" id="icustomGlyphs" size="60" maxlength="250" /></dd>
+								<dd><input type="text" name="customGlyphs" id="icustomGlyphs" size="70" maxlength="250" /></dd>
 							</dl>
 							
 						</div>
@@ -125,7 +132,7 @@
 							<dl>
 								<dt><label for="idomains">Limit usage to the following domain(s)</label></dt>
 								<dd>
-									<input type="text" name="domains" id="idomains" size="40" maxlength="250" value="" /> <span class="example">(example.org, www.example.org)</span>
+									<input type="text" name="domains" id="idomains" size="70" maxlength="250" value="" /> <span class="example">(example.org, www.example.org)</span>
 									<p class="info">Separate multiple domains by either commas or spaces. Please make sure to include your domain both with and without &laquo;www&raquo; if necessary (if you're not sure, it's probably necessary). Please note that is <strong>not</strong> a fool-proof solution but will prevent people from hotlinking your fonts.</p>
 								</dd>
 							</dl>

@@ -1,7 +1,7 @@
 <?php
 
-require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'FontForgeScript.php';
-require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFontContainer.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'FontForgeScript.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFontContainer.php';
 
 class Cufon {
 	
@@ -111,7 +111,7 @@ class Cufon {
 		
 		$fonts = array();
 		
-		foreach (SVGFontContainer::fromFile($svgFile) as $font)
+		foreach (SVGFontContainer::fromFile($svgFile, $options) as $font)
 		{
 			$fonts[$font->getId()] = $options['callback'] . '(' . $font->toJSON() . ');';
 		}

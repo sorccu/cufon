@@ -26,6 +26,10 @@ switch ($_SERVER['REQUEST_METHOD'])
 }
 
 $filters = array(
+	'family' => array(
+		'filter' => FILTER_SANITIZE_STRING,
+		'flags' => FILTER_NULL_ON_FAILURE
+	),
 	'terms' => array(
 		'filter' => FILTER_VALIDATE_BOOLEAN,
 		'message' => "You didn't accept the terms"
