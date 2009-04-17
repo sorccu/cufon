@@ -779,7 +779,7 @@ Cufon.registerEngine('vml', (function() {
 	document.write('<style type="text/css">' +
 		'.cufon-vml-canvas{text-indent:0}' +
 		'@media screen{' + 
-			'cvml\\:shape,cvml\\:group,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
+			'cvml\\:shape,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
 			'.cufon-vml-canvas{position:absolute;text-align:left}' +
 			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
 			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px}' +
@@ -852,7 +852,7 @@ Cufon.registerEngine('vml', (function() {
 			// ie6, for some reason, has trouble rendering the last VML element in the document.
 			// we can work around this by injecting a dummy element where needed.
 			// @todo find a better solution
-			if (!hasNext) wrapper.appendChild(document.createElement('cvml:group'));
+			if (!hasNext) wrapper.appendChild(document.createElement('cvml:shape'));
 		}
 		
 		var wStyle = wrapper.style;
