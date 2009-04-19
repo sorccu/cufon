@@ -435,11 +435,12 @@ var Cufon = (function() {
 	}
 	
 	function replaceElement(el, options) {
-		var font, style, nextNode, redraw;
-		for (var node = attach(el, options).firstChild; node; node = nextNode) {
+		var font, style, node, nodeType, nextNode, redraw;
+		for (node = attach(el, options).firstChild; node; node = nextNode) {
+			nodeType = node.nodeType;
 			nextNode = node.nextSibling;
 			redraw = false;
-			if (node.nodeType == 1) {
+			if (nodeType == 1) {
 				if (!node.firstChild) continue;
 				if (!/cufon/.test(node.className)) {
 					arguments.callee(node, options);
@@ -447,6 +448,7 @@ var Cufon = (function() {
 				}
 				else redraw = true;
 			}
+			else if (nodeType != 3) continue;
 			if (!style) style = CSS.getStyle(el).extend(options);
 			if (!font) font = getFont(el, style);
 			if (!font) continue;
