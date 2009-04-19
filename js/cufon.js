@@ -151,7 +151,7 @@ var Cufon = (function() {
 			for (var search = el; search.parentNode && search.parentNode.nodeType == 1; ) {
 				var foundAll = true;
 				for (var type in types) {
-					if (types[type]) continue;
+					if (!hasOwnProperty(types, type) || types[type]) continue;
 					if (style.get('textDecoration').indexOf(type) != -1) types[type] = style.get('color');
 					foundAll = false;
 				}
@@ -265,6 +265,7 @@ var Cufon = (function() {
 			if (up === undefined) up = weight > 400;
 			if (weight == 500) weight = 400;
 			for (var alt in weights) {
+				if (!hasOwnProperty(weights, alt)) continue;
 				alt = parseInt(alt, 10);
 				if (!min || alt < min) min = alt;
 				if (!max || alt > max) max = alt;
@@ -349,7 +350,9 @@ var Cufon = (function() {
 		};
 		
 		this.extend = function(styles) {
-			for (var property in styles) custom[property] = styles[property];
+			for (var property in styles) {
+				if (hasOwnProperty(styles, property)) custom[property] = styles[property];
+			}
 			return this;
 		};
 		
@@ -379,7 +382,7 @@ var Cufon = (function() {
 	function cached(fun) {
 		var cache = {};
 		return function(key) {
-			if (!cache.hasOwnProperty(key)) cache[key] = fun.apply(null, arguments);
+			if (!hasOwnProperty(cache, key)) cache[key] = fun.apply(null, arguments);
 			return cache[key];
 		};	
 	}
@@ -398,10 +401,16 @@ var Cufon = (function() {
 		return document.getElementsByTagName(query);
 	}
 	
+	function hasOwnProperty(obj, property) {
+		return obj.hasOwnProperty(property);
+	}
+	
 	function merge() {
-		var merged = {}, key;
-		for (var i = 0, l = arguments.length; i < l; ++i) {
-			for (key in arguments[i]) merged[key] = arguments[i][key];
+		var merged = {}, args, key;
+		for (var i = 0, l = arguments.length; args = arguments[i], i < l; ++i) {
+			for (key in args) {
+				if (hasOwnProperty(args, key)) merged[key] = args[key];
+			}
 		}
 		return merged;
 	}
