@@ -95,29 +95,40 @@ var Cufon = (function() {
 		
 		ready: (function() {
 			
-			var complete = false;
+			// don't do anything in Safari 2
+			var complete = (function() {
+				var el = document.createElement('style');
+				return !el.sheet && !el.styleSheet;
+			})();
 			
 			var queue = [], perform = function() {
 				complete = true;
 				for (var fn; fn = queue.shift(); fn());
 			};
 			
-			// Safari 2 does not include <style> elements in document.styleSheets.
-			// Safari 2 also does not support Object.prototype.propertyIsEnumerable.
+			var linkElements = elementsByTagName('link'), watch = {
+				stylesheet: 1
+			};
 			
-			var styleElements = Object.prototype.propertyIsEnumerable ? elementsByTagName('style') : { length: 0 };
-			var linkElements = elementsByTagName('link');
-			
-			DOM.ready(function() {
-				// These checks are actually only needed for WebKit-based browsers, but don't really hurt other browsers.
-				var linkStyles = 0, link;
-				for (var i = 0, l = linkElements.length; link = linkElements[i], i < l; ++i) {
-					// WebKit does not load alternate stylesheets.
-					if (!link.disabled && link.rel.toLowerCase() == 'stylesheet') ++linkStyles;
+			function allStylesLoaded() {
+				var sheet, i, link;
+				for (i = 0; link = linkElements[i]; ++i) {
+					if (link.disabled || !watch[link.rel.toLowerCase()] || !CSS.recognizesMedia(link.media || 'all')) continue;
+					sheet = link.sheet || link.styleSheet;
+					// in Opera sheet.disabled is true when it's still loading,
+					// even though link.disabled is false. they stay in sync if
+					// set manually.
+					if (!sheet || sheet.disabled) return false;
 				}
-				if (document.styleSheets.length >= styleElements.length + linkStyles) perform();
-				else setTimeout(arguments.callee, 10);
-			});
+				return true;
+			}
+			
+			if (!complete) {
+				DOM.ready(function() {
+					if (allStylesLoaded()) perform();
+					else setTimeout(arguments.callee, 10);
+				});
+			}
 			
 			return function(listener) {
 				if (complete) listener();
@@ -125,6 +136,18 @@ var Cufon = (function() {
 			};
 			
 		})(),
+		
+		recognizesMedia: cached(function(media) {
+			if (media == 'all') return true;
+			var el = document.createElement('style'), container, supported;
+			el.type = 'text/css';
+			el.media = media;
+			container = elementsByTagName('head')[0];
+			container.insertBefore(el, container.firstChild);
+			supported = !!(el.sheet || el.styleSheet);
+			container.removeChild(el);
+			return supported;
+		}),
 
 		supports: function(property, value) {
 			var checker = document.createElement('span').style;
