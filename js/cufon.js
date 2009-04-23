@@ -93,52 +93,7 @@ var Cufon = (function() {
 			return list;
 		}),
 		
-		ready: (function() {
-			
-			// don't do anything in Safari 2
-			var complete = (function() {
-				var el = document.createElement('style');
-				return !el.sheet && !el.styleSheet;
-			})();
-			
-			var queue = [], perform = function() {
-				complete = true;
-				for (var fn; fn = queue.shift(); fn());
-			};
-			
-			var linkElements = elementsByTagName('link'), watch = {
-				stylesheet: 1
-			};
-			
-			function allStylesLoaded() {
-				var sheet, i, link;
-				for (i = 0; link = linkElements[i]; ++i) {
-					if (link.disabled || !watch[link.rel.toLowerCase()] || !CSS.recognizesMedia(link.media || 'all')) continue;
-					sheet = link.sheet || link.styleSheet;
-					// in Opera sheet.disabled is true when it's still loading,
-					// even though link.disabled is false. they stay in sync if
-					// set manually.
-					if (!sheet || sheet.disabled) return false;
-				}
-				return true;
-			}
-			
-			if (!complete) {
-				DOM.ready(function() {
-					if (allStylesLoaded()) perform();
-					else setTimeout(arguments.callee, 10);
-				});
-			}
-			
-			return function(listener) {
-				if (complete) listener();
-				else queue.push(listener);
-			};
-			
-		})(),
-		
 		recognizesMedia: cached(function(media) {
-			if (media == 'all') return true;
 			var el = document.createElement('style'), container, supported;
 			el.type = 'text/css';
 			el.media = media;
@@ -221,6 +176,47 @@ var Cufon = (function() {
 		}
 		
 	};
+	
+	CSS.ready = (function() {
+		
+		// don't do anything in Safari 2 (it doesn't recognize any media type)
+		var complete = !CSS.recognizesMedia('all');
+		
+		var queue = [], perform = function() {
+			complete = true;
+			for (var fn; fn = queue.shift(); fn());
+		};
+		
+		var linkElements = elementsByTagName('link'), watch = {
+			stylesheet: 1
+		};
+		
+		function allStylesLoaded() {
+			var sheet, i, link;
+			for (i = 0; link = linkElements[i]; ++i) {
+				if (link.disabled || !watch[link.rel.toLowerCase()] || !CSS.recognizesMedia(link.media || 'screen')) continue;
+				sheet = link.sheet || link.styleSheet;
+				// in Opera sheet.disabled is true when it's still loading,
+				// even though link.disabled is false. they stay in sync if
+				// set manually.
+				if (!sheet || sheet.disabled) return false;
+			}
+			return true;
+		}
+		
+		if (!complete) {
+			DOM.ready(function() {
+				if (allStylesLoaded()) perform();
+				else setTimeout(arguments.callee, 10);
+			});
+		}
+		
+		return function(listener) {
+			if (complete) listener();
+			else queue.push(listener);
+		};
+		
+	})();
 	
 	function Font(data) {
 		
