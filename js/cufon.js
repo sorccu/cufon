@@ -204,12 +204,10 @@ var Cufon = (function() {
 			return true;
 		}
 		
-		if (!complete) {
-			DOM.ready(function() {
-				if (allStylesLoaded()) perform();
-				else setTimeout(arguments.callee, 10);
-			});
-		}
+		DOM.ready(function() {
+			if (complete || allStylesLoaded()) perform();
+			else setTimeout(arguments.callee, 10);
+		});
 		
 		return function(listener) {
 			if (complete) listener();
