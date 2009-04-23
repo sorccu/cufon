@@ -651,7 +651,7 @@ Cufon.registerEngine('canvas', (function() {
 		var expandTop = 0, expandRight = 0, expandBottom = 0, expandLeft = 0;
 		var shadows = options.textShadow, shadowOffsets = [];
 		if (shadows) {
-			for (var i = 0, l = shadows.length; i < l; ++i) {
+			for (var i = shadows.length; i--;) {
 				var shadow = shadows[i];
 				var x = size.convertFrom(parseFloat(shadow.offX));
 				var y = size.convertFrom(parseFloat(shadow.offY));
@@ -703,12 +703,12 @@ Cufon.registerEngine('canvas', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 		
-		var height = size.convert(viewBox.height - expandTop + expandBottom);
+		var height = size.convert(viewBox.height);
 		var roundedHeight = Math.ceil(height);
 		var roundingFactor = roundedHeight / height;
 		
-		canvas.width = Math.ceil(size.convert(width + expandRight - expandLeft) * roundingFactor);
-		canvas.height = roundedHeight;
+		canvas.width = Math.ceil(size.convert(width * roundingFactor + expandRight - expandLeft));
+		canvas.height = Math.ceil(size.convert(viewBox.height - expandTop + expandBottom));
 		
 		// minY has no part in canvas.height
 		expandTop += viewBox.minY;
@@ -727,9 +727,10 @@ Cufon.registerEngine('canvas', (function() {
 			wStyle.paddingBottom = (size.convert(font.height) - 1) + 'px';
 		}
 		
-		var g = canvas.getContext('2d'), scale = roundedHeight / viewBox.height;
+		var g = canvas.getContext('2d'), scale = height / viewBox.height;
 		
-		g.scale(scale, scale);
+		// proper horizontal scaling is performed later
+		g.scale(scale, scale * roundingFactor);
 		g.translate(-expandLeft, -expandTop);
 		
 		g.lineWidth = font.face['underline-thickness'];
@@ -755,6 +756,7 @@ Cufon.registerEngine('canvas', (function() {
 		g.fillStyle = style.get('color');
 		
 		function renderText() {
+			g.scale(roundingFactor, 1);
 			for (var i = 0, l = chars.length; i < l; ++i) {
 				var glyph = font.glyphs[chars[i]] || font.missingGlyph;
 				if (!glyph) continue;
@@ -766,22 +768,20 @@ Cufon.registerEngine('canvas', (function() {
 				g.fill();
 				g.translate(Number(glyph.w || font.w) + letterSpacing, 0);
 			}
+			g.restore();
 		}
 		
 		if (shadows) {
-			for (var i = 0, l = shadows.length; i < l; ++i) {
+			for (var i = shadows.length; i--;) {
 				var shadow = shadows[i];
 				g.save();
 				g.fillStyle = shadow.color;
 				g.translate.apply(g, shadowOffsets[i]);
 				renderText();
-				g.restore();
 			}
 		}
 		
 		renderText();
-		
-		g.restore();
 		
 		if (textDecoration['line-through']) line(-font.descent, textDecoration['line-through']);
 		
