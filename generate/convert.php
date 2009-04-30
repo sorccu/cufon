@@ -108,27 +108,6 @@ if (!empty($errors))
 
 ob_start();
 
-$domains = preg_split('/\s*[, ]\s*/', trim($options['domains']), -1, PREG_SPLIT_NO_EMPTY);
-
-if (!empty($domains))
-{
-	$domainList = array();
-	
-	foreach ($domains as $domain)
-	{
-		$domain = preg_replace('@^\w+://@', '', mb_strtolower($domain, 'utf-8'));
-		
-		$domainList[$domain] = 1;
-		
-		if (substr($domain, 0, 4) !== 'www.')
-		{
-			$domainList["www.{$domain}"] = 1;
-		}
-	}
-	
-	printf('if (!%s[location.host]) throw Error("This font cannot be used with this domain");', json_encode($domainList));
-}
-
 $fonts = array();
 
 $upload = false;

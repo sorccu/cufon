@@ -1,5 +1,6 @@
 <?php
 
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'JSEncoder.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFontContainer.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'VMLPath.php';
 
@@ -96,7 +97,7 @@ class SVGFont {
 	/**
 	 * @return string
 	 */
-	public function toJSON()
+	public function toJavaScript()
 	{
 		$font = $this->document;
 		
@@ -156,7 +157,62 @@ class SVGFont {
 			$fontJSON['glyphs'][$nbsp] = $fontJSON['glyphs'][' '];
 		}
 		
-		return json_encode($fontJSON);
+		return self::processFont($fontJSON, $this->container->getOptions());
+	}
+	
+	/**
+	 * @param array $data
+	 * @param array $options
+	 * @return string
+	 */
+	private static function processFont($data, $options)
+	{
+		$domains = preg_split('/\s*[, ]\s*/', trim($options['domains']), -1, PREG_SPLIT_NO_EMPTY);
+		
+		if (empty($domains))
+		{
+			return json_encode($data);
+		}
+		
+		$domainMap = array();
+		
+		foreach ($domains as $domain)
+		{
+			$domain = preg_replace('@^\w+://@', '', mb_strtolower($domain, 'utf-8'));
+			
+			$domainMap[$domain] = 1;
+			
+			if (substr($domain, 0, 4) !== 'www.')
+			{
+				$domainMap["www.{$domain}"] = 1;
+			}
+		}
+		
+		$glyphs = $data['glyphs'];
+		
+		unset($data['glyphs']);
+		
+		uasort($glyphs, array(__CLASS__, 'sortRandom'));
+		
+		$encoder = new JSEncoder(
+			sprintf('(function(){var b=_cufon_bridge_,c=%s.split(""),i=0,p=b.p,l=p.length,g=b.f.glyphs={};if(%s[location.hostname])for(;i<l;++i)g[c[i]]=p[i]})()',
+				json_encode(implode('', array_keys($glyphs))),
+				json_encode($domainMap)));
+		
+		return sprintf('(function(f){_cufon_bridge_={p:%s,f:f};try{%s}catch(e){}delete _cufon_bridge_;return f})(%s)',
+			json_encode(array_values($glyphs)),
+			$encoder->getDecoder(),
+			json_encode($data));
+	}
+	
+	/**
+	 * @param mixed $a
+	 * @param mixed $b
+	 * @return int
+	 */
+	private static function sortRandom($a, $b)
+	{
+		return mt_rand(-1, 1);
 	}
 	
 }

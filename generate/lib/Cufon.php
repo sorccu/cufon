@@ -113,12 +113,12 @@ class Cufon {
 		
 		foreach (SVGFontContainer::fromFile($svgFile, $options) as $font)
 		{
-			$fonts[$font->getId()] = $options['callback'] . '(' . $font->toJSON() . ');';
+			$fonts[$font->getId()] = $options['callback'] . '(' . $font->toJavaScript() . ');';
 		}
 		
 		unlink($svgFile);
 		
 		return $fonts;
 	}
-
+	
 }
