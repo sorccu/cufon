@@ -85,6 +85,19 @@ var Cufon = (function() {
 			return new Style(el.style);
 		},
 		
+		gradient: cached(function(value) {
+			var gradient = {
+				id: value,
+				type: value.match(/^-([a-z]+)-gradient\(/)[1],
+				stops: []
+			}, colors = value.substr(value.indexOf('(')).match(/([\d.]+=)?(#[a-f0-9]+|[a-z]+\(.*?\)|[a-z]+)/ig);
+			for (var i = 0, l = colors.length, stop; i < l; ++i) {
+				stop = colors[i].split('=', 2).reverse();
+				gradient.stops.push([ stop[1] || i / (l - 1), stop[0] ]);
+			}
+			return gradient;
+		}),
+		
 		quotedList: cached(function(value) {
 			// doesn't work properly with empty quoted strings (""), but
 			// it's not worth the extra code.
@@ -548,6 +561,8 @@ var Cufon = (function() {
 		if (!options.engine) return api; // there's no browser support so we'll just stop here
 		if (typeof options.textShadow == 'string')
 			options.textShadow = CSS.textShadow(options.textShadow);
+		if (typeof options.color == 'string' && /^-/.test(options.color))
+			options.textGradient = CSS.gradient(options.color);
 		if (!ignoreHistory) replaceHistory.push(arguments);
 		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
 		CSS.ready(function() {
@@ -760,12 +775,12 @@ Cufon.registerEngine('canvas', (function() {
 			for (var i = 0, l = chars.length; i < l; ++i) {
 				var glyph = font.glyphs[chars[i]] || font.missingGlyph;
 				if (!glyph) continue;
-				g.beginPath();
 				if (glyph.d) {
+					g.beginPath();
 					if (glyph.code) interpret(glyph.code, g);
 					else glyph.code = generateFromVML('m' + glyph.d, g);
+					g.fill();
 				}
-				g.fill();
 				g.translate(Number(glyph.w || font.w) + letterSpacing, 0);
 			}
 			g.restore();
@@ -779,6 +794,15 @@ Cufon.registerEngine('canvas', (function() {
 				g.translate.apply(g, shadowOffsets[i]);
 				renderText();
 			}
+		}
+		
+		var gradient = options.textGradient;
+		if (gradient) {
+			var stops = gradient.stops, fill = g.createLinearGradient(0, viewBox.minY, 0, viewBox.maxY);
+			for (var i = 0, l = stops.length; i < l; ++i) {
+				fill.addColorStop.apply(fill, stops[i]);
+			}
+			g.fillStyle = fill;
 		}
 		
 		renderText();
@@ -807,7 +831,7 @@ Cufon.registerEngine('vml', (function() {
 	document.write('<style type="text/css">' +
 		'.cufon-vml-canvas{text-indent:0}' +
 		'@media screen{' + 
-			'cvml\\:shape,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
+			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
 			'.cufon-vml-canvas{position:absolute;text-align:left}' +
 			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
 			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px}' +
@@ -834,6 +858,27 @@ Cufon.registerEngine('vml', (function() {
 		el.style.left = style;
 		el.runtimeStyle.left = runtimeStyle;
 		return result;
+	}
+	
+	var fills = {};
+	
+	function gradientFill(gradient) {
+		var id = gradient.id;
+		if (!fills[id]) {
+			var stops = gradient.stops, fill = document.createElement('cvml:fill'), colors = [];
+			fill.type = 'gradient';
+			fill.angle = 180;
+			fill.focus = '0';
+			fill.method = 'sigma';
+			fill.color = stops[0][1];
+			for (var j = 1, k = stops.length - 1; j < k; ++j) {
+				colors.push(stops[j][0] * 100 + '% ' + stops[j][1]);
+			}
+			fill.colors = colors.join(',');
+			fill.color2 = stops[k][1];
+			fills[id] = fill;
+		}
+		return fills[id];
 	}
 	
 	return function(font, text, style, options, node, el, hasNext) {
@@ -918,7 +963,9 @@ Cufon.registerEngine('vml', (function() {
 		var shapeWidth = size.convert(fullWidth * roundingFactor), roundedShapeWidth = Math.round(shapeWidth);
 		
 		var coordSize = fullWidth + ',' + viewBox.height, coordOrigin;
-		var stretch = 'r' + coordSize + 'nsnf';
+		var stretch = 'r' + coordSize + 'ns';
+		
+		var fill = options.textGradient && gradientFill(options.textGradient);
 		
 		for (i = 0; i < l; ++i) {
 			
@@ -928,7 +975,7 @@ Cufon.registerEngine('vml', (function() {
 			if (redraw) {
 				// some glyphs may be missing so we can't use i
 				shape = canvas.childNodes[k];
-				if (shape.firstChild) shape.removeChild(shape.firstChild); // shadow
+				if (shape.firstChild) shape.removeChild(shape.firstChild); // shadow, fill
 			}
 			else { 
 				shape = document.createElement('cvml:shape');
@@ -940,6 +987,8 @@ Cufon.registerEngine('vml', (function() {
 			shape.coordorigin = coordOrigin = (minX - offsetX) + ',' + minY;
 			shape.path = (glyph.d ? 'm' + glyph.d + 'xe' : '') + 'm' + coordOrigin + stretch;
 			shape.fillcolor = color;
+			
+			if (fill) shape.appendChild(fill.cloneNode(false));
 			
 			// it's important to not set top/left or IE8 will grind to a halt
 			var sStyle = shape.style;
