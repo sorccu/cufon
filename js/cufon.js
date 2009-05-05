@@ -77,6 +77,15 @@ var Cufon = (function() {
 			};
 
 		},
+		
+		color: cached(function(value) {
+			var parsed = {};
+			parsed.color = value.replace(/^rgba\((.*?),\s*([\d.]+)\)/, function($0, $1, $2) {
+				parsed.opacity = parseFloat($2);
+				return 'rgb(' + $1 + ')';
+			});
+			return parsed;
+		}),
 	
 		getStyle: function(el) {
 			var view = document.defaultView;
@@ -170,15 +179,6 @@ var Cufon = (function() {
 			}
 			shadows.push(currentShadow);
 			return shadows;
-		}),
-		
-		color: cached(function(value) {
-			var parsed = {};
-			parsed.color = value.replace(/^rgba\((.*?),\s*([\d.]+)\)/, function($0, $1, $2) {
-				parsed.opacity = parseFloat($2);
-				return 'rgb(' + $1 + ')';
-			});
-			return parsed;
 		}),
 		
 		textTransform: function(text, style) {
