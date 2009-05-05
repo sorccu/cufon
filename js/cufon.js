@@ -186,7 +186,21 @@ var Cufon = (function() {
 				uppercase: 'toUpperCase',
 				lowercase: 'toLowerCase'
 			}[style.get('textTransform')] || 'toString']();
-		}
+		},
+		
+		whiteSpace: (function() {
+			var ignore = {
+				inline: 1,
+				'inline-block': 1,
+				'run-in': 1
+			};
+			return function(text, style, node) {
+				if (ignore[style.get('display')]) return text;
+				if (!node.previousSibling) text = text.replace(/^\s+/, '');
+				if (!node.nextSibling) text = text.replace(/\s+$/, '');
+				return text;
+			};
+		})()
 		
 	};
 	
@@ -486,7 +500,7 @@ var Cufon = (function() {
 				engines[options.engine](font, null, style, options, node, el);
 				continue;
 			}
-			var text = node.data;
+			var text = CSS.whiteSpace(node.data, style, node);
 			if (text === '') continue;
 			var processed = process(font, text, style, options, node, el);
 			if (processed) node.parentNode.replaceChild(processed, node);
