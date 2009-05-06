@@ -76,12 +76,12 @@ class JSEncoder {
 			'function(s){var c="charAt",i="indexOf",a=String(arguments.cal' .
 			'lee).replace(/\s+/g,""),z=s.length+%d-a.length+(a.charCodeAt(' .
 			'0)==40&&2),w=64,k=s.substring(z,w+=z),v=s.substr(0,z)+s.subst' .
-			'r(w),m,t="",x=0,y=v.length,d=document,h=d.getElementsByTagNam' .
-			'e("head")[0],e=d.createElement("script");for(;x<y;++x){m=(k[i' .
-			'](v[c](x))&255)<<18|(k[i](v[c](++x))&255)<<12|(k[i](v[c](++x)' .
-			')&255)<<6|k[i](v[c](++x))&255;t+=String.fromCharCode((m&16711' .
-			'680)>>16,(m&65280)>>8,m&255);}e.text=t;h.insertBefore(e,h.fir' .
-			'stChild);h.removeChild(e);}';
+			'r(w),m=0,t="",x=0,y=v.length,d=document,h=d.getElementsByTagN' .
+			'ame("head")[0],e=d.createElement("script");for(;x<y;++x){m=(k' .
+			'[i](v[c](x))&255)<<18|(k[i](v[c](++x))&255)<<12|(k[i](v[c](++' .
+			'x))&255)<<6|k[i](v[c](++x))&255;t+=String.fromCharCode((m&167' .
+			'11680)>>16,(m&65280)>>8,m&255);}e.text=t;h.insertBefore(e,h.f' .
+			'irstChild);h.removeChild(e);}';
 		
 		$predictedSize = self::getInjectedSize(strlen($decoder) - 3);
 		
