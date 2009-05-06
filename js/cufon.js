@@ -207,7 +207,7 @@ var Cufon = (function() {
 	CSS.ready = (function() {
 		
 		// don't do anything in Safari 2 (it doesn't recognize any media type)
-		var complete = !CSS.recognizesMedia('all');
+		var complete = !CSS.recognizesMedia('all'), hasLayout = false;
 		
 		var queue = [], perform = function() {
 			complete = true;
@@ -232,7 +232,9 @@ var Cufon = (function() {
 		}
 		
 		DOM.ready(function() {
-			if (complete || allStylesLoaded()) perform();
+			// getComputedStyle returns null in Gecko if used in an iframe with display: none
+			if (!hasLayout) hasLayout = CSS.getStyle(document.body).isUsable();
+			if (complete || (hasLayout && allStylesLoaded())) perform();
 			else setTimeout(arguments.callee, 10);
 		});
 		
@@ -398,6 +400,10 @@ var Cufon = (function() {
 		
 		this.getSize = function(property, base) {
 			return sizes[property] || (sizes[property] = new CSS.Size(this.get(property), base));
+		};
+		
+		this.isUsable = function() {
+			return !!style;
 		};
 		
 	}
