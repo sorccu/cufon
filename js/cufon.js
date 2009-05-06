@@ -385,19 +385,19 @@ var Cufon = (function() {
 		
 		var custom = {}, sizes = {};
 		
+		this.extend = function(styles) {
+			for (var property in styles) {
+				if (hasOwnProperty(styles, property)) custom[property] = styles[property];
+			}
+			return this;
+		};
+		
 		this.get = function(property) {
 			return custom[property] != undefined ? custom[property] : style[property];
 		};
 		
 		this.getSize = function(property, base) {
 			return sizes[property] || (sizes[property] = new CSS.Size(this.get(property), base));
-		};
-		
-		this.extend = function(styles) {
-			for (var property in styles) {
-				if (hasOwnProperty(styles, property)) custom[property] = styles[property];
-			}
-			return this;
 		};
 		
 	}
