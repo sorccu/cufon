@@ -788,8 +788,6 @@ Cufon.registerEngine('canvas', (function() {
 		if (textDecoration.underline) line(-font.face['underline-position'], textDecoration.underline);
 		if (textDecoration.overline) line(font.ascent, textDecoration.overline);
 		
-		g.fillStyle = style.get('color');
-		
 		function renderText() {
 			g.scale(roundingFactor, 1);
 			for (var i = 0, l = chars.length; i < l; ++i) {
@@ -824,6 +822,7 @@ Cufon.registerEngine('canvas', (function() {
 			}
 			g.fillStyle = fill;
 		}
+		else g.fillStyle = style.get('color');
 		
 		renderText();
 		
