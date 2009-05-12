@@ -546,7 +546,7 @@ var Cufon = (function() {
 	};
 	
 	var separators = {
-		words: /\s+/,
+		words: /[^\S\u00a0]+/,
 		characters: ''
 	};
 	
