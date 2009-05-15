@@ -86,6 +86,9 @@ $filters = array(
 			'max_range' => 100
 		),
 		'message' => "The distance between the original and the optimized path may not be greater than 100 units"
+	),
+	'kerning' => array(
+		'filter' => FILTER_VALIDATE_BOOLEAN
 	)
 );
 
@@ -97,6 +100,7 @@ $errors = array_diff_key($errors, array(
 	'ligatures' => 1,
 	'disableScaling' => 1,
 	'simplify' => 1,
+	'kerning' => 1,
 	'glyphs' => 1
 ));
 
