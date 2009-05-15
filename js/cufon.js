@@ -700,12 +700,12 @@ Cufon.registerEngine('canvas', (function() {
 		
 		var chars = Cufon.CSS.textTransform(redraw ? node.alt : text, style).split('');
 		
-		var width = 0, lastWidth = null;
+		var width = 0, lastWidth = null, jumps = [];
 		
 		for (var i = 0, l = chars.length; i < l; ++i) {
 			var glyph = font.glyphs[chars[i]] || font.missingGlyph;
 			if (!glyph) continue;
-			width += lastWidth = Number(glyph.w || font.w) + letterSpacing;
+			width += lastWidth = jumps[i] = Number(glyph.w || font.w) + letterSpacing;
 		}
 		
 		if (lastWidth === null) return null; // there's nothing to render
@@ -799,7 +799,7 @@ Cufon.registerEngine('canvas', (function() {
 					else glyph.code = generateFromVML('m' + glyph.d, g);
 					g.fill();
 				}
-				g.translate(Number(glyph.w || font.w) + letterSpacing, 0);
+				g.translate(jumps[i], 0);
 			}
 			g.restore();
 		}
@@ -965,14 +965,14 @@ Cufon.registerEngine('vml', (function() {
 		var color = style.get('color');
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 		
-		var width = 0, offsetX = 0, advance = null;
+		var width = 0, jumps = [], offsetX = 0, advance = null;
 		
 		var glyph, shape, shadows = options.textShadow;
 		
 		// pre-calculate width
 		for (var i = 0, k = 0, l = chars.length; i < l; ++i) {
 			glyph = font.glyphs[chars[i]] || font.missingGlyph;
-			if (glyph) width += advance = ~~(glyph.w || font.w) + letterSpacing;
+			if (glyph) width += advance = jumps[i] = ~~(glyph.w || font.w) + letterSpacing;
 		}
 		
 		if (advance === null) return null;
@@ -1034,7 +1034,7 @@ Cufon.registerEngine('vml', (function() {
 				shape.appendChild(shadow);
 			}
 			
-			offsetX += ~~(glyph.w || font.w) + letterSpacing;
+			offsetX += jumps[i];
 			
 			++k;
 			
