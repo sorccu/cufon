@@ -2,6 +2,7 @@
 
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'FontForgeScript.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFontContainer.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'UnicodeRange.php';
 
 class Cufon {
 	
@@ -73,11 +74,7 @@ class Cufon {
 			
 			foreach ($glyphs as $glyph)
 			{
-				// http://www.php.net/manual/en/function.ord.php#68914
-				
-				$cp = unpack('N', mb_convert_encoding($glyph, 'UCS-4BE', 'UTF-8'));
-				
-				$script->selectUnicode($cp[1]);
+				$script->selectUnicode(UnicodeRange::getCodePoint($glyph));
 			}
 		}
 		
@@ -91,7 +88,6 @@ class Cufon {
 			$script->scaleToEm($options['emSize']);
 		}
 		
-		$script->removeAllKerns();
 		$script->selectAll();
 		$script->verticalFlip(0);
 		

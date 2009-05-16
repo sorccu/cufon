@@ -2,6 +2,7 @@
 
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'JSEncoder.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFontContainer.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'UnicodeRange.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'VMLPath.php';
 
 class SVGFont {
@@ -121,6 +122,9 @@ class SVGFont {
 			$fontJSON['face'][$key] = $this->getSanitizedFaceValue($key, (string) $val);
 		}
 		
+		$nameIndex = array();
+		$charIndex = array();
+		
 		foreach ($font->xpath('glyph') as $glyph)
 		{
 			if (!isset($glyph['unicode']))
@@ -147,7 +151,71 @@ class SVGFont {
 				$data->w = (int) $glyph['horiz-adv-x'];
 			}
 			
-			$fontJSON['glyphs'][(string) $glyph['unicode']] = $data;
+			$char = (string) $glyph['unicode'];
+			
+			if (isset($glyph['glyph-name']))
+			{
+				foreach (explode(',', (string) $glyph['glyph-name']) as $glyphName)
+				{
+					$nameIndex[$glyphName] = $char;
+					$charIndex[$char] = $data;
+				}
+			}
+			
+			$fontJSON['glyphs'][$char] = $data;
+		}
+		
+		$options = $this->container->getOptions();
+		
+		if ($options['kerning'])
+		{
+			$kerning = array();
+			
+			foreach ($font->xpath('hkern') as $hkern)
+			{
+				$firstSet = array();
+				$secondSet = array();
+				
+				if (isset($hkern['u1']))
+				{
+					$firstSet = self::getMatchingCharsFromUnicodeRange((string) $hkern['u1'], $charIndex);
+				}
+				
+				if (isset($hkern['g1']))
+				{
+					$firstSet = array_merge($firstSet, self::getMatchingCharsFromGlyphNames((string) $hkern['g1'], $nameIndex));
+				}
+				
+				if (isset($hkern['u2']))
+				{
+					$secondSet = self::getMatchingCharsFromUnicodeRange((string) $hkern['u2'], $charIndex);
+				}
+				
+				if (isset($hkern['g2']))
+				{
+					$secondSet = array_merge($secondSet, self::getMatchingCharsFromGlyphNames((string) $hkern['g2'], $nameIndex));
+				}
+				
+				if (!empty($secondSet))
+				{
+					foreach ($firstSet as $firstGlyph)
+					{
+						foreach ($secondSet as $secondGlyph)
+						{
+							$glyph = $fontJSON['glyphs'][$firstGlyph];
+							
+							if (!isset($glyph->k))
+							{
+								$glyph->k = array();
+							}
+							
+							$glyph->k[$secondGlyph] = (int) $hkern['k'];
+						}
+					}
+				}
+			}
+			
+			$fontJSON['kerning'] = (object) $kerning;
 		}
 		
 		$nbsp = utf8_encode(chr(0xa0));
@@ -157,7 +225,7 @@ class SVGFont {
 			$fontJSON['glyphs'][$nbsp] = $fontJSON['glyphs'][' '];
 		}
 		
-		return self::processFont($fontJSON, $this->container->getOptions());
+		return self::processFont($fontJSON, $options);
 	}
 	
 	/**
@@ -203,6 +271,60 @@ class SVGFont {
 			json_encode(array_values($glyphs)),
 			$encoder->getDecoder(),
 			json_encode($data));
+	}
+	
+	/**
+	 * @param string $group
+	 * @param array $nameIndex
+	 * @return array
+	 */
+	private static function getMatchingCharsFromGlyphNames($group, $nameIndex)
+	{
+		$matches = array();
+		
+		foreach (explode(',', $group) as $g)
+		{
+			if (isset($nameIndex[$g]))
+			{
+				$matches[] = $nameIndex[$g];
+			}
+		}
+		
+		return $matches;
+	}
+	
+	/**
+	 * @param string $unicodeRange
+	 * @param array $charIndex
+	 * @return array
+	 */
+	private static function getMatchingCharsFromUnicodeRange($unicodeRange, $charIndex)
+	{
+		$matches = array();
+		
+		$range = new UnicodeRange($unicodeRange);
+		
+		if ($range->isSimple())
+		{
+			if ($charIndex[$unicodeRange])
+			{
+				$matches[] = $unicodeRange;
+			}
+		}
+		else
+		{
+			reset($charIndex);
+			
+			while (list($char) = each($charIndex))
+			{
+				if ($range->contains($char))
+				{
+					$matches[] = $char;
+				}
+			}
+		}
+		
+		return $matches;
 	}
 	
 	/**
