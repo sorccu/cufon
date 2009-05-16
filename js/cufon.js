@@ -249,7 +249,6 @@ var Cufon = (function() {
 		
 		var face = this.face = data.face;
 		this.glyphs = data.glyphs;
-		this.kerning = data.kerning;
 		this.w = data.w;
 		this.baseSize = parseInt(face['units-per-em'], 10);
 		
