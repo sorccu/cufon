@@ -12,7 +12,7 @@
 		
 		<meta name="description" content="Fast text replacement with canvas and VML - no Flash or images required." />
 		
-		<style type="text/css"> @import url(css/style.css); </style>
+		<link rel="stylesheet" href="css/style.css" type="text/css" />
 		
 		<script src="../js/cufon.js" type="text/javascript"></script>
 		<script src="../fonts/Frutiger_LT_Std.font.js" type="text/javascript"></script>
