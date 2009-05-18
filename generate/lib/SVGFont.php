@@ -169,8 +169,6 @@ class SVGFont {
 		
 		if ($options['kerning'])
 		{
-			$kerning = array();
-			
 			foreach ($font->xpath('hkern') as $hkern)
 			{
 				$firstSet = array();
@@ -214,8 +212,6 @@ class SVGFont {
 					}
 				}
 			}
-			
-			$fontJSON['kerning'] = (object) $kerning;
 		}
 		
 		$nbsp = utf8_encode(chr(0xa0));
