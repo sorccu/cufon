@@ -1009,7 +1009,7 @@ Cufon.registerEngine('vml', (function() {
 			if (redraw) {
 				// some glyphs may be missing so we can't use i
 				shape = canvas.childNodes[j];
-				if (shape.firstChild) shape.removeChild(shape.firstChild); // shadow, fill
+				while (shape.firstChild) shape.removeChild(shape.firstChild); // shadow, fill
 			}
 			else { 
 				shape = document.createElement('cvml:shape');
