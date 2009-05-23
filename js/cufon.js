@@ -368,6 +368,27 @@ var Cufon = (function() {
 		
 	}
 	
+	function ReplaceHistory() {
+		
+		var list = [], map = {};
+		
+		function filter(keys) {
+			var values = [], key;
+			for (var i = 0; key = keys[i]; ++i) values[i] = list[map[keys[i]]];
+			return values;
+		}
+		
+		this.add = function(key, args) {
+			map[key] = list.push(args) - 1;
+		};
+		
+		this.repeat = function() {
+			var snapshot = arguments.length ? filter(arguments) : list, args;
+			for (var i = 0; args = snapshot[i++];) api.replace(args[0], args[1], true);
+		};
+		
+	}
+	
 	function Storage() {
 		
 		var map = {}, at = 0;
@@ -518,7 +539,7 @@ var Cufon = (function() {
 	
 	var sharedStorage = new Storage();
 	var hoverHandler = new HoverHandler();
-	var replaceHistory = [];
+	var replaceHistory = new ReplaceHistory();
 	
 	var engines = {}, fonts = {}, defaultOptions = {
 		enableTextDecoration: false,
@@ -556,10 +577,7 @@ var Cufon = (function() {
 	};
 	
 	api.refresh = function() {
-		var currentHistory = replaceHistory.splice(0, replaceHistory.length);
-		for (var i = 0, l = currentHistory.length; i < l; ++i) {
-			api.replace.apply(null, currentHistory[i]);
-		}
+		replaceHistory.repeat.apply(replaceHistory, arguments);
 		return api;
 	};
 	
@@ -583,7 +601,7 @@ var Cufon = (function() {
 			options.textShadow = CSS.textShadow(options.textShadow);
 		if (typeof options.color == 'string' && /^-/.test(options.color))
 			options.textGradient = CSS.gradient(options.color);
-		if (!ignoreHistory) replaceHistory.push(arguments);
+		if (!ignoreHistory) replaceHistory.add(elements, arguments);
 		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
 		CSS.ready(function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
