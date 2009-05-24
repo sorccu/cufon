@@ -374,7 +374,7 @@ var Cufon = (function() {
 		
 		function filter(keys) {
 			var values = [], key;
-			for (var i = 0; key = keys[i]; ++i) values[i] = list[map[keys[i]]];
+			for (var i = 0; key = keys[i]; ++i) values[i] = list[map[key]];
 			return values;
 		}
 		
