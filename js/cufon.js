@@ -637,24 +637,24 @@ Cufon.registerEngine('canvas', (function() {
 	
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
-	styleSheet.appendChild(document.createTextNode(
-		'.cufon-canvas{text-indent:0}' +
+	styleSheet.appendChild(document.createTextNode((
+		'.cufon-canvas{text-indent:0;}' +
 		'@media screen,projection{' +
-			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle' + 
+			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle;' + 
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
-				: ';font-size:1px;line-height:1px') +
-			'}.cufon-canvas .cufon-alt{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden}' +
+				: 'font-size:1px;line-height:1px;') +
+			'}.cufon-canvas .cufon-alt{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;}' +
 			(HAS_INLINE_BLOCK
-				? '.cufon-canvas canvas{position:relative}'
-				: '.cufon-canvas canvas{position:absolute}') +
+				? '.cufon-canvas canvas{position:relative;}'
+				: '.cufon-canvas canvas{position:absolute;}') +
 		'}' +
 		'@media print{' +
-			'.cufon-canvas{padding:0 !important}' +
-			'.cufon-canvas canvas{display:none}' +
-			'.cufon-canvas .cufon-alt{display:inline}' +
+			'.cufon-canvas{padding:0;}' +
+			'.cufon-canvas canvas{display:none;}' +
+			'.cufon-canvas .cufon-alt{display:inline;}' +
 		'}'
-	));
+	).replace(/;/g, '!important;')));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
 
 	function generateFromVML(path, context) {
@@ -873,20 +873,20 @@ Cufon.registerEngine('vml', (function() {
 	if (!check.coordsize) return; // VML isn't supported
 	check = null;
 	
-	document.write('<style type="text/css">' +
-		'.cufon-vml-canvas{text-indent:0}' +
+	document.write(('<style type="text/css">' +
+		'.cufon-vml-canvas{text-indent:0;}' +
 		'@media screen{' + 
-			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
-			'.cufon-vml-canvas{position:absolute;text-align:left}' +
-			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
-			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px}' +
-			'a .cufon-vml{cursor:pointer}' +
+			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
+			'.cufon-vml-canvas{position:absolute;text-align:left;}' +
+			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle;}' +
+			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px;}' +
+			'a .cufon-vml{cursor:pointer}' + // ignore !important here
 		'}' +
 		'@media print{' + 
-			'.cufon-vml *{display:none}' +
-			'.cufon-vml .cufon-alt{display:inline}' +
+			'.cufon-vml *{display:none;}' +
+			'.cufon-vml .cufon-alt{display:inline;}' +
 		'}' +
-	'</style>');
+	'</style>').replace(/;/g, '!important;'));
 
 	function getFontSizeInPixels(el, value) {
 		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
