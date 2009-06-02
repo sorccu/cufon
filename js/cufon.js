@@ -914,7 +914,7 @@ Cufon.registerEngine('vml', (function() {
 	document.write(('<style type="text/css">' +
 		'.cufon-vml-canvas{text-indent:0;}' +
 		'@media screen{' + 
-			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
+			'cvml\\:shape,cvml\\:rect,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
 			'.cufon-vml-canvas{position:absolute;text-align:left;}' +
 			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle;}' +
 			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px;}' +
@@ -1107,6 +1107,30 @@ Cufon.registerEngine('vml', (function() {
 			
 			offsetX += jumps[j++];
 		}
+		
+		// addresses flickering issues on :hover
+		
+		var cover = shape.nextSibling, coverFill, vStyle;
+		
+		if (options.hover) {
+			
+			if (!cover) {
+				cover = document.createElement('cvml:rect');
+				cover.stroked = 'f';
+				cover.className = 'cufon-vml-cover';
+				coverFill = document.createElement('cvml:fill');
+				coverFill.opacity = 0;
+				cover.appendChild(coverFill);
+				canvas.appendChild(cover);
+			}
+			
+			vStyle = cover.style;
+			
+			vStyle.width = roundedShapeWidth;
+			vStyle.height = roundedHeight;
+			
+		}
+		else if (cover) canvas.removeChild(cover);
 		
 		wStyle.width = Math.max(Math.ceil(size.convert(width * roundingFactor)), 0);
 		
