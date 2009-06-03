@@ -216,7 +216,7 @@ class SVGFont {
 		
 		$nbsp = utf8_encode(chr(0xa0));
 		
-		if (!isset($fontJSON['glyphs'][$nbsp]))
+		if (!isset($fontJSON['glyphs'][$nbsp]) && isset($fontJSON['glyphs'][' ']))
 		{
 			$fontJSON['glyphs'][$nbsp] = $fontJSON['glyphs'][' '];
 		}
