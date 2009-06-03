@@ -3,6 +3,17 @@
 class UnicodeRange {
 	
 	/**
+	 * @see http://www.w3.org/TR/css3-webfonts/#dataqual
+	 * 
+	 * @param string $range
+	 * @return UnicodeRange
+	 */
+	public static function fromCSSValue($range)
+	{
+		return new UnicodeRange($range);
+	}
+	
+	/**
 	 * @see http://www.php.net/manual/en/function.ord.php#68914
 	 * 
 	 * @param string $char
@@ -32,11 +43,35 @@ class UnicodeRange {
 		}
 		else
 		{
-			foreach (explode(',', $range) as $part)
+			foreach (preg_split('/\s*,\s*/', $range, null, PREG_SPLIT_NO_EMPTY) as $part)
 			{
 				$this->ranges[] = self::solve($part);
 			}
 		}
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function asHexString()
+	{
+		$parts = array();
+		
+		foreach ($this->ranges as $range)
+		{
+			list($start, $end) = $range;
+			
+			if ($start === $end)
+			{
+				$parts[] = sprintf('0x%X', $start);
+			}
+			else
+			{
+				$parts[] = sprintf('0x%X-0x%X', $start, $end);
+			}
+		}
+		
+		return implode(',', $parts);
 	}
 	
 	/**
