@@ -79,7 +79,7 @@ class FontForgeScript {
 		
 		exec($command, $output, $status);
 		
-		Cufon::log('Exited with status %d', $status);
+		Cufon::log('Exited with status %d, output: %s', $status, implode(' / ', $output));
 		
 		if ($status > 0)
 		{
