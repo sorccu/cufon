@@ -116,12 +116,16 @@ var Cufon = (function() {
 		}),
 		
 		recognizesMedia: cached(function(media) {
-			var el = document.createElement('style'), container, supported;
+			var el = document.createElement('style'), sheet, container, supported;
 			el.type = 'text/css';
 			el.media = media;
+			try { // this is cached anyway
+				el.appendChild(document.createTextNode('/**/'));
+			} catch (e) {}
 			container = elementsByTagName('head')[0];
 			container.insertBefore(el, container.firstChild);
-			supported = !!(el.sheet || el.styleSheet);
+			sheet = (el.sheet || el.styleSheet);
+			supported = sheet && !sheet.disabled;
 			container.removeChild(el);
 			return supported;
 		}),
