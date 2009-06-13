@@ -214,14 +214,17 @@ var Cufon = (function() {
 			for (var fn; fn = queue.shift(); fn());
 		};
 		
-		var linkElements = elementsByTagName('link'), watch = {
-			stylesheet: 1
-		};
+		var links = elementsByTagName('link'), styles = elementsByTagName('style');
 		
-		function isSheetLoaded(sheet) {
+		function isContainerReady(el) {
+			return el.disabled || isSheetReady(el.sheet || el.styleSheet, el.media || 'screen');
+		}
+		
+		function isSheetReady(sheet, media) {
 			// in Opera sheet.disabled is true when it's still loading,
 			// even though link.disabled is false. they stay in sync if
 			// set manually.
+			if (!CSS.recognizesMedia(media || 'all')) return true;
 			if (!sheet || sheet.disabled) return false;
 			var rules = sheet.cssRules, rule;
 			if (rules) {
@@ -234,7 +237,7 @@ var Cufon = (function() {
 						case 2: // @charset
 							break;
 						case 3: // @import
-							if (!isSheetLoaded(rule.styleSheet)) return false;
+							if (!isSheetReady(rule.styleSheet, rule.media.mediaText)) return false;
 							break;
 						default:
 							// only @charset can precede @import
@@ -246,9 +249,12 @@ var Cufon = (function() {
 		}
 		
 		function allStylesLoaded() {
-			for (var i = 0, link; link = linkElements[i]; ++i) {
-				if (link.disabled || !watch[link.rel.toLowerCase()] || !CSS.recognizesMedia(link.media || 'screen')) continue;
-				if (!isSheetLoaded(link.sheet || link.styleSheet)) return false;
+			var el, i;
+			for (i = 0; el = links[i]; ++i) {
+				if (el.rel.toLowerCase() == 'stylesheet' && !isContainerReady(el)) return false;
+			}
+			for (i = 0; el = styles[i]; ++i) {
+				if (!isContainerReady(el)) return false;
 			}
 			return true;
 		}
