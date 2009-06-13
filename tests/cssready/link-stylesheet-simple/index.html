@@ -1,0 +1,36 @@
+<!doctype html>
+
+<html>
+
+	<head>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	
+		<link rel="stylesheet" type="text/css" href="style.css" />
+	
+		<script src="../../../js/cufon.js" type="text/javascript"></script>
+		
+		<script type="text/javascript">
+
+			(function(test) {
+
+				Cufon.CSS.ready(function() {
+					if (document.body.offsetWidth == 100) {
+						test.success();
+					}
+					else {
+						test.fail();
+					}
+				});
+
+			})(parent.testRunner.registerTest('<link rel="stylesheet"> with a simple and short style sheet'));
+
+		</script>
+	
+	</head>
+	
+	<body>
+	
+	</body>
+	
+</html>

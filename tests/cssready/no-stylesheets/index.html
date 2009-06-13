@@ -1,0 +1,32 @@
+<!doctype html>
+
+<html>
+
+	<head>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	
+		<script src="../../../js/cufon.js" type="text/javascript"></script>
+		
+		<script type="text/javascript">
+
+			// Note: this test is actually invalid because cufon.js
+			// inserts a style sheet of its own.
+
+			(function(test) {
+
+				Cufon.CSS.ready(function() {
+					test.success();
+				});
+
+			})(parent.testRunner.registerTest('No style sheets'));
+
+		</script>
+	
+	</head>
+	
+	<body>
+	
+	</body>
+	
+</html>

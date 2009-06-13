@@ -1,0 +1,252 @@
+<!doctype html>
+
+<html>
+
+	<head>
+	
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	
+		<title>CSS.ready() tests</title>
+		
+		<style type="text/css">
+		
+			html, body {
+				margin: 0;
+				padding: 0;
+			}
+			
+			body {
+				background: #FFF2D2;
+				color: #000;
+				font: 10pt Arial, Helvetica, sans-serif;
+				padding: 20px;
+			}
+			
+			h1 {
+				font-size: 160%;
+				margin: 0.5em 0;
+			}
+			
+			#testframe {
+				height: 1px;
+				visibility: hidden;
+				width: 1px;
+			}
+			
+			#results {
+				background: #fff;
+				border: 1px solid #D6DEE7;
+				margin: 0;
+				width: 100%;
+			}
+			
+			#results th {
+				border-bottom: 1px solid #EFD6AA;
+				color: #FEA202;
+				padding: 2px;
+				text-align: left;
+			}
+			
+			#results tfoot th {
+				border-bottom: 0;
+				border-top: 1px solid #EFD6AA;
+			}
+			
+			#results td {
+				padding: 2px;
+				text-align: left;
+			}
+			
+			#results .col-result {
+				width: 10em;
+			}
+			
+			#results .pass {
+				background: #00cc00;
+				color: #fff;
+			}
+			
+			#results .fail, #results .stalled {
+				background: red;
+				color: #fff;
+				font-weight: bold;
+			}
+			
+		</style>
+		
+		<script type="text/javascript">
+
+		var testRunner = (function() {
+
+			var api = {};
+
+			var urls = [], at = -1;
+
+			function next() {
+				if (++at < urls.length) {
+					document.getElementById('progress').innerHTML = 'Running test ' + (at + 1) + ' of ' + urls.length + '..';
+					setTimeout(function() {
+						fetchTest(urls[at]);
+					}, 10);
+				}
+				else {
+					document.getElementById('progress').innerHTML = 'Completed all ' + urls.length + ' tests.';
+				}
+			}
+
+			function fetchTest(url) {
+				document.getElementById('testframe').src = url;
+			}
+
+			function Test(name, timeout, cooldown) {
+
+				var status = 'RUNNING';
+
+				var row = (function() {
+					var tr = document.createElement('tr');
+					var cellTest = document.createElement('td');
+					tr.appendChild(cellTest);
+					cellTest.className = 'col-test';
+					var cellStatus = document.createElement('td');
+					tr.appendChild(cellStatus);
+					cellStatus.className = 'col-result';
+					return tr;
+				})();
+
+				function update() {
+					row.firstChild.innerHTML = '';
+					row.firstChild.appendChild(document.createTextNode(name));
+					row.lastChild.innerHTML = status;
+					row.className = status.replace(/[^a-z0-9]/gi, '').toLowerCase();
+				}
+
+				function finish() {
+					clearTimeout(autoFail);
+					setTimeout(function() {
+						update();
+						next();
+					}, cooldown);
+				}
+
+				this.fail = function() {
+					status = 'FAIL';
+					finish();
+				};
+
+				this.row = function() {
+					return row;
+				};
+
+				this.timeout = function() {
+					status = 'STALLED';
+					finish();
+				};
+
+				this.toString = function() {
+					return name;
+				};
+
+				this.success = function() {
+					status = 'PASS';
+					finish();
+				};
+
+				var autoFail = setTimeout(this.timeout, timeout);
+
+				update();
+				
+			}
+
+			api.registerTest = function(name, timeout, cooldown) {
+				var test = new Test(name, timeout || 3000, cooldown || 0);
+				document.getElementById('tests').appendChild(test.row());
+				return test;
+			};
+
+			api.run = function(list) {
+				urls = list;
+				next();
+			};
+
+			return api;
+			
+		})();
+
+		window.onload = function() {
+
+			testRunner.run([
+				'no-stylesheets/',
+				'link-next/',
+				'link-stylesheet-simple/',
+				'link-altstylesheet-simple/',
+				'link-stylesheet-simple-print/',
+				'link-altstylesheet-simple-print/',
+				'link-stylesheet-simple-fake/',
+				'link-altstylesheet-simple-fake/',
+				'link-stylesheet-disabled/',
+				'link-stylesheet-slow/',
+				'link-stylesheet-slow-print/',
+				'link-stylesheet-slowdisabled/',
+				'link-stylesheet-empty/',
+				'link-stylesheet-empty-print/',
+				'link-stylesheet-charsetempty/',
+				'link-stylesheet-charsetempty-print/',
+				'link-stylesheet-commentempty/',
+				'link-stylesheet-commentempty-print/',
+				'link-stylesheet-404/',
+				'link-stylesheet-404-print/',
+				'link-stylesheet-import/',
+				'link-stylesheet-import-print/',
+				'link-stylesheet-printimport/',
+				'style-simple/',
+				'style-simple-print/',
+				'style-simple-fake/',
+				'style-import/',
+				'style-import-print/',
+				'style-import-fake/',
+				'style-printimport/',
+				'style-emptyimport/',
+				'style-emptyimport-print/',
+				'style-404import/',
+				'style-404import-print/'
+			]);
+			
+		};
+		
+		</script>
+	
+	</head>
+	
+	<body>
+		
+		<h1>CSS.ready() tests</h1>
+	
+		<p>Tests must be run at least twice, with both empty and full cache. Some tests take longer than others.</p>
+	
+		<table id="results">
+			<thead>
+				<tr>
+					<th class="col-test">Test</th>
+					<th class="col-result">Result</th>
+				</tr>
+			</thead>
+			<tbody id="tests">
+			</tbody>
+			<tfoot>
+				<tr>
+					<th id="progress" colspan="2">Initializing..</th>
+				</tr>
+			</tfoot>
+		</table>
+	
+		<iframe id="testframe" src="about:blank"></iframe>
+		
+		<script type="text/javascript">
+
+			document.getElementById('testframe').src = 'about:blank';
+			
+		</script>
+		
+	</body>
+	
+</html>
