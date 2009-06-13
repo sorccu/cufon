@@ -217,7 +217,7 @@ var Cufon = (function() {
 		var links = elementsByTagName('link'), styles = elementsByTagName('style');
 		
 		function isContainerReady(el) {
-			return el.disabled || isSheetReady(el.sheet || el.styleSheet, el.media || 'screen');
+			return el.disabled || isSheetReady(el.sheet, el.media || 'screen');
 		}
 		
 		function isSheetReady(sheet, media) {
@@ -249,6 +249,9 @@ var Cufon = (function() {
 		}
 		
 		function allStylesLoaded() {
+			// Internet Explorer's style sheet model, there's no need to do anything
+			if (document.createStyleSheet) return true;
+			// standards-compliant browsers
 			var el, i;
 			for (i = 0; el = links[i]; ++i) {
 				if (el.rel.toLowerCase() == 'stylesheet' && !isContainerReady(el)) return false;
