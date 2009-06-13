@@ -218,15 +218,37 @@ var Cufon = (function() {
 			stylesheet: 1
 		};
 		
+		function isSheetLoaded(sheet) {
+			// in Opera sheet.disabled is true when it's still loading,
+			// even though link.disabled is false. they stay in sync if
+			// set manually.
+			if (!sheet || sheet.disabled) return false;
+			var rules = sheet.cssRules, rule;
+			if (rules) {
+				// needed for Safari 3 and Chrome 1.0.
+				// in standards-conforming browsers cssRules contains @-rules.
+				// Chrome 1.0 weirdness: rules[<number larger than .length - 1>]
+				// returns the last rule, so a for loop is the only option.
+				search: for (var i = 0, l = rules.length; rule = rules[i], i < l; ++i) {
+					switch (rule.type) {
+						case 2: // @charset
+							break;
+						case 3: // @import
+							if (!isSheetLoaded(rule.styleSheet)) return false;
+							break;
+						default:
+							// only @charset can precede @import
+							break search;
+					}
+				}
+			}
+			return true;
+		}
+		
 		function allStylesLoaded() {
-			var sheet, i, link;
-			for (i = 0; link = linkElements[i]; ++i) {
+			for (var i = 0, link; link = linkElements[i]; ++i) {
 				if (link.disabled || !watch[link.rel.toLowerCase()] || !CSS.recognizesMedia(link.media || 'screen')) continue;
-				sheet = link.sheet || link.styleSheet;
-				// in Opera sheet.disabled is true when it's still loading,
-				// even though link.disabled is false. they stay in sync if
-				// set manually.
-				if (!sheet || sheet.disabled) return false;
+				if (!isSheetLoaded(link.sheet || link.styleSheet)) return false;
 			}
 			return true;
 		}
