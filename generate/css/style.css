@@ -137,3 +137,21 @@ button:hover, #nav a:hover, #nav a:active, .actions a:hover, .actions a:active {
 #head, .about, .actions, #foot {
 	text-align: center;
 }
+
+#lfont_0 {
+	font-weight: normal;
+}
+
+#lfont_1 {
+	font-weight: bold;
+}
+
+#lfont_2 {
+	font-style: italic;
+	font-weight: normal;
+}
+
+#lfont_3 {
+	font-style: italic;
+	font-weight: bold;
+}
