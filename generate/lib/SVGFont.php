@@ -242,14 +242,22 @@ class SVGFont {
 		
 		foreach ($domains as $domain)
 		{
-			$domain = preg_replace('@^\w+://@', '', mb_strtolower($domain, 'utf-8'));
+			$domain = preg_quote(preg_replace('@^\w+://@', '', mb_strtolower($domain, 'utf-8')), '/');
+			
+			// this is kind of ugly, but we have to make sure that JSEncoder
+			// only gets ASCII characters
+			$domain = str_replace('\\\\', '\\', substr(json_encode($domain), 1, -1));
+			
+			if (substr($domain, 0, 2) === '\\.')
+			{
+				$domain = ".+{$domain}";
+			}
+			else if (substr($domain, 0, 4) === '\\*\\.')
+			{
+				$domain = '.+' . substr($domain, 2);
+			}
 			
 			$domainMap[$domain] = 1;
-			
-			if (substr($domain, 0, 4) !== 'www.')
-			{
-				$domainMap["www.{$domain}"] = 1;
-			}
 		}
 		
 		$glyphs = $data['glyphs'];
@@ -259,9 +267,9 @@ class SVGFont {
 		uasort($glyphs, array(__CLASS__, 'sortRandom'));
 		
 		$encoder = new JSEncoder(
-			sprintf('(function(){var b=_cufon_bridge_,c=%s.split(""),i=0,p=b.p,l=p.length,g=b.f.glyphs={};if(%s[location.hostname])for(;i<l;++i)g[c[i]]=p[i]})()',
+			sprintf('(function(){var b=_cufon_bridge_,c=%s.split(""),i=0,p=b.p,l=p.length,g=b.f.glyphs={};if(/^(?:www\\.)?(?:%s)$/.test(location.hostname))for(;i<l;++i)g[c[i]]=p[i]})()',
 				json_encode(implode('', array_keys($glyphs))),
-				json_encode($domainMap)));
+				implode('|', array_keys($domainMap))));
 		
 		return sprintf('(function(f){_cufon_bridge_={p:%s,f:f};try{%s}catch(e){}delete _cufon_bridge_;return f})(%s)',
 			json_encode(array_values($glyphs)),

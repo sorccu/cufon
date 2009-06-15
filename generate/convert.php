@@ -95,7 +95,7 @@ $filters = array(
 		'flags' => FILTER_REQUIRE_SCALAR | FILTER_NULL_ON_FAILURE
 	),
 	'domains' => array(
-		'filter' => FILTER_SANITIZE_STRING,
+		'filter' => FILTER_UNSAFE_RAW,
 		'flags' => FILTER_NULL_ON_FAILURE
 	),
 	'callback' => array(
