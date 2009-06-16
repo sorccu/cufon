@@ -16,7 +16,9 @@ class SVGFontContainer implements IteratorAggregate {
 		// (only allow Tab, LF and CR)
 		$xml = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $xml);
 		
-		return new SVGFontContainer(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_COMPACT), $options);
+		$params = defined('LIBXML_COMPACT') ? constant('LIBXML_COMPACT') : 0;
+		
+		return new SVGFontContainer(simplexml_load_string($xml, 'SimpleXMLElement', $params), $options);
 	}
 
 	/**
