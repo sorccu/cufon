@@ -39,7 +39,9 @@ class VMLPath {
 		
 		$previous = null;
 		
-		foreach ($matches as $set)
+		$zm = false;
+		
+		for (; $set = current($matches); next($matches))
 		{
 			list($cmd, $coords) = array($set[1], array_map('floatval', preg_split('/(?:,|\s+)/', trim($set[2]))));
 			
@@ -47,7 +49,14 @@ class VMLPath {
 			{
 				case 'z':
 				case 'Z':
-					$vml->closePath();
+					if ($zm) // ignore chained zm-commands
+					{
+						$vml->pop();
+					}
+					else
+					{
+						$vml->closePath();
+					}
 					break;
 				case 'M':
 					$vml->moveTo(
@@ -188,6 +197,8 @@ class VMLPath {
 					break;
 				
 			}
+			
+			$zm = strcasecmp($cmd, 'm') === 0 && strcasecmp($previous, 'z') === 0;
 			
 			$previous = $cmd;
 		}
@@ -346,6 +357,19 @@ class VMLPath {
 		$this->atY += $rounded;
 		
 		return $rounded;
+	}
+	
+	/**
+	 * Removes the last point from the path. Note: this does NOT
+	 * reset atX, atY and others to their prior values.
+	 * 
+	 * @return VMLPath
+	 */
+	public function pop()
+	{
+		array_pop($this->parts);
+		
+		return $this;
 	}
 	
 	/**
