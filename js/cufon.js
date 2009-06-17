@@ -230,25 +230,28 @@ var Cufon = (function() {
 			// set manually.
 			if (!CSS.recognizesMedia(media || 'all')) return true;
 			if (!sheet || sheet.disabled) return false;
-			var rules = sheet.cssRules, rule;
-			if (rules) {
-				// needed for Safari 3 and Chrome 1.0.
-				// in standards-conforming browsers cssRules contains @-rules.
-				// Chrome 1.0 weirdness: rules[<number larger than .length - 1>]
-				// returns the last rule, so a for loop is the only option.
-				search: for (var i = 0, l = rules.length; rule = rules[i], i < l; ++i) {
-					switch (rule.type) {
-						case 2: // @charset
-							break;
-						case 3: // @import
-							if (!isSheetReady(rule.styleSheet, rule.media.mediaText)) return false;
-							break;
-						default:
-							// only @charset can precede @import
-							break search;
+			try {
+				var rules = sheet.cssRules, rule;
+				if (rules) {
+					// needed for Safari 3 and Chrome 1.0.
+					// in standards-conforming browsers cssRules contains @-rules.
+					// Chrome 1.0 weirdness: rules[<number larger than .length - 1>]
+					// returns the last rule, so a for loop is the only option.
+					search: for (var i = 0, l = rules.length; rule = rules[i], i < l; ++i) {
+						switch (rule.type) {
+							case 2: // @charset
+								break;
+							case 3: // @import
+								if (!isSheetReady(rule.styleSheet, rule.media.mediaText)) return false;
+								break;
+							default:
+								// only @charset can precede @import
+								break search;
+						}
 					}
 				}
 			}
+			catch (e) {} // probably a style sheet from another domain
 			return true;
 		}
 		
