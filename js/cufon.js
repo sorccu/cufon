@@ -172,7 +172,8 @@ var Cufon = (function() {
 			while (result = re.exec(value)) {
 				if (result[0] == ',') {
 					shadows.push(currentShadow);
-					currentShadow = {}, offCount = 0;
+					currentShadow = {};
+					offCount = 0;
 				}
 				else if (result[1]) {
 					currentShadow.color = result[1];
@@ -302,7 +303,7 @@ var Cufon = (function() {
 				maxX: parseInt(parts[2], 10),
 				maxY: parseInt(parts[3], 10)
 			};
-			box.width = box.maxX - box.minX,
+			box.width = box.maxX - box.minX;
 			box.height = box.maxY - box.minY;
 			box.toString = function() {
 				return [ this.minX, this.minY, this.width, this.height ].join(' ');
