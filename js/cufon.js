@@ -86,6 +86,23 @@ var Cufon = (function() {
 			});
 			return parsed;
 		}),
+		
+		// has no direct CSS equivalent.
+		// @see http://msdn.microsoft.com/en-us/library/system.windows.fontstretches.aspx
+		fontStretch: cached(function(value) {
+			if (typeof value == 'number') return value;
+			if (/%$/.test(value)) return parseFloat(value) / 100;
+			return {
+				'ultra-condensed': 0.5,
+				'extra-condensed': 0.625,
+				condensed: 0.75,
+				'semi-condensed': 0.875,
+				'semi-expanded': 1.125,
+				expanded: 1.25,
+				'extra-expanded': 1.5,
+				'ultra-expanded': 2
+			}[value] || 1;
+		}),
 	
 		getStyle: function(el) {
 			var view = document.defaultView;
@@ -806,8 +823,10 @@ Cufon.registerEngine('canvas', (function() {
 		var height = size.convert(viewBox.height);
 		var roundedHeight = Math.ceil(height);
 		var roundingFactor = roundedHeight / height;
+		var stretchFactor = roundingFactor * Cufon.CSS.fontStretch(style.get('fontStretch'));
+		var stretchedWidth = width * stretchFactor;
 		
-		canvas.width = Math.ceil(size.convert(width * roundingFactor + expandRight - expandLeft));
+		canvas.width = Math.ceil(size.convert(stretchedWidth + expandRight - expandLeft));
 		canvas.height = Math.ceil(size.convert(viewBox.height - expandTop + expandBottom));
 		
 		// minY has no part in canvas.height
@@ -816,7 +835,7 @@ Cufon.registerEngine('canvas', (function() {
 		cStyle.top = Math.round(size.convert(expandTop - font.ascent)) + 'px';
 		cStyle.left = Math.round(size.convert(expandLeft)) + 'px';
 		
-		var wrapperWidth = Math.ceil(size.convert(width * roundingFactor)) + 'px';
+		var wrapperWidth = Math.ceil(size.convert(stretchedWidth)) + 'px';
 		
 		if (HAS_INLINE_BLOCK) {
 			wStyle.width = wrapperWidth;
@@ -854,7 +873,7 @@ Cufon.registerEngine('canvas', (function() {
 		if (textDecoration.overline) line(font.ascent, textDecoration.overline);
 		
 		function renderText() {
-			g.scale(roundingFactor, 1);
+			g.scale(stretchFactor, 1);
 			for (var i = 0, j = 0, l = chars.length; i < l; ++i) {
 				var glyph = glyphs[chars[i]] || font.missingGlyph;
 				if (!glyph) continue;
@@ -1017,6 +1036,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		var height = size.convert(viewBox.height), roundedHeight = Math.ceil(height);
 		var roundingFactor = roundedHeight / height;
+		var stretchFactor = roundingFactor * Cufon.CSS.fontStretch(style.get('fontStretch'));
 		var minX = viewBox.minX, minY = viewBox.minY;
 		
 		cStyle.height = roundedHeight;
@@ -1051,7 +1071,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		var fullWidth = -minX + width + (viewBox.width - advance);
 	
-		var shapeWidth = size.convert(fullWidth * roundingFactor), roundedShapeWidth = Math.round(shapeWidth);
+		var shapeWidth = size.convert(fullWidth * stretchFactor), roundedShapeWidth = Math.round(shapeWidth);
 		
 		var coordSize = fullWidth + ',' + viewBox.height, coordOrigin;
 		var stretch = 'r' + coordSize + 'ns';
@@ -1133,7 +1153,7 @@ Cufon.registerEngine('vml', (function() {
 		}
 		else if (cover) canvas.removeChild(cover);
 		
-		wStyle.width = Math.max(Math.ceil(size.convert(width * roundingFactor)), 0);
+		wStyle.width = Math.max(Math.ceil(size.convert(width * stretchFactor)), 0);
 		
 		return wrapper;
 		
