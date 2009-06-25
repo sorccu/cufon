@@ -602,6 +602,7 @@ var Cufon = (function() {
 		engine: null,
 		//fontScale: 1,
 		//fontScaling: false,
+		forceHitArea: false,
 		hover: false,
 		hoverables: {
 			a: true
@@ -653,6 +654,7 @@ var Cufon = (function() {
 	api.replace = function(elements, options, ignoreHistory) {
 		options = merge(defaultOptions, options);
 		if (!options.engine) return api; // there's no browser support so we'll just stop here
+		if (options.hover) options.forceHitArea = true;
 		if (typeof options.textShadow == 'string')
 			options.textShadow = CSS.textShadow(options.textShadow);
 		if (typeof options.color == 'string' && /^-/.test(options.color))
@@ -1133,7 +1135,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		var cover = shape.nextSibling, coverFill, vStyle;
 		
-		if (options.hover) {
+		if (options.forceHitArea) {
 			
 			if (!cover) {
 				cover = document.createElement('cvml:rect');
