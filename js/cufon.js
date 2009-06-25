@@ -702,7 +702,7 @@ Cufon.registerEngine('canvas', (function() {
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
 				: 'font-size:1px;line-height:1px;') +
-			'}.cufon-canvas .cufon-alt{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;}' +
+			'}.cufon-canvas .cufon-alt{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;text-indent:-10000in;}' +
 			(HAS_INLINE_BLOCK
 				? '.cufon-canvas canvas{position:relative;}'
 				: '.cufon-canvas canvas{position:absolute;}') +
