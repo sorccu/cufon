@@ -167,10 +167,24 @@ class SVGFont {
 		
 		$options = $this->container->getOptions();
 		
+		$emSize = (int) $fontJSON['face']['units-per-em'];
+		
+		// for some extremely weird reason FontForge sometimes pumps out
+		// astronomical kerning values.
+		// @todo figure out what's really wrong
+		$kerningLimit = $emSize * 2;
+		
 		if ($options['kerning'])
 		{
 			foreach ($font->xpath('hkern') as $hkern)
 			{
+				$k = (int) $hkern['k'];
+				
+				if (abs($k) > $kerningLimit)
+				{
+					continue;
+				}
+				
 				$firstSet = array();
 				$secondSet = array();
 				
@@ -207,7 +221,7 @@ class SVGFont {
 								$glyph->k = array();
 							}
 							
-							$glyph->k[$secondGlyph] = (int) $hkern['k'];
+							$glyph->k[$secondGlyph] = $k;
 						}
 					}
 				}
