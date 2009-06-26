@@ -40,6 +40,7 @@ class Cufon {
 		$script = new FontForgeScript();
 		
 		$script->open($file);
+		$script->flattenCID();
 		$script->reEncode('unicode');
 		$script->selectNone();
 		

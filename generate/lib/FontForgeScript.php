@@ -92,6 +92,16 @@ class FontForgeScript {
 	}
 	
 	/**
+	 * @return FontForgeScript
+	 */
+	public function flattenCID()
+	{
+		$this->commands[] = 'if ($iscid); CIDFlatten(); endif;';
+		
+		return $this;
+	}
+	
+	/**
 	 * @param string $filename
 	 * @return FontForgeScript
 	 */
