@@ -13,6 +13,11 @@ class FontForgeScript {
 	private $commands = array();
 	
 	/**
+	 * @var array
+	 */
+	private $files = array();
+	
+	/**
 	 * @return void
 	 */
 	public function __construct()
@@ -25,6 +30,20 @@ class FontForgeScript {
 	public function __toString()
 	{
 		return implode("\n", $this->commands);
+	}
+	
+	/**
+	 * @return void
+	 */
+	public function __destruct()
+	{
+		foreach ($this->files as $file)
+		{
+			if (is_file($file))
+			{
+				unlink($file);
+			}
+		}
 	}
 	
 	/**
@@ -67,6 +86,8 @@ class FontForgeScript {
 		
 		file_put_contents($filename, $this->__toString());
 		
+		$this->files[] = $filename;
+		
 		chmod($filename, 0777);
 		
 		$command = sprintf('env %s -script %s 2>&1', CUFON_FONTFORGE, escapeshellarg($filename));
@@ -85,8 +106,6 @@ class FontForgeScript {
 		{
 			throw new ConversionException('Conversion failed');
 		}
-		
-		unlink($filename);
 		
 		return $output;
 	}
