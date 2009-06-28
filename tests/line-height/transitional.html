@@ -1,0 +1,462 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+
+	<head>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+		<title>Line-height in almost standards (transitional) mode</title>
+
+		<style type="text/css">
+
+			body {
+				background: #fff url(guide.gif) 0 0 repeat;
+				font: 18px Arial, Verdana, Helvetica, sans-serif;
+			}
+
+			h2, .test {
+				clear: both;
+			}
+
+			.test .expected {
+				float: left;
+				text-align: right;
+				width: 49%;
+			}
+
+			.test .result {
+				float: right;
+				text-align: left;
+				width: 49%;
+			}
+
+			.test p {
+				margin: 0;
+			}
+
+			#test1 p {
+				line-height: normal;
+			}
+
+			#test2_0 p {
+				line-height: 0.5;
+			}
+
+			#test2_1 p {
+				line-height: 1;
+			}
+
+			#test2_2 p {
+				line-height: 1.2;
+			}
+
+			#test2_3 p {
+				line-height: 1.5;
+			}
+
+			#test2_4 p {
+				line-height: 3;
+			}
+
+			#test3_0 p {
+				line-height: 0.5em;
+			}
+
+			#test3_1 p {
+				line-height: 1em;
+			}
+
+			#test3_2 p {
+				line-height: 1.2em;
+			}
+
+			#test3_3 p {
+				line-height: 1.5em;
+			}
+
+			#test3_4 p {
+				line-height: 3em;
+			}
+
+			#test4_0 p {
+				line-height: 50%;
+			}
+
+			#test4_1 p {
+				line-height: 100%;
+			}
+
+			#test4_2 p {
+				line-height: 120%;
+			}
+
+			#test4_3 p {
+				line-height: 150%;
+			}
+
+			#test4_4 p {
+				line-height: 300%;
+			}
+
+			#test5_0 p {
+				line-height: 10px;
+			}
+
+			#test5_1 p {
+				line-height: 100px;
+			}
+
+		</style>
+
+		<script src="../../js/cufon.js" type="text/javascript"></script>
+		<script src="../../fonts/Frutiger_LT_Std.font.js" type="text/javascript"></script>
+
+		<script type="text/javascript">
+
+			Cufon.DOM.ready(function() {
+				var divs = document.getElementsByTagName('div'), div, i = 0;
+				while (div = divs[i++]) {
+					if (/result/.test(div.className)) {
+						Cufon.replace(div.getElementsByTagName('p'));
+					}
+				}
+			});
+
+		</script>
+
+	</head>
+
+	<body>
+
+		<h1>Line-height in almost standards (transitional) mode</h1>
+
+		<p><a href="index.html">Strict mode</a> | <strong><a href="transitional.html">Almost standards (transitional) mode</a></strong> | <a href="quirks.html">Quirks mode</a></p>
+
+		<h2>line-height: normal</h2>
+
+		<div id="test1" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 0.5</h2>
+
+		<div id="test2_0" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 1</h2>
+
+		<div id="test2_1" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 1.2</h2>
+
+		<div id="test2_2" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 1.5</h2>
+
+		<div id="test2_3" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 3</h2>
+
+		<div id="test2_4" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 0.5em</h2>
+
+		<div id="test3_0" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 1em</h2>
+
+		<div id="test3_1" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 1.2em</h2>
+
+		<div id="test3_2" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 1.5em</h2>
+
+		<div id="test3_3" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 3em</h2>
+
+		<div id="test3_4" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 50%</h2>
+
+		<div id="test4_0" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 100%</h2>
+
+		<div id="test4_1" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 120%</h2>
+
+		<div id="test4_2" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 150%</h2>
+
+		<div id="test4_3" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 300%</h2>
+
+		<div id="test4_4" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 10px</h2>
+
+		<div id="test5_0" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+		<h2>line-height: 100px</h2>
+
+		<div id="test5_1" class="test">
+
+			<div class="expected">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+			<div class="result">
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam purus risus, tristique et faucibus sed, aliquet sed dui. Mauris ac enim augue, at dignissim leo. Donec volutpat facilisis dignissim. Phasellus.</p>
+
+			</div>
+
+		</div>
+
+	</body>
+
+</html>
