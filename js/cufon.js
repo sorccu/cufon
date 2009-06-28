@@ -933,12 +933,18 @@ Cufon.registerEngine('vml', (function() {
 	if (!check.coordsize) return; // VML isn't supported
 	check = null;
 	
+	var HAS_BROKEN_LINEHEIGHT = (document.documentMode || 0) < 8;
+	
 	document.write(('<style type="text/css">' +
 		'.cufon-vml-canvas{text-indent:0;}' +
 		'@media screen{' + 
 			'cvml\\:shape,cvml\\:rect,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
 			'.cufon-vml-canvas{position:absolute;text-align:left;}' +
-			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle;}' +
+			'.cufon-vml{display:inline-block;position:relative;vertical-align:' +
+			(HAS_BROKEN_LINEHEIGHT
+				? 'middle'
+				: 'text-bottom') +
+			';}' +
 			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px;}' +
 			'a .cufon-vml{cursor:pointer}' + // ignore !important here
 		'}' +
@@ -958,7 +964,7 @@ Cufon.registerEngine('vml', (function() {
 		if (/px$/i.test(value)) return parseFloat(value);
 		var style = el.style.left, runtimeStyle = el.runtimeStyle.left;
 		el.runtimeStyle.left = el.currentStyle.left;
-		el.style.left = value;
+		el.style.left = value.replace('%', 'em');
 		var result = el.style.pixelLeft;
 		el.style.left = style;
 		el.runtimeStyle.left = runtimeStyle;
@@ -1156,6 +1162,24 @@ Cufon.registerEngine('vml', (function() {
 		else if (cover) canvas.removeChild(cover);
 		
 		wStyle.width = Math.max(Math.ceil(size.convert(width * stretchFactor)), 0);
+		
+		if (HAS_BROKEN_LINEHEIGHT) {
+			
+			var yAdjust = style.computedYAdjust;
+			
+			if (yAdjust === undefined) {
+				var lineHeight = style.get('lineHeight');
+				if (lineHeight == 'normal') lineHeight = '1em';
+				else if (!isNaN(lineHeight)) lineHeight += 'em'; // no unit
+				style.computedYAdjust = yAdjust = 0.5 * (getSizeInPixels(el, lineHeight) - parseFloat(wStyle.height));
+			}
+			
+			if (yAdjust) {
+				wStyle.marginTop = Math.ceil(yAdjust) + 'px';
+				wStyle.marginBottom = yAdjust + 'px';
+			}
+			
+		}
 		
 		return wrapper;
 		
