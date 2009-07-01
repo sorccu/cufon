@@ -828,8 +828,15 @@ Cufon.registerEngine('canvas', (function() {
 		var stretchFactor = roundingFactor * Cufon.CSS.fontStretch(style.get('fontStretch'));
 		var stretchedWidth = width * stretchFactor;
 		
-		canvas.width = Math.ceil(size.convert(stretchedWidth + expandRight - expandLeft));
-		canvas.height = Math.ceil(size.convert(viewBox.height - expandTop + expandBottom));
+		var canvasWidth = Math.ceil(size.convert(stretchedWidth + expandRight - expandLeft));
+		var canvasHeight = Math.ceil(size.convert(viewBox.height - expandTop + expandBottom));
+		
+		canvas.width = canvasWidth;
+		canvas.height = canvasHeight;
+		
+		// needed for WebKit and full page zoom
+		cStyle.width = canvasWidth + 'px';
+		cStyle.height = canvasHeight + 'px';
 		
 		// minY has no part in canvas.height
 		expandTop += viewBox.minY;
