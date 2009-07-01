@@ -617,6 +617,7 @@ var Cufon = (function() {
 			||	(window.$$ && function(query) { return $$(query); })
 			||	(window.$ && function(query) { return $(query); })
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
+			||	(window.Ext && Ext.query)
 			||	elementsByTagName
 		),
 		separate: 'words', // 'none' and 'characters' are also accepted
