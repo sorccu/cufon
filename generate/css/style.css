@@ -32,6 +32,15 @@ a:link, a:visited {
 	text-decoration: none;
 }
 
+a img {
+	border: 0;
+	vertical-align: 0;
+}
+
+html>/**/body a img {
+	vertical-align: text-bottom;
+}
+
 .section {
 	background: #fff;
 	border: 1px solid #d6dee7;

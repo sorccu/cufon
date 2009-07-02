@@ -13,6 +13,8 @@
 		
 		<link rel="stylesheet" href="css/style.css" type="text/css" />
 		
+		<script src="js/ui.js" type="text/javascript"></script>
+		
 		<script src="../js/cufon.js" type="text/javascript"></script>
 		<script src="../fonts/Frutiger_LT_Std.font.js" type="text/javascript"></script>
 		
@@ -167,6 +169,20 @@
 						
 						</div>
 						
+						<div id="customization" class="section">
+							
+							<h3>Customization (for 3rd-party scripts only)</h3>
+								
+							<dl>
+								<dt><label for="icallback">The following JavaScript function will receive the font data</label></dt>
+								<dd><input type="text" name="callback" id="icallback" value="Cufon.registerFont" size="70" maxlength="250" />
+									<a href="#set-callback" class="callback" title="Cufon.registerFont"><img src="img/cufon16.png" alt="Cufón" title="Cufón" width="16" height="16" /></a>
+									<a href="#set-callback" class="callback" title="Raphael.registerFont"><img src="img/raphael16.png" alt="Raphaël" title="Raphaël" width="16" height="16" /></a>
+								</dd>
+							</dl>
+							
+						</div>
+						
 						<div class="section">
 						
 							<h3>Terms</h3>
@@ -185,8 +201,6 @@
 						<div class="actions">
 						
 							<input type="hidden" name="MAX_FILE_SIZE" value="6000" />
-							
-							<input type="hidden" name="callback" value="Cufon.registerFont" />
 							
 							<button type="submit">Let's do this!</button>
 						
