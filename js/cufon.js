@@ -53,7 +53,11 @@ var Cufon = (function() {
 				else complete ? listener() : queue.push(listener);
 			};
 			
-		})()
+		})(),
+		
+		root: function() {
+			return document.documentElement || document.body;
+		}
 		
 	};
 
@@ -76,6 +80,11 @@ var Cufon = (function() {
 				return this.value + this.unit;
 			};
 
+		},
+		
+		addClass: function(el, className) {
+			el.className = (el.className && ' ') + className;
+			return el;
 		},
 		
 		color: cached(function(value) {
@@ -146,7 +155,13 @@ var Cufon = (function() {
 			container.removeChild(el);
 			return supported;
 		}),
-
+		
+		removeClass: function(el, className) {
+			var re = RegExp('(?:^|\\s+)' + className +  '(?=\\s|$)', 'g');
+			el.className = el.className.replace(re, '');
+			return el;
+		},
+		
 		supports: function(property, value) {
 			var checker = document.createElement('span').style;
 			if (checker[property] === undefined) return false;
@@ -596,6 +611,7 @@ var Cufon = (function() {
 	var sharedStorage = new Storage();
 	var hoverHandler = new HoverHandler();
 	var replaceHistory = new ReplaceHistory();
+	var initialized = false;
 	
 	var engines = {}, fonts = {}, defaultOptions = {
 		enableTextDecoration: false,
@@ -655,6 +671,14 @@ var Cufon = (function() {
 	api.replace = function(elements, options, ignoreHistory) {
 		options = merge(defaultOptions, options);
 		if (!options.engine) return api; // there's no browser support so we'll just stop here
+		if (!initialized) {
+			CSS.addClass(DOM.root(), 'cufon-active cufon-loading');
+			CSS.ready(function() {
+				// fires before any replace() calls, but it doesn't really matter
+				CSS.removeClass(DOM.root(), 'cufon-loading');
+			});
+			initialized = true;
+		}
 		if (options.hover) options.forceHitArea = true;
 		if (typeof options.textShadow == 'string')
 			options.textShadow = CSS.textShadow(options.textShadow);
