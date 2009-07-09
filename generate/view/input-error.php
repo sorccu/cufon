@@ -15,7 +15,7 @@
 		<link rel="stylesheet" href="css/style.css" type="text/css" />
 		
 		<script src="../js/cufon.js" type="text/javascript"></script>
-		<script src="../fonts/Frutiger_LT_Std.font.js" type="text/javascript"></script>
+		<script src="../fonts/Vegur.font.js" type="text/javascript"></script>
 		
 		<script type="text/javascript"> Cufon.replace([ 'h1', 'h3' ]); </script>
 	
