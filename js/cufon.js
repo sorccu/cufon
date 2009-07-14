@@ -987,7 +987,7 @@ Cufon.registerEngine('vml', (function() {
 	'</style>').replace(/;/g, '!important;'));
 
 	function getFontSizeInPixels(el, value) {
-		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
+		return getSizeInPixels(el, /(?:em|ex|%)$|^[a-z-]+$/i.test(value) ? '1em' : value);
 	}
 	
 	// Original by Dead Edwards.
