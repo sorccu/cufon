@@ -218,12 +218,25 @@ var Cufon = (function() {
 			return shadows;
 		}),
 		
-		textTransform: function(text, style) {
-			return text[{
-				uppercase: 'toUpperCase',
-				lowercase: 'toLowerCase'
-			}[style.get('textTransform')] || 'toString']();
-		},
+		textTransform: (function() {
+			var map = {
+				uppercase: function(s) {
+					return s.toUpperCase();
+				},
+				lowercase: function(s) {
+					return s.toLowerCase();
+				},
+				capitalize: function(s) {
+					return s.replace(/\b./g, function($0) {
+						return $0.toUpperCase();
+					});
+				}
+			};
+			return function(text, style) {
+				var transform = map[style.get('textTransform')];
+				return transform ? transform(text) : text;
+			};
+		})(),
 		
 		whiteSpace: (function() {
 			var ignore = {
