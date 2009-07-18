@@ -49,16 +49,21 @@ class VMLPath {
 			{
 				case 'z':
 				case 'Z':
+					if (strcasecmp($previous, 'm') === 0)
+					{
+						$vml->pop();
+					}
 					if ($zm) // ignore chained zm-commands
 					{
 						$vml->pop();
 					}
-					else
-					{
-						$vml->closePath();
-					}
+					$vml->closePath();
 					break;
 				case 'M':
+					if (strcasecmp($previous, 'm') === 0)
+					{
+						$vml->pop();
+					}
 					$vml->moveTo(
 						$at->x = $coords[0],
 						$at->y = $coords[1]
