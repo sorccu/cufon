@@ -83,7 +83,8 @@ var Cufon = (function() {
 		},
 		
 		addClass: function(el, className) {
-			el.className = (el.className && ' ') + className;
+			var current = el.className;
+			el.className = current + (current && ' ') + className;
 			return el;
 		},
 		
