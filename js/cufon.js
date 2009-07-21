@@ -570,9 +570,9 @@ var Cufon = (function() {
 	}
 	
 	function process(font, text, style, options, node, el) {
-		var separate = options.separate;
-		if (separate == 'none') return engines[options.engine].apply(null, arguments);
 		var fragment = document.createDocumentFragment(), processed;
+		if (text === '') return fragment;
+		var separate = options.separate;
 		var parts = text.split(separators[separate]), needsAligning = (separate == 'words');
 		if (needsAligning && HAS_BROKEN_REGEXP) {
 			// @todo figure out a better way to do this
@@ -589,32 +589,32 @@ var Cufon = (function() {
 	}
 	
 	function replaceElement(el, options) {
-		var font, style, node, nodeType, nextNode, redraw;
-		for (node = attach(el, options).firstChild; node; node = nextNode) {
-			nodeType = node.nodeType;
-			nextNode = node.nextSibling;
-			redraw = false;
-			if (nodeType == 1) {
-				if (!node.firstChild) continue;
-				if (!/cufon/.test(node.className)) {
-					arguments.callee(node, options);
-					continue;
+		var style = CSS.getStyle(attach(el, options)).extend(options);
+		var font = getFont(el, style), node, type, next, anchor, text;
+		for (node = el.firstChild; node; node = next) {
+			type = node.nodeType;
+			next = node.nextSibling;
+			if (type == 3) {
+				// Node.normalize() is broken in IE 6, 7, 8
+				if (anchor) {
+					anchor.appendData(node.data);
+					el.removeChild(node);
 				}
-				else redraw = true;
+				else anchor = node;
+				if (next) continue;
 			}
-			else if (nodeType != 3) continue;
-			if (!style) style = CSS.getStyle(el).extend(options);
-			if (!font) font = getFont(el, style);
-			if (!font) continue;
-			if (redraw) {
-				engines[options.engine](font, null, style, options, node, el);
-				continue;
+			if (anchor) {
+				el.replaceChild(process(font,
+					CSS.whiteSpace(anchor.data, style, node),
+					style, options, node, el), anchor);
+				anchor = null;
 			}
-			var text = CSS.whiteSpace(node.data, style, node);
-			if (text === '') continue;
-			var processed = process(font, text, style, options, node, el);
-			if (processed) node.parentNode.replaceChild(processed, node);
-			else node.parentNode.removeChild(node);
+			if (type == 1 && node.firstChild) {
+				if (/cufon/.test(node.className)) {
+					engines[options.engine](font, null, style, options, node, el);
+				}
+				else arguments.callee(node, options);
+			}
 		}
 	}
 	
@@ -654,7 +654,8 @@ var Cufon = (function() {
 	
 	var separators = {
 		words: /[^\S\u00a0]+/,
-		characters: ''
+		characters: '',
+		none: /^/
 	};
 	
 	api.now = function() {
