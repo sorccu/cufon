@@ -544,10 +544,8 @@ var Cufon = (function() {
 	}
 	
 	function getFont(el, style) {
-		if (!style) style = CSS.getStyle(el);
 		var families = CSS.quotedList(style.get('fontFamily').toLowerCase()), family;
-		for (var i = 0, l = families.length; i < l; ++i) {
-			family = families[i];
+		for (var i = 0; family = families[i]; ++i) {
 			if (fonts[family]) return fonts[family].get(style.get('fontStyle'), style.get('fontWeight'));
 		}
 		return null;
