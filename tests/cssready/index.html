@@ -3,77 +3,77 @@
 <html>
 
 	<head>
-	
+
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	
+
 		<title>CSS.ready() tests</title>
-		
+
 		<style type="text/css">
-		
+
 			html, body {
 				margin: 0;
 				padding: 0;
 			}
-			
+
 			body {
 				background: #FFF2D2;
 				color: #000;
 				font: 10pt Arial, Helvetica, sans-serif;
 				padding: 20px;
 			}
-			
+
 			h1 {
 				font-size: 160%;
 				margin: 0.5em 0;
 			}
-			
+
 			#testframe {
 				height: 1px;
 				visibility: hidden;
 				width: 1px;
 			}
-			
+
 			#results {
 				background: #fff;
 				border: 1px solid #D6DEE7;
 				margin: 0;
 				width: 100%;
 			}
-			
+
 			#results th {
 				border-bottom: 1px solid #EFD6AA;
 				color: #FEA202;
 				padding: 2px;
 				text-align: left;
 			}
-			
+
 			#results tfoot th {
 				border-bottom: 0;
 				border-top: 1px solid #EFD6AA;
 			}
-			
+
 			#results td {
 				padding: 2px;
 				text-align: left;
 			}
-			
+
 			#results .col-result {
 				width: 10em;
 			}
-			
+
 			#results .pass {
 				background: #00cc00;
 				color: #fff;
 			}
-			
+
 			#results .fail, #results .stalled {
 				background: red;
 				color: #fff;
 				font-weight: bold;
 			}
-			
+
 		</style>
-		
+
 		<script type="text/javascript">
 
 		var testRunner = (function() {
@@ -154,7 +154,7 @@
 				var autoFail = setTimeout(this.timeout, timeout);
 
 				update();
-				
+
 			}
 
 			api.registerTest = function(name, timeout, cooldown) {
@@ -169,7 +169,7 @@
 			};
 
 			return api;
-			
+
 		})();
 
 		window.onload = function() {
@@ -212,19 +212,19 @@
 				'style-404import/',
 				'style-404import-print/'
 			]);
-			
+
 		};
-		
+
 		</script>
-	
+
 	</head>
-	
+
 	<body>
-		
+
 		<h1>CSS.ready() tests</h1>
-	
+
 		<p>Tests must be run at least twice, with both empty and full cache. Some tests take longer than others.</p>
-	
+
 		<table id="results">
 			<thead>
 				<tr>
@@ -240,15 +240,15 @@
 				</tr>
 			</tfoot>
 		</table>
-	
+
 		<iframe id="testframe" src="about:blank"></iframe>
-		
+
 		<script type="text/javascript">
 
 			document.getElementById('testframe').src = 'about:blank';
-			
+
 		</script>
-		
+
 	</body>
-	
+
 </html>

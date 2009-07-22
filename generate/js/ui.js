@@ -1,5 +1,5 @@
 (function() {
-	
+
 	function addEvent(el, type, listener) {
 		if (el.addEventListener) {
 			el.addEventListener(type, listener, false);
@@ -10,7 +10,7 @@
 			});
 		}
 	}
-	
+
 	function handle(el) {
 		switch (el.nodeName.toLowerCase()) {
 			case '#text':
@@ -30,7 +30,7 @@
 		}
 		return false;
 	}
-	
+
 	addEvent(document, 'click', function(e) {
 		if (!handle(e.target || e.srcElement)) return;
 		if (e.preventDefault) e.preventDefault();
@@ -38,5 +38,5 @@
 		if (e.stopPropagation) e.stopPropagation();
 		else e.returnValue = false;
 	});
-	
+
 })();

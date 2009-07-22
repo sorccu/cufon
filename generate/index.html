@@ -3,39 +3,39 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 	<head>
-		
+
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta http-equiv="imagetoolbar" content="no" />
-	
+
 		<title>cufón - fonts for the people</title>
-		
+
 		<meta name="description" content="Fast text replacement with canvas and VML - no Flash or images required." />
-		
+
 		<link rel="stylesheet" href="css/style.css" type="text/css" />
-		
+
 		<script src="js/ui.js" type="text/javascript"></script>
-		
+
 		<script src="../js/cufon.js" type="text/javascript"></script>
 		<script src="../fonts/Vegur.font.js" type="text/javascript"></script>
-		
+
 		<script type="text/javascript"> Cufon.replace([ 'h1', 'h3' ]); </script>
-	
+
 	</head>
-	
+
 	<body>
-	
+
 		<div id="doc">
 
 			<div id="page">
-			
+
 				<div id="head">
-				
+
 					<h1><a href="/">cufón - fonts for the people</a></h1>
-					
+
 				</div>
-				
+
 				<div id="nav">
-				
+
 					<ul class="nav">
 						<li><a href="http://cufon.shoqolate.com/js/cufon-yui.js">Download</a></li>
 						<li class="current"><a href=".">Generator</a></li>
@@ -43,17 +43,17 @@
 						<li><a href="http://groups.google.com/group/cufon" class="external">Community</a></li>
 						<li><a href="http://github.com/sorccu/cufon/tree/master">Source</a></li>
 					</ul>
-					
+
 				</div>
-				
+
 				<div id="content">
-										
+
 					<form action="convert.php" method="post" enctype="multipart/form-data">
-						
+
 						<div class="section">
-							
+
 							<h3>Select the font you'd like to use</h3>
-						
+
 							<dl>
 								<dt><label for="ifont_0" id="lfont_0">Regular typeface</label></dt>
 								<dd><input type="file" name="font[]" id="ifont_0" size="70" /></dd>
@@ -64,18 +64,18 @@
 								<dt><label for="ifont_3" id="lfont_3">Bold Italic typeface (optional)</label></dt>
 								<dd><input type="file" name="font[]" id="ifont_3" size="70" /></dd>
 							</dl>
-							
+
 							<p class="info">On Windows, <em>you may first have to copy the font file out of the Fonts folder and paste it elsewhere</em> in order to be able to select it.</p>
-							
+
 							<p class="info">Currently only TrueType (TTF), OpenType (OTF), Printer Font Binary (PFB) and PostScript fonts are supported. Files are disposed of immediately after conversion.</p>
-							
+
 							<dl>
 								<dt><label for="ifamily">Use the following value as the <code>font-family</code> of the generated font (optional)</label></dt>
 								<dd><input type="text" name="family" id="ifamily" size="70" maxlength="150" />
 									<p class="info">Useful if you're using multiple variants of the same font (bold, italic etc). Sometimes they may have slightly different family names, which may lead to unexpected behavior.</p>
 								</dd>
 							</dl>
-							
+
 							<dl>
 								<dt><label for="ipermission" class="important"><input type="checkbox" name="permission" id="ipermission" value="yes" /> The EULAs of these fonts allow Web Embedding (without <a href="http://www.adobe.com/products/flashplayer/" class="external">Adobe Flash</a>)</label></dt>
 								<dd>
@@ -89,13 +89,13 @@
 									<a href="http://www.linotype.com/2061-28225/licenseagreementforfontsoftware.html" class="external">Linotype</a> (extended).</p>
 								</dd>
 							</dl>
-							
+
 						</div>
-						
+
 						<div class="section">
-							
+
 							<h3>Include the following glyphs (if available)</h3>
-						
+
 							<dl>
 								<dt><label for="iglyphs_all"><input type="checkbox" name="glyphs[]" id="iglyphs_all" value="0x0-0xFFFF" /> All</label></dt>
 								<dd>Includes all available glyphs. Highly unrecommended.</dd>
@@ -126,13 +126,13 @@
 								<dt><label for="icustomGlyphs"> .. and also these single characters</label></dt>
 								<dd><input type="text" name="customGlyphs" id="icustomGlyphs" size="70" maxlength="250" /></dd>
 							</dl>
-							
+
 						</div>
-						
+
 						<div class="section">
-							
+
 							<h3>Security</h3>
-						
+
 							<dl>
 								<dt><label for="idomains">Limit usage to the following domain(s)</label></dt>
 								<dd>
@@ -141,13 +141,13 @@
 									<p class="info">Separate multiple domains by either commas or spaces. You can also use wildcards (e.g. *.example.org to cover all subdomains of example.org). Using a font that doesn't match any of the allowed domains results in no text showing up.</p>
 								</dd>
 							</dl>
-							
+
 						</div>
-						
+
 						<div class="section">
-						
+
 							<h3>Performance &amp; file size</h3>
-							
+
 							<dl>
 								<dt><label for="iemSize">Scale the font to the following size</label></dt>
 								<dd>
@@ -164,15 +164,15 @@
 								</dd>
 								<dt><label for="ikerning"><input type="checkbox" name="kerning" id="ikerning" value="yes" checked="checked" /> Include kerning tables (improves readability but slightly increases file size)</label></dt>
 							</dl>
-							
+
 							<p>Also, try to make sure your server serves gzipped JavaScript. 70-80% drops in file size are not unheard of.</p>
-						
+
 						</div>
-						
+
 						<div id="customization" class="section">
-							
+
 							<h3>Customization (for 3rd-party scripts only)</h3>
-								
+
 							<dl>
 								<dt><label for="icallback">The following JavaScript function will receive the font data</label></dt>
 								<dd><input type="text" name="callback" id="icallback" value="Cufon.registerFont" size="70" maxlength="250" />
@@ -180,44 +180,44 @@
 									<a href="#set-callback" class="callback" title="Raphael.registerFont"><img src="img/raphael16.png" alt="Raphaël" title="Raphaël" width="16" height="16" /></a>
 								</dd>
 							</dl>
-							
+
 						</div>
-						
+
 						<div class="section">
-						
+
 							<h3>Terms</h3>
-							
+
 							<p>Cufón is distributed under the <a href="http://en.wikipedia.org/wiki/MIT_License" class="external">MIT license</a>. By using this tool you agree to its terms.</p>
-							
+
 							<p>Should you require help you may ask for it at <a href="http://groups.google.com/group/cufon" class="external">our Google Group</a>, but keep
 							in mind that you are in no way entitled to support, which means that even if you do not
 							get a satisfactory answer you may not complain about it. Nice people are more likely to
 							get helpful answers.</p>
-							
+
 							<p><label for="iterms" class="important"><input type="checkbox" name="terms" id="iterms" value="yes" /> I acknowledge and accept these terms</label></p>
-						
+
 						</div>
-						
+
 						<div class="actions">
-						
+
 							<button type="submit">Let's do this!</button>
-						
+
 						</div>
-						
+
 					</form>
-					
+
 				</div>
-				
+
 				<div id="foot">
-					
+
 					<p>Idea and implementation by Simo Kinnunen, 2008-. Bugs by nature.</p>
-					
+
 				</div>
-				
+
 			</div>
-				
+
 		</div>
-	
+
 	</body>
-	
+
 </html>

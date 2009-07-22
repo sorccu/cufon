@@ -3,76 +3,76 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
 	<head>
-	
+
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	
+
 		<title>Chart of optimal scaling values</title>
-		
+
 		<style type="text/css">
-		
+
 			body {
 				font: 9pt Arial, Verdana, Helvetica, sans-serif;
 			}
-		
+
 			#scale-value-chart {
 				border-collapse: collapse;
 				border-spacing: 0;
 			}
-			
+
 			#scale-value-chart caption {
 				font-size: 200%;
 				font-weight: bold;
 				padding: 0.5em;
 			}
-			
+
 			#scale-value-chart th {
 				background: #eee;
 				vertical-align: bottom;
 				width: 1em;
 			}
-			
+
 			#scale-value-chart th.col-text {
 				padding-left: 2em;
 				padding-right: 2em;
 				width: auto;
 			}
-			
+
 			#scale-value-chart td {
 				border: 2px solid #fff;
 				padding: 1px 2px;
 				text-align: center;
 			}
-		
+
 			#scale-value-chart .pos {
 				background: #00ff00;
 				color: #fff;
 			}
-			
+
 			#scale-value-chart .neg {
 				background: #ffdddd;
 			}
-			
+
 		</style>
-		
+
 	</head>
-	
+
 	<body>
-	
+
 		<noscript>
-		
+
 			<h1>Chart of optimal scaling values</h1>
-			
+
 			<p>You need JavaScript to view this chart.</p>
-			
+
 		</noscript>
-	
+
 		<script type="text/javascript">
-		
+
 		var sizes = {};
 		var map = [];
 		var best = [];
 		var length = 0;
-		
+
 		for (var i = 8; i <= 48; i += 1, ++length) {
 			sizes[i] = [];
 			for (var j = 1; j < 100; ++j) {
@@ -83,9 +83,9 @@
 				map[size][i] = true;
 			}
 		}
-		
+
 		var table = document.createElement('table');
-		
+
 		table.id = 'scale-value-chart';
 
 		var caption = document.createElement('caption');
@@ -95,10 +95,10 @@
 		table.appendChild(caption);
 
 		var thead = table.createTHead();
-		
+
 		var header1 = thead.insertRow(-1);
 		var header2 = thead.insertRow(-1);
-		
+
 		var scaleHeading = document.createElement('th');
 		scaleHeading.className = 'col-text';
 		scaleHeading.rowSpan = 2;
@@ -110,7 +110,7 @@
 		header1.appendChild(pxHeading);
 
 		var count = 0;
-		
+
 		for (var size in sizes) {
 			var th = document.createElement('th');
 			th.appendChild(document.createTextNode(size));
@@ -125,9 +125,9 @@
 		matchHeading.rowSpan = 2;
 		matchHeading.innerHTML = 'Font sizes<br />matched in total';
 		header1.appendChild(matchHeading);
-		
+
 		var tbody = document.createElement('tbody');
-		
+
 		table.appendChild(tbody);
 
 		for (var i = 0, l = map.length; i < l; ++i) {
@@ -147,11 +147,11 @@
 			var matchCell = row.insertCell(-1);
 			matchCell.innerHTML = matches;
 		}
-		
+
 		document.body.appendChild(table);
-		
+
 		</script>
-	
+
 	</body>
-	
+
 </html>

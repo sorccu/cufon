@@ -1,10 +1,10 @@
 <?php
 
 class JSEncoderKey implements ArrayAccess, Countable {
-	
+
 	/**
 	 * Only 0x3f + 1 (64) values are needed.
-	 * 
+	 *
 	 * @var array
 	 */
 	private $salt = array();
@@ -15,12 +15,12 @@ class JSEncoderKey implements ArrayAccess, Countable {
 	public function __construct()
 	{
 		$this->salt = str_split('!#$%&()*+,-.0123456789:;=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~', 1);
-		
+
 		shuffle($this->salt);
-		
+
 		array_splice($this->salt, 64);
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -28,7 +28,7 @@ class JSEncoderKey implements ArrayAccess, Countable {
 	{
 		return implode('', $this->salt);
 	}
-	
+
 	/**
 	 * @see Countable::count()
 	 *
@@ -83,5 +83,5 @@ class JSEncoderKey implements ArrayAccess, Countable {
 	{
 		throw new RuntimeException('JSEncoderKey is immutable');
 	}
-	
+
 }

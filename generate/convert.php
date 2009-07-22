@@ -9,49 +9,49 @@ Options:
 
   -b  --callback        The JavaScript function that handles the font.
                         Defaults to Cufon.registerFont.
-                        
+
                         Example: -b myRegisterFont
-                        
+
   -c  --characters      All of these characters are included in the
                         resulting font file.
-                        
+
                         Example: -c "abc123"
-                        
+
   -d  --domain          Restricts the font file to one or more domain
                         names.
-                        
+
                         Example: -d example.org -d example.com
-                        
+
   -f  --fontforge       Path to the FontForge binary.
-                        
+
   -h  --help            Displays this message.
-                        
+
   -n  --family-name     The font-family of the font. By default the
                         real name of the font is used, but it may not
                         always be what you need.
-                        
+
                         Example: -n "Nifty Font"
-                        
+
   -u  --unicode-range   See http://www.w3.org/TR/css3-webfonts/#dataqual
-  
+
                         Example: -u "U+00??,U+20A7"
-                        
+
   -s  --scale           Scales the font's em-size to this value. Defaults
                         to 360.
-                        
+
                         Example: --scale 720
-                        
+
   -k  --no-kerning      Disables kerning.
-  
+
   -l  --no-scaling      No scaling, use the native value instead.
-  
+
   -m  --no-simplify     Keep the paths as they are, do not attempt to
                         simplify them.
-                        
+
   -e  --simplify-delta  Simplified paths may differ from the original
                         by this many units (relative to scaling value).
                         Defaults to 2.
-                        
+
                         Example: -e 1
 
 Sample usage:
@@ -146,9 +146,9 @@ $files = array();
 switch (PHP_SAPI)
 {
 	case 'cli':
-		
+
 		$fontforge = trim(`which fontforge`);
-		
+
 		$options = array(
 			'family' => '',
 			'terms' => 'yes',
@@ -164,11 +164,11 @@ switch (PHP_SAPI)
 			'simplifyDelta' => 2,
 			'kerning' => 'yes'
 		);
-		
+
 		$domains = array();
-		
+
 		$args = $_SERVER['argv'];
-		
+
 		for (next($args); ($arg = current($args)) !== false; next($args))
 		{
 			switch ($arg)
@@ -231,33 +231,33 @@ switch (PHP_SAPI)
 					$files[] = $arg;
 			}
 		}
-		
+
 		if (!is_executable($fontforge))
 		{
 			echo "Could not find FontForge binary\n";
 			exit(4);
 		}
-		
+
 		define('CUFON_FONTFORGE', $fontforge);
-		
+
 		if (empty($files))
 		{
 			echo 'Nothing to convert.';
 			exit(0);
 		}
-		
+
 		$options['domains'] = implode(', ', $domains);
-		
+
 		$options = filter_var_array($options, $filters);
-		
+
 		$errors = array_diff_key(array_filter($options, 'is_null'), $optional);
-		
+
 		if (!empty($errors))
 		{
 			usage();
 			exit(1);
 		}
-		
+
 		foreach ($files as $file)
 		{
 			try
@@ -265,9 +265,9 @@ switch (PHP_SAPI)
 				foreach (Cufon::generate($file, $options) as $id => $json)
 				{
 					echo $json;
-					
+
 					$fonts[] = $id;
-				}	
+				}
 			}
 			catch (ConversionException $e)
 			{
@@ -275,22 +275,22 @@ switch (PHP_SAPI)
 				exit(2);
 			}
 		}
-		
+
 		break;
 
 	default:
-				
+
 		if (!is_readable('settings.ini'))
 		{
 			echo 'settings.ini is missing';
 			exit(1);
 		}
-		
+
 		$config = parse_ini_file('settings.ini', false);
-		
+
 		define('CUFON_VALID', true);
 		define('CUFON_FONTFORGE', $config['fontforge']);
-				
+
 		switch ($_SERVER['REQUEST_METHOD'])
 		{
 			case 'POST':
@@ -300,9 +300,9 @@ switch (PHP_SAPI)
 				header('Location: ./');
 				exit(0);
 		}
-		
+
 		$options = filter_input_array(INPUT_POST, $filters);
-		
+
 		if (isset($_FILES['font']))
 		{
 			foreach ($_FILES['font']['error'] as $key => $error)
@@ -328,7 +328,7 @@ switch (PHP_SAPI)
 				}
 			}
 		}
-		
+
 		if (empty($files))
 		{
 			require 'view/upload-empty-error.php';
@@ -336,17 +336,17 @@ switch (PHP_SAPI)
 		}
 
 		$errors = array_diff_key(array_filter($options, 'is_null'), $optional);
-		
+
 		if (!empty($errors))
 		{
 			require 'view/input-error.php';
 			exit(0);
 		}
-		
+
 		ob_start();
-		
+
 		$fonts = array();
-		
+
 		foreach ($files as $file)
 		{
 			try
@@ -354,9 +354,9 @@ switch (PHP_SAPI)
 				foreach (Cufon::generate($file, $options) as $id => $json)
 				{
 					echo $json;
-					
+
 					$fonts[] = $id;
-				}	
+				}
 			}
 			catch (ConversionException $e)
 			{
@@ -365,7 +365,7 @@ switch (PHP_SAPI)
 				exit(0);
 			}
 		}
-		
+
 		$filename = preg_replace(
 			array(
 				'/\s+/',
@@ -376,7 +376,7 @@ switch (PHP_SAPI)
 				''
 			),
 			empty($fonts) ? 'Cufon Font' : implode('-', $fonts)) . '.font.js';
-		
+
 		header(sprintf('Content-Disposition: attachment; filename=%s', $filename));
 		header('Content-Type: text/javascript');
 }
