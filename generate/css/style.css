@@ -115,6 +115,10 @@ input {
 	display: inline;
 }
 
+#nav a {
+	position: relative;
+}
+
 #nav .current a {
 	text-decoration: underline;
 }
@@ -144,8 +148,26 @@ button:hover, #nav a:hover, #nav a:active, .actions a:hover, .actions a:active {
 	background: #4cc9f2;
 }
 
+#nav .version {
+	background: url(../img/badge.png) 0 0 no-repeat;
+	color: #fff;
+	font: bold 11px Arial, Verdana, Helvetica, sans-serif;
+	height: 37px;
+	line-height: 37px;
+	position: absolute;
+	right: -9px;
+	text-align: center;
+	top: -15px;
+	width: 37px;
+}
+
 #head, .about, .actions, #foot {
 	text-align: center;
+}
+
+#head h1 a {
+	background: url(../img/cufon32.png) 0 66% no-repeat;
+	padding-left: 42px;
 }
 
 #lfont_0 {
