@@ -16,7 +16,7 @@ build:
 	git checkout -qf $(orig_branch)
 	git branch -f $(build_branch) $(tag)
 	git checkout -q $(build_branch)
-	if sed --in-place --version &> /dev/null; then \
+	if sed --in-place --version 1> /dev/null 2> /dev/null; then \
 		sed --in-place -e 's/$${Version}/$(tag)/' $(versioned); \
 	else \
 		sed -i '' -e 's/$${Version}/$(tag)/' $(versioned); \
