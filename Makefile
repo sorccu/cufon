@@ -16,7 +16,11 @@ build:
 	git checkout -qf $(orig_branch)
 	git branch -f $(build_branch) $(tag)
 	git checkout -q $(build_branch)
-	sed -i '' -e 's/$${Version}/$(tag)/' $(versioned)
+	if sed --in-place --version &> /dev/null; then \
+		sed --in-place -e 's/$${Version}/$(tag)/' $(versioned); \
+	else \
+		sed -i '' -e 's/$${Version}/$(tag)/' $(versioned); \
+	fi
 	java -jar $(yui_compressor) js/cufon.js -o js/cufon-yui.js
 	git add $(versioned) js/cufon-yui.js
 	git commit -a -m 'Built $(tag)'
