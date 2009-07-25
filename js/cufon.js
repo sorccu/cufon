@@ -690,7 +690,7 @@ var Cufon = (function() {
 			CSS.addClass(DOM.root(), 'cufon-active cufon-loading');
 			CSS.ready(function() {
 				// fires before any replace() calls, but it doesn't really matter
-				CSS.removeClass(DOM.root(), 'cufon-loading');
+				CSS.addClass(CSS.removeClass(DOM.root(), 'cufon-loading'), 'cufon-ready');
 			});
 			initialized = true;
 		}
