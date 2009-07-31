@@ -644,10 +644,10 @@ var Cufon = (function() {
 				window.Sizzle
 			||	(window.jQuery && function(query) { return jQuery(query); }) // avoid noConflict issues
 			||	(window.dojo && dojo.query)
+			||	(window.Ext && Ext.query)
 			||	(window.$$ && function(query) { return $$(query); })
 			||	(window.$ && function(query) { return $(query); })
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
-			||	(window.Ext && Ext.query)
 			||	elementsByTagName
 		),
 		separate: 'words', // 'none' and 'characters' are also accepted
