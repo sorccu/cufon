@@ -969,11 +969,10 @@ Cufon.registerEngine('canvas', (function() {
 
 Cufon.registerEngine('vml', (function() {
 
-	if (!document.namespaces) return;
-
-	if (document.namespaces.cvml == null) {
-		document.namespaces.add('cvml', 'urn:schemas-microsoft-com:vml');
-	}
+	var ns = document.namespaces;
+	if (!ns) return;
+	ns.add('cvml', 'urn:schemas-microsoft-com:vml');
+	ns = null;
 
 	var check = document.createElement('cvml:shape');
 	check.style.behavior = 'url(#default#VML)';
