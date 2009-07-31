@@ -136,6 +136,10 @@ var Cufon = (function() {
 			return gradient;
 		}),
 
+		hasClass: function(el, className) {
+			return RegExp('(?:^|\\s)' + className +  '(?=\\s|$)').test(el.className);
+		},
+
 		quotedList: cached(function(value) {
 			// doesn't work properly with empty quoted strings (""), but
 			// it's not worth the extra code.
@@ -612,7 +616,7 @@ var Cufon = (function() {
 				anchor = null;
 			}
 			if (type == 1 && node.firstChild) {
-				if (/cufon/.test(node.className)) {
+				if (CSS.hasClass(node, 'cufon')) {
 					engines[options.engine](font, null, style, options, node, el);
 				}
 				else arguments.callee(node, options);
