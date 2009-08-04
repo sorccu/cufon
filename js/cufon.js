@@ -611,7 +611,7 @@ var Cufon = (function() {
 			}
 			if (anchor) {
 				el.replaceChild(process(font,
-					CSS.whiteSpace(anchor.data, style, node),
+					CSS.whiteSpace(anchor.data, style, anchor),
 					style, options, node, el), anchor);
 				anchor = null;
 			}
