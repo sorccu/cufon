@@ -258,6 +258,11 @@ class SVGFont {
 		{
 			$domain = preg_quote(preg_replace('@^\w+://@', '', mb_strtolower($domain, 'utf-8')), '/');
 
+			if (substr($domain, 0, 5) === 'www\\.')
+			{
+				$domain = substr($domain, 5);
+			}
+
 			// this is kind of ugly, but we have to make sure that JSEncoder
 			// only gets ASCII characters
 			$domain = str_replace('\\\\', '\\', substr(json_encode($domain), 1, -1));
