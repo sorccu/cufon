@@ -632,6 +632,7 @@ var Cufon = (function() {
 	var initialized = false;
 
 	var engines = {}, fonts = {}, defaultOptions = {
+		autoDetect: false,
 		enableTextDecoration: false,
 		engine: null,
 		//fontScale: 1,
@@ -699,6 +700,7 @@ var Cufon = (function() {
 			initialized = true;
 		}
 		if (options.hover) options.forceHitArea = true;
+		if (options.autoDetect) delete options.fontFamily;
 		if (typeof options.textShadow == 'string')
 			options.textShadow = CSS.textShadow(options.textShadow);
 		if (typeof options.color == 'string' && /^-/.test(options.color))
