@@ -286,11 +286,11 @@ class SVGFont {
 		uasort($glyphs, array(__CLASS__, 'sortRandom'));
 
 		$encoder = new JSEncoder(
-			sprintf('(function(){var b=_cufon_bridge_,c=%s.split(""),i=0,p=b.p,l=p.length,g=b.f.glyphs={};if(/^(?:www\\.)?(?:%s)$/.test(location.hostname))for(;i<l;++i)g[c[i]]=p[i]})()',
+			sprintf('(function(){var b=_cufon_bridge_,c=%s.split(""),i=0,p=b.p,l=p.length,g=b.f.glyphs={};if(b.ok=/^(?:www\\.)?(?:%s)$/.test(location.hostname))for(;i<l;++i)g[c[i]]=p[i]})()',
 				json_encode(implode('', array_keys($glyphs))),
 				implode('|', array_keys($domainMap))));
 
-		return sprintf('(function(f){_cufon_bridge_={p:%s,f:f};try{%s}catch(e){}delete _cufon_bridge_;return f})(%s)',
+		return sprintf('(function(f){var b=_cufon_bridge_={p:%s,f:f};try{%s}catch(e){}delete _cufon_bridge_;return b.ok&&f})(%s)',
 			json_encode(array_values($glyphs)),
 			$encoder->getDecoder(),
 			json_encode($data));

@@ -597,6 +597,7 @@ var Cufon = (function() {
 	function replaceElement(el, options) {
 		var style = CSS.getStyle(attach(el, options)).extend(options);
 		var font = getFont(el, style), node, type, next, anchor, text;
+		if (!font) return;
 		for (node = el.firstChild; node; node = next) {
 			type = node.nodeType;
 			next = node.nextSibling;
@@ -682,6 +683,7 @@ var Cufon = (function() {
 	};
 
 	api.registerFont = function(data) {
+		if (!data) return api;
 		var font = new Font(data), family = font.family;
 		if (!fonts[family]) fonts[family] = new FontFamily();
 		fonts[family].add(font);
