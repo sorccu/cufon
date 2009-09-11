@@ -184,26 +184,6 @@ var Cufon = (function() {
 			return word;
 		},
 
-		textDecoration: function(el, style) {
-			if (!style) style = this.getStyle(el);
-			var types = {
-				underline: null,
-				overline: null,
-				'line-through': null
-			};
-			for (var search = el; search.parentNode && search.parentNode.nodeType == 1; ) {
-				var foundAll = true;
-				for (var type in types) {
-					if (!hasOwnProperty(types, type) || types[type]) continue;
-					if (style.get('textDecoration').indexOf(type) != -1) types[type] = style.get('color');
-					foundAll = false;
-				}
-				if (foundAll) break; // this is rather unlikely to happen
-				style = this.getStyle(search = search.parentNode);
-			}
-			return types;
-		},
-
 		textShadow: cached(function(value) {
 			if (value == 'none') return null;
 			var shadows = [], currentShadow = {}, result, offCount = 0;
@@ -634,7 +614,6 @@ var Cufon = (function() {
 
 	var engines = {}, fonts = {}, defaultOptions = {
 		autoDetect: false,
-		enableTextDecoration: false,
 		engine: null,
 		//fontScale: 1,
 		//fontScaling: false,
@@ -909,26 +888,7 @@ Cufon.registerEngine('canvas', (function() {
 		// proper horizontal scaling is performed later
 		g.scale(scale, scale * roundingFactor);
 		g.translate(-expandLeft, -expandTop);
-
-		g.lineWidth = font.face['underline-thickness'];
-
 		g.save();
-
-		function line(y, color) {
-			g.strokeStyle = color;
-
-			g.beginPath();
-
-			g.moveTo(0, y);
-			g.lineTo(width, y);
-
-			g.stroke();
-		}
-
-		var textDecoration = options.enableTextDecoration ? Cufon.CSS.textDecoration(el, style) : {};
-
-		if (textDecoration.underline) line(-font.face['underline-position'], textDecoration.underline);
-		if (textDecoration.overline) line(font.ascent, textDecoration.overline);
 
 		function renderText() {
 			g.scale(stretchFactor, 1);
@@ -967,8 +927,6 @@ Cufon.registerEngine('canvas', (function() {
 		else g.fillStyle = style.get('color');
 
 		renderText();
-
-		if (textDecoration['line-through']) line(-font.descent, textDecoration['line-through']);
 
 		return wrapper;
 
@@ -1107,8 +1065,6 @@ Cufon.registerEngine('vml', (function() {
 		cStyle.left = Math.round(size.convert(minX));
 
 		wStyle.height = size.convert(font.height) + 'px';
-
-		var textDecoration = options.enableTextDecoration ? Cufon.CSS.textDecoration(el, style) : {};
 
 		var color = style.get('color');
 		var chars = Cufon.CSS.textTransform(text, style).split(''), chr;
