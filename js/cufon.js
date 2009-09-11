@@ -412,8 +412,8 @@ var Cufon = (function() {
 			if (weight > max) weight = max;
 			alts.sort(function(a, b) {
 				return (up
-					? (a > weight && b > weight) ? a < b : a > b
-					: (a < weight && b < weight) ? a > b : a < b) ? -1 : 1;
+					? (a >= weight && b >= weight) ? a < b : a > b
+					: (a <= weight && b <= weight) ? a > b : a < b) ? -1 : 1;
 			});
 			return weights[alts[0]];
 		};
