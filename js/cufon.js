@@ -136,10 +136,6 @@ var Cufon = (function() {
 			return gradient;
 		}),
 
-		hasClass: function(el, className) {
-			return RegExp('(?:^|\\s)' + className +  '(?=\\s|$)').test(el.className);
-		},
-
 		quotedList: cached(function(value) {
 			// doesn't work properly with empty quoted strings (""), but
 			// it's not worth the extra code.
@@ -623,7 +619,7 @@ var Cufon = (function() {
 				anchor = null;
 			}
 			if (type == 1 && node.firstChild) {
-				if (CSS.hasClass(node, 'cufon')) {
+				if (node.nodeName.toLowerCase() == 'cufon') {
 					engines[options.engine](font, null, style, options, node, el);
 				}
 				else arguments.callee(node, options);
@@ -778,21 +774,20 @@ Cufon.registerEngine('canvas', (function() {
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode((
-		'.cufon-canvas{text-indent:0;}' +
+		'cufon{text-indent:0;}' +
 		'@media screen,projection{' +
-			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle;' +
+			'cufon{display:inline;display:inline-block;position:relative;vertical-align:middle;' +
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
 				: 'font-size:1px;line-height:1px;') +
-			'}.cufon-canvas .cufon-alt{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;text-indent:-10000in;}' +
+			'}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;text-indent:-10000in;}' +
 			(HAS_INLINE_BLOCK
-				? '.cufon-canvas canvas{position:relative;}'
-				: '.cufon-canvas canvas{position:absolute;}') +
+				? 'cufon canvas{position:relative;}'
+				: 'cufon canvas{position:absolute;}') +
 		'}' +
 		'@media print{' +
-			'.cufon-canvas{padding:0;}' +
-			'.cufon-canvas canvas{display:none;}' +
-			'.cufon-canvas .cufon-alt{display:inline;}' +
+			'cufon{padding:0;}' + // Firefox 2
+			'cufon canvas{display:none;}' +
 		'}'
 	).replace(/;/g, '!important;')));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
@@ -876,7 +871,7 @@ Cufon.registerEngine('canvas', (function() {
 			canvas = node.firstChild;
 		}
 		else {
-			wrapper = document.createElement('span');
+			wrapper = document.createElement('cufon');
 			wrapper.className = 'cufon cufon-canvas';
 			wrapper.alt = text;
 
@@ -884,8 +879,7 @@ Cufon.registerEngine('canvas', (function() {
 			wrapper.appendChild(canvas);
 
 			if (options.printable) {
-				var print = document.createElement('span');
-				print.className = 'cufon-alt';
+				var print = document.createElement('cufontext');
 				print.appendChild(document.createTextNode(text));
 				wrapper.appendChild(print);
 			}
@@ -994,21 +988,20 @@ Cufon.registerEngine('vml', (function() {
 	var HAS_BROKEN_LINEHEIGHT = (document.documentMode || 0) < 8;
 
 	document.write(('<style type="text/css">' +
-		'.cufon-vml-canvas{text-indent:0;}' +
+		'cufoncanvas{text-indent:0;}' +
 		'@media screen{' +
 			'cvml\\:shape,cvml\\:rect,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
-			'.cufon-vml-canvas{position:absolute;text-align:left;}' +
-			'.cufon-vml{display:inline-block;position:relative;vertical-align:' +
+			'cufoncanvas{position:absolute;text-align:left;}' +
+			'cufon{display:inline-block;position:relative;vertical-align:' +
 			(HAS_BROKEN_LINEHEIGHT
 				? 'middle'
 				: 'text-bottom') +
 			';}' +
-			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px;}' +
-			'a .cufon-vml{cursor:pointer}' + // ignore !important here
+			'cufon cufontext{position:absolute;left:-10000in;font-size:1px;}' +
+			'a cufon{cursor:pointer}' + // ignore !important here
 		'}' +
 		'@media print{' +
-			'.cufon-vml *{display:none;}' +
-			'.cufon-vml .cufon-alt{display:inline;}' +
+			'cufon cufoncanvas{display:none;}' +
 		'}' +
 	'</style>').replace(/;/g, '!important;'));
 
@@ -1077,17 +1070,15 @@ Cufon.registerEngine('vml', (function() {
 			canvas = node.firstChild;
 		}
 		else {
-			wrapper = document.createElement('span');
+			wrapper = document.createElement('cufon');
 			wrapper.className = 'cufon cufon-vml';
 			wrapper.alt = text;
 
-			canvas = document.createElement('span');
-			canvas.className = 'cufon-vml-canvas';
+			canvas = document.createElement('cufoncanvas');
 			wrapper.appendChild(canvas);
 
 			if (options.printable) {
-				var print = document.createElement('span');
-				print.className = 'cufon-alt';
+				var print = document.createElement('cufontext');
 				print.appendChild(document.createTextNode(text));
 				wrapper.appendChild(print);
 			}
