@@ -227,10 +227,16 @@ var Cufon = (function() {
 				'inline-block': 1,
 				'run-in': 1
 			};
-			return function(text, style, node) {
+			var wsStart = /^\s+/, wsEnd = /\s+$/;
+			return function(text, style, node, previousElement) {
+				if (previousElement) {
+					if (previousElement.nodeName.toLowerCase() == 'br') {
+						text = text.replace(wsStart, '');
+					}
+				}
 				if (ignore[style.get('display')]) return text;
-				if (!node.previousSibling) text = text.replace(/^\s+/, '');
-				if (!node.nextSibling) text = text.replace(/\s+$/, '');
+				if (!node.previousSibling) text = text.replace(wsStart, '');
+				if (!node.nextSibling) text = text.replace(wsEnd, '');
 				return text;
 			};
 		})()
@@ -598,7 +604,7 @@ var Cufon = (function() {
 		if (options.ignore[name]) return;
 		var replace = !options.textless[name];
 		var style = CSS.getStyle(attach(el, options)).extend(options);
-		var font = getFont(el, style), node, type, next, anchor, text;
+		var font = getFont(el, style), node, type, next, anchor, text, lastElement;
 		if (!font) return;
 		for (node = el.firstChild; node; node = next) {
 			type = node.nodeType;
@@ -614,15 +620,18 @@ var Cufon = (function() {
 			}
 			if (anchor) {
 				el.replaceChild(process(font,
-					CSS.whiteSpace(anchor.data, style, anchor),
+					CSS.whiteSpace(anchor.data, style, anchor, lastElement),
 					style, options, node, el), anchor);
 				anchor = null;
 			}
-			if (type == 1 && node.firstChild) {
-				if (node.nodeName.toLowerCase() == 'cufon') {
-					engines[options.engine](font, null, style, options, node, el);
+			if (type == 1) {
+				if (node.firstChild) {
+					if (node.nodeName.toLowerCase() == 'cufon') {
+						engines[options.engine](font, null, style, options, node, el);
+					}
+					else arguments.callee(node, options);
 				}
-				else arguments.callee(node, options);
+				lastElement = node;
 			}
 		}
 	}
