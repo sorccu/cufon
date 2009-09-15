@@ -598,13 +598,16 @@ var Cufon = (function() {
 	}
 
 	function replaceElement(el, options) {
+		var name = el.nodeName.toLowerCase();
+		if (options.ignore[name]) return;
+		var replace = !options.textless[name];
 		var style = CSS.getStyle(attach(el, options)).extend(options);
 		var font = getFont(el, style), node, type, next, anchor, text;
 		if (!font) return;
 		for (node = el.firstChild; node; node = next) {
 			type = node.nodeType;
 			next = node.nextSibling;
-			if (type == 3) {
+			if (replace && type == 3) {
 				// Node.normalize() is broken in IE 6, 7, 8
 				if (anchor) {
 					anchor.appendData(node.data);
@@ -645,6 +648,23 @@ var Cufon = (function() {
 		hoverables: {
 			a: true
 		},
+		ignore: {
+			applet: 1,
+			canvas: 1,
+			col: 1,
+			colgroup: 1,
+			head: 1,
+			iframe: 1,
+			map: 1,
+			optgroup: 1,
+			option: 1,
+			script: 1,
+			select: 1,
+			style: 1,
+			textarea: 1,
+			title: 1,
+			pre: 1
+		},
 		printable: true,
 		//rotation: 0,
 		//selectable: false,
@@ -660,6 +680,17 @@ var Cufon = (function() {
 			||	elementsByTagName
 		),
 		separate: 'words', // 'none' and 'characters' are also accepted
+		textless: {
+			dl: 1,
+			html: 1,
+			ol: 1,
+			table: 1,
+			tbody: 1,
+			thead: 1,
+			tfoot: 1,
+			tr: 1,
+			ul: 1
+		},
 		textShadow: 'none'
 	};
 
