@@ -435,19 +435,20 @@ var Cufon = (function() {
 		function onOverOut(e) {
 			var related = e.relatedTarget;
 			if (!related || contains(this, related)) return;
-			trigger(this);
+			trigger(this, e.type == 'mouseover');
 		}
 
 		function onEnterLeave(e) {
-			trigger(this);
+			trigger(this, e.type == 'mouseenter');
 		}
 
-		function trigger(el) {
+		function trigger(el, hoverState) {
 			// A timeout is needed so that the event can actually "happen"
 			// before replace is triggered. This ensures that styles are up
 			// to date.
 			setTimeout(function() {
-				api.replace(el, sharedStorage.get(el).options, true);
+				var options = sharedStorage.get(el).options;
+				api.replace(el, hoverState ? merge(options, options.hover) : options, true);
 			}, 10);
 		}
 
@@ -571,10 +572,11 @@ var Cufon = (function() {
 	}
 
 	function merge() {
-		var merged = {}, args, key;
-		for (var i = 0, l = arguments.length; args = arguments[i], i < l; ++i) {
-			for (key in args) {
-				if (hasOwnProperty(args, key)) merged[key] = args[key];
+		var merged = {}, arg, key;
+		for (var i = 0, l = arguments.length; arg = arguments[i], i < l; ++i) {
+			if (!arg) continue;
+			for (key in arg) {
+				if (hasOwnProperty(arg, key)) merged[key] = arg[key];
 			}
 		}
 		return merged;
