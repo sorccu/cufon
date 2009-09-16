@@ -27,9 +27,20 @@ class SVGFont {
 		$this->container = $container;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function __toString()
 	{
 		return $this->document->asXML();
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getCopyright()
+	{
+		return $this->container->getCopyright();
 	}
 
 	/**

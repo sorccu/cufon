@@ -110,12 +110,36 @@ class Cufon {
 
 		foreach (SVGFontContainer::fromFile($svgFile, $options) as $font)
 		{
-			$fonts[$font->getId()] = $options['callback'] . '(' . $font->toJavaScript() . ');';
+			$fonts[$font->getId()] = sprintf("%s%s(%s);\n",
+				self::createJSDocComment($font->getCopyright()),
+				$options['callback'],
+				$font->toJavaScript()
+			);
 		}
 
 		unlink($svgFile);
 
 		return $fonts;
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function createJSDocComment($comment)
+	{
+		if ($comment === '')
+		{
+			return '';
+		}
+
+		$lines = explode("\n", wordwrap($comment, 72));
+
+		for ($i = 0, $l = count($lines); $i < $l; ++$i)
+		{
+			$lines[$i] = ' * ' . $lines[$i];
+		}
+
+		return "/*!\n" . implode("\n", $lines) . "\n */\n";
 	}
 
 }
