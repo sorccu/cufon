@@ -702,7 +702,11 @@ var Cufon = (function() {
 	};
 
 	var separators = {
-		words: /[^\S\u00a0]+/,
+		// The first pattern may cause unicode characters above
+		// code point 255 to be removed in Safari 3.0. Luckily enough
+		// Safari 3.0 does not include non-breaking spaces in \s, so
+		// we can just use a simple alternative pattern.
+		words: /\s/.test('\u00a0') ? /[^\S\u00a0]+/ : /\s+/,
 		characters: '',
 		none: /^/
 	};
