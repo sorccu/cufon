@@ -574,7 +574,6 @@ var Cufon = (function() {
 	function merge() {
 		var merged = {}, arg, key;
 		for (var i = 0, l = arguments.length; arg = arguments[i], i < l; ++i) {
-			if (!arg) continue;
 			for (key in arg) {
 				if (hasOwnProperty(arg, key)) merged[key] = arg[key];
 			}
@@ -748,10 +747,13 @@ var Cufon = (function() {
 		}
 		if (options.hover) options.forceHitArea = true;
 		if (options.autoDetect) delete options.fontFamily;
-		if (typeof options.textShadow == 'string')
+		if (typeof options.textShadow == 'string') {
 			options.textShadow = CSS.textShadow(options.textShadow);
-		if (typeof options.color == 'string' && /^-/.test(options.color))
+		}
+		if (typeof options.color == 'string' && /^-/.test(options.color)) {
 			options.textGradient = CSS.gradient(options.color);
+		}
+		else delete options.textGradient;
 		if (!ignoreHistory) replaceHistory.add(elements, arguments);
 		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
 		CSS.ready(function() {
