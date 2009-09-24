@@ -38,14 +38,6 @@ class SVGFont {
 	/**
 	 * @return string
 	 */
-	public function getCopyright()
-	{
-		return $this->container->getCopyright();
-	}
-
-	/**
-	 * @return string
-	 */
 	public function getId()
 	{
 		$faces = $this->document->xpath('//font-face');

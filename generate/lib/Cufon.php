@@ -103,15 +103,26 @@ class Cufon {
 
 		Cufon::log('Converting to SVG with filename %s', $svgFile);
 
+		$script->printNameIDs();
 		$script->generate($svgFile);
-		$script->execute();
+
+		$output = trim($script->execute());
 
 		$fonts = array();
+
+		$copyright = '';
+
+		if (!empty($output))
+		{
+			$copyright = self::createJSDocComment(
+				"The following copyright notice may not be removed under " .
+				"any circumstances.\n\n${output}");
+		}
 
 		foreach (SVGFontContainer::fromFile($svgFile, $options) as $font)
 		{
 			$fonts[$font->getId()] = sprintf("%s%s(%s);\n",
-				self::createJSDocComment($font->getCopyright()),
+				$copyright,
 				$options['callback'],
 				$font->toJavaScript()
 			);
@@ -132,7 +143,7 @@ class Cufon {
 			return '';
 		}
 
-		$lines = explode("\n", wordwrap($comment, 72));
+		$lines = explode("\n", wordwrap(trim($comment), 80));
 
 		for ($i = 0, $l = count($lines); $i < $l; ++$i)
 		{

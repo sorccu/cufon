@@ -43,27 +43,6 @@ class SVGFontContainer implements IteratorAggregate {
 	}
 
 	/**
-	 * @return string
-	 */
-	public function getCopyright()
-	{
-		$parts = array();
-
-		foreach ($this->document->xpath('//metadata') as $meta)
-		{
-			$content = preg_replace('/\.(?=\p{L})/u', '. ', trim((string) $meta));
-
-			$lines = explode("\n", $content);
-
-			array_splice($lines, 0, 2);
-
-			$parts[] = implode("\n", $lines);
-		}
-
-		return implode("\n\n", $parts);
-	}
-
-	/**
 	 * @return array of SVGFont
 	 */
 	public function getFonts()

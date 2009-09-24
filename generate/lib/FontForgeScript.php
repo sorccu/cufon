@@ -78,7 +78,7 @@ class FontForgeScript {
 	}
 
 	/**
-	 * @return void
+	 * @return string
 	 */
 	public function execute()
 	{
@@ -90,7 +90,7 @@ class FontForgeScript {
 
 		chmod($filename, 0777);
 
-		$command = sprintf('env %s -script %s 2>&1', CUFON_FONTFORGE, escapeshellarg($filename));
+		$command = sprintf('env %s -script %s', CUFON_FONTFORGE, escapeshellarg($filename));
 
 		Cufon::log('Executing command: %s', $command);
 
@@ -100,14 +100,14 @@ class FontForgeScript {
 
 		exec($command, $output, $status);
 
-		Cufon::log('Exited with status %d, output: %s', $status, implode(' / ', $output));
+		Cufon::log('Exited with status %d', $status);
 
 		if ($status > 0)
 		{
 			throw new ConversionException('Conversion failed');
 		}
 
-		return $output;
+		return implode("\n", $output);
 	}
 
 	/**
@@ -132,6 +132,42 @@ class FontForgeScript {
 	}
 
 	/**
+	 * @return FontForgeScript
+	 */
+	public function printNameIDs()
+	{
+		$fields = array(
+			'Copyright' => array(0, '$copyright'),
+			'Trademark' => array(7, null),
+			'Full name' => array(4, null),
+			'Description' => array(10, null),
+			'Manufacturer' => array(8, null),
+			'Designer' => array(9, null),
+			'Vendor URL' => array(11, null),
+			'License information' => array(14, null)
+		);
+
+		foreach ($fields as $field => $info)
+		{
+			list($code, $alt) = $info;
+
+			$this->commands[] =
+				"if (GetTTFName(0x409, ${code}) != '')\n" .
+					"\tPrint('${field}:')\n" .
+					"\tPrint(GetTTFName(0x409, ${code}))\n" .
+					"\tPrint('')\n" .
+				(!empty($alt) ?
+				"elseif (${alt} != '')" .
+					"\tPrint('${field}:')\n" .
+					"\tPrint(${alt})\n" .
+					"\tPrint('')\n" : '') .
+				"endif";
+		}
+
+		return $this;
+	}
+
+	/**
 	 * @param int $at
 	 * @return FontForgeScript
 	 */
@@ -149,8 +185,6 @@ class FontForgeScript {
 	public function open($filename)
 	{
 		$this->commands[] = sprintf('Open("%s")', addslashes($filename));
-
-		chmod($filename, 0777);
 
 		return $this;
 	}
