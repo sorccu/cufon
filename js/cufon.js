@@ -846,7 +846,7 @@ Cufon.registerEngine('canvas', (function() {
 
 		var redraw = (text === null);
 
-		if (redraw) text = node.alt;
+		if (redraw) text = node.getAttribute('alt');
 
 		var viewBox = font.viewBox;
 
@@ -890,7 +890,7 @@ Cufon.registerEngine('canvas', (function() {
 		else {
 			wrapper = document.createElement('cufon');
 			wrapper.className = 'cufon cufon-canvas';
-			wrapper.alt = text;
+			wrapper.setAttribute('alt', text);
 
 			canvas = document.createElement('canvas');
 			wrapper.appendChild(canvas);
