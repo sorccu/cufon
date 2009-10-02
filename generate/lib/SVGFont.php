@@ -78,7 +78,7 @@ class SVGFont {
 
 				if (!is_null($family) && $family !== '')
 				{
-					return $family;
+					return trim($family);
 				}
 
 				break;
@@ -95,7 +95,7 @@ class SVGFont {
 				return max(100, min($weight, 900));
 		}
 
-		return $value;
+		return trim($value);
 	}
 
 	/**
