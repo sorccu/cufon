@@ -364,7 +364,7 @@ var Cufon = (function() {
 				if (!glyph) continue;
 				if (kerning) {
 					width -= k = kerning[chr] || 0;
-					jumps[j - 1] -= k;
+					jumps[j] -= k;
 				}
 				width += jumps[++j] = ~~(glyph.w || this.w) + letterSpacing + (wordSeparators[chr] ? wordSpacing : 0);
 				kerning = glyph.k;
