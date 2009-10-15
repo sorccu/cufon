@@ -662,6 +662,7 @@ var Cufon = (function() {
 			head: 1,
 			iframe: 1,
 			map: 1,
+			noscript: 1,
 			optgroup: 1,
 			option: 1,
 			script: 1,
