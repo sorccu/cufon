@@ -356,8 +356,10 @@ var Cufon = (function() {
 		this.height = -this.ascent + this.descent;
 
 		this.spacing = function(chars, letterSpacing, wordSpacing) {
-			var glyphs = this.glyphs, glyph, kerning, k,
-				jumps = [], width = 0,
+			var glyphs = this.glyphs, glyph,
+				kerning, k,
+				jumps = [],
+				width = 0, w,
 				i = -1, j = -1, chr;
 			while (chr = chars[++i]) {
 				glyph = glyphs[chr] || this.missingGlyph;
@@ -366,7 +368,11 @@ var Cufon = (function() {
 					width -= k = kerning[chr] || 0;
 					jumps[j] -= k;
 				}
-				width += jumps[++j] = ~~(glyph.w || this.w) + letterSpacing + (wordSeparators[chr] ? wordSpacing : 0);
+				w = glyph.w;
+				if (isNaN(w)) w = +this.w; // may have been a String in old fonts
+				w += letterSpacing;
+				if (wordSeparators[chr]) w += wordSpacing;
+				width += jumps[++j] = ~~w; // get rid of decimals
 				kerning = glyph.k;
 			}
 			jumps.total = width;
