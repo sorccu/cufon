@@ -119,13 +119,15 @@
 								<dt><label for="iglyphs_wp"><input type="checkbox" name="glyphs[]" id="iglyphs_wp" value="0xD7,0x2013,0x2014,0x2018,0x2019,0x2026,0x2032,0x2033,0x201C,0x201D,0x2122" /> WordPress punctuation</label></dt>
 								<dd><a href="http://codex.wordpress.org/User:Here/Texturize" class="external">Texturized</a> WordPress punctuation. Some fonts may not support all of these characters. (12 glyphs)</dd>
 								<dt><label for="iglyphs_bl"><input type="checkbox" name="glyphs[]" id="iglyphs_bl" value="0x20-0x7E" checked="checked" /> Basic Latin</label></dt>
-								<dd>Basic Latin glyphs within the Unicode range 0x0020 to 0x007E. (95 glyphs)</dd>
-								<dt><label for="iglyphs_l1s"><input type="checkbox" name="glyphs[]" id="iglyphs_l1s" value="0xA0-0xFF" /> Latin-1 Supplement</label></dt>
-								<dd>Latin glyphs within the Unicode range 0x00A0 to 0x00FF. Includes punctuation, currency symbols, numerals and common accented characters. (96 glyphs)</dd>
+								<dd>Basic Latin glyphs within the Unicode range U+0020 to U+007E. (95 glyphs)</dd>
+								<dt><label for="iglyphs_l1s"><input type="checkbox" name="glyphs[]" id="iglyphs_l1s" value="0xA0-0xFF,0x20AC" /> Latin-1 Supplement</label></dt>
+								<dd>Latin glyphs within the Unicode range U+00A0 to U+00FF and the euro sign U+20AC. Includes punctuation, some currency symbols, numerals and common accented characters. (97 glyphs)</dd>
+								<dt><label for="iglyphs_cur"><input type="checkbox" name="glyphs[]" id="iglyphs_cur" value="0x0024,0x00A2-0x00A5,0x20A0-0x20CF" /> Currency Symbols</label></dt>
+								<dd>Currency symbols within the Unicode range U+20A0 to U+20CF. The dollar sign from Basic Latin and the cent, pound and yen signs from Latin-1 Supplement are also included. (about 22 glyphs)</dd>
 								<dt><label for="iglyphs_l1ea"><input type="checkbox" name="glyphs[]" id="iglyphs_l1ea" value="0x100-0x17F" /> Latin Extended-A</label></dt>
-								<dd>Extended Latin glyphs within the Unicode range 0x0100 to 0x017F. (128 glyphs)</dd>
+								<dd>Extended Latin glyphs within the Unicode range U+0100 to U+017F. (128 glyphs)</dd>
 								<dt><label for="iglyphs_l1eb"><input type="checkbox" name="glyphs[]" id="iglyphs_l1eb" value="0x180-0x24F" /> Latin Extended-B</label></dt>
-								<dd>Extended Latin glyphs within the Unicode range 0x0180 to 0x024F. (208 glyphs)</dd>
+								<dd>Extended Latin glyphs within the Unicode range U+0180 to U+024F. (208 glyphs)</dd>
 								<dt><label for="iglyphs_cyr"><input type="checkbox" name="glyphs[]" id="iglyphs_cyr" value="0x400-0x4FF,0x500-0x52F,0x2DE0-0x2DFF,0xA640-0xA69F" /> Cyrillic Alphabet</label></dt>
 								<dd>For a complete list, see <a href="http://en.wikipedia.org/wiki/Cyrillic_characters_in_Unicode" class="external">Cyrillic characters in Unicode</a>. (up to 432 glyphs)</dd>
 								<dt><label for="iglyphs_rus"><input type="checkbox" name="glyphs[]" id="iglyphs_rus" value="0x410-0x44F,0x401,0x451" /> Russian Alphabet</label></dt>
