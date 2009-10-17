@@ -370,8 +370,10 @@ var Cufon = (function() {
 				}
 				w = glyph.w;
 				if (isNaN(w)) w = +this.w; // may have been a String in old fonts
-				w += letterSpacing;
-				if (wordSeparators[chr]) w += wordSpacing;
+				if (w > 0) {
+					w += letterSpacing;
+					if (wordSeparators[chr]) w += wordSpacing;
+				}
 				width += jumps[++j] = ~~w; // get rid of decimals
 				kerning = glyph.k;
 			}
