@@ -94,6 +94,9 @@ $filters = array(
 		'filter' => FILTER_UNSAFE_RAW,
 		'flags' => FILTER_REQUIRE_SCALAR | FILTER_NULL_ON_FAILURE
 	),
+	'useGlyphCSSRange' => array(
+		'filter' => FILTER_VALIDATE_BOOLEAN
+	),
 	'domains' => array(
 		'filter' => FILTER_UNSAFE_RAW,
 		'flags' => FILTER_NULL_ON_FAILURE
@@ -137,7 +140,8 @@ $optional = array(
 	'disableScaling' => true,
 	'simplify' => true,
 	'kerning' => true,
-	'glyphs' => true
+	'glyphs' => true,
+	'useGlyphCSSRange' => true
 );
 
 $options = array();
@@ -156,6 +160,7 @@ switch (PHP_SAPI)
 			'glyphs' => array(),
 			'ligatures' => 'no',
 			'customGlyphs' => '',
+			'useGlyphCSSRange' => 'yes', // has no effect in cli mode
 			'domains' => '',
 			'callback' => 'Cufon.registerFont',
 			'emSize' => 360,

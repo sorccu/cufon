@@ -44,6 +44,13 @@ class Cufon {
 		$script->reEncode('unicode');
 		$script->selectNone();
 
+		if (!empty($options['useGlyphCSSRange']) && !empty($options['customGlyphs']))
+		{
+			$options['glyphs'][] = UnicodeRange::fromCSSValue($options['customGlyphs'])->asHexString();
+
+			$options['customGlyphs'] = '';
+		}
+
 		if (!empty($options['glyphs']))
 		{
 			foreach ($options['glyphs'] as $glyph)
@@ -84,7 +91,7 @@ class Cufon {
 
 		$script->setFontOrder(FontForgeScript::ORDER_CUBIC);
 
-		if (!$options['disableScaling'])
+		if (empty($options['disableScaling']))
 		{
 			$script->scaleToEm($options['emSize']);
 		}
@@ -92,7 +99,7 @@ class Cufon {
 		$script->selectAll();
 		$script->verticalFlip(0);
 
-		if ($options['simplify'])
+		if (!empty($options['simplify']))
 		{
 			$script->simplify($options['simplifyDelta']);
 		}
@@ -123,7 +130,7 @@ class Cufon {
 		{
 			$fonts[$font->getId()] = sprintf("%s%s(%s);\n",
 				$copyright,
-				$options['callback'],
+				isset($options['callback']) ? $options['callback'] : '',
 				$font->toJavaScript()
 			);
 		}

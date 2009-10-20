@@ -127,7 +127,7 @@ class UnicodeRange {
 
 		if (strpos($from, '?') !== false)
 		{
-			return array(hexdec($from), hexdec(str_replace('?', 'F', $from)), false);
+			return array(hexdec(str_replace('?', '0', $from)), hexdec(str_replace('?', 'F', $from)), false);
 		}
 
 		$from = hexdec($from);
