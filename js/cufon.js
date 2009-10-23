@@ -806,7 +806,7 @@ Cufon.registerEngine('canvas', (function() {
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
 				: 'font-size:1px;line-height:1px;') +
-			'}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;text-indent:-10000in;}' +
+			'}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;text-indent:-10000in;}' +
 			(HAS_INLINE_BLOCK
 				? 'cufon canvas{position:relative;}'
 				: 'cufon canvas{position:absolute;}') +
