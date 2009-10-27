@@ -276,7 +276,7 @@ class SVGFont {
 			}
 			else if (substr($domain, 0, 4) === '\\*\\.')
 			{
-				$domain = '.+' . substr($domain, 2);
+				$domain = '(.+\\.)?' . substr($domain, 4);
 			}
 
 			$domainMap[$domain] = 1;
