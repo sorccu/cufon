@@ -272,7 +272,7 @@ class SVGFont {
 
 			if (substr($domain, 0, 2) === '\\.')
 			{
-				$domain = ".+{$domain}";
+				$domain = '(.+\\.)?' . substr($domain, 2);
 			}
 			else if (substr($domain, 0, 4) === '\\*\\.')
 			{
