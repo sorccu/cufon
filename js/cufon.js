@@ -687,6 +687,7 @@ var Cufon = (function() {
 				window.Sizzle
 			||	(window.jQuery && function(query) { return jQuery(query); }) // avoid noConflict issues
 			||	(window.dojo && dojo.query)
+			||	(window.glow && glow.dom && glow.dom.get)
 			||	(window.Ext && Ext.query)
 			||	(window.YAHOO && YAHOO.util && YAHOO.util.Selector && YAHOO.util.Selector.query)
 			||	(window.$$ && function(query) { return $$(query); })
