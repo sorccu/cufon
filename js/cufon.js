@@ -1068,7 +1068,7 @@ Cufon.registerEngine('vml', (function() {
 			fill.type = 'gradient';
 			fill.angle = 180;
 			fill.focus = '0';
-			fill.method = 'sigma';
+			fill.method = 'none';
 			fill.color = stops[0][1];
 			for (var j = 1, k = stops.length - 1; j < k; ++j) {
 				colors.push(stops[j][0] * 100 + '% ' + stops[j][1]);
