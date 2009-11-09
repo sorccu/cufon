@@ -436,13 +436,19 @@ var Cufon = (function() {
 	function HoverHandler() {
 
 		function contains(node, anotherNode) {
-			if (node.contains) return node.contains(anotherNode);
-			return node.compareDocumentPosition(anotherNode) & 16;
+			try {
+				if (node.contains) return node.contains(anotherNode);
+				return node.compareDocumentPosition(anotherNode) & 16;
+			}
+			catch(e) {} // probably a XUL element such as a scrollbar
+			return false;
 		}
 
 		function onOverOut(e) {
 			var related = e.relatedTarget;
-			if (!related || contains(this, related)) return;
+			// there might be no relatedTarget if the element is right next
+			// to the window frame
+			if (related && contains(this, related)) return;
 			trigger(this, e.type == 'mouseover');
 		}
 
