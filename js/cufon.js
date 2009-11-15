@@ -1045,8 +1045,7 @@ Cufon.registerEngine('vml', (function() {
 	// Original by Dead Edwards.
 	// Combined with getFontSizeInPixels it also works with relative units.
 	function getSizeInPixels(el, value) {
-		if (value === '0') return 0;
-		if (/px$/i.test(value)) return parseFloat(value);
+		if (!isNaN(value) || /px$/i.test(value)) return parseFloat(value);
 		var style = el.style.left, runtimeStyle = el.runtimeStyle.left;
 		el.runtimeStyle.left = el.currentStyle.left;
 		el.style.left = value.replace('%', 'em');
