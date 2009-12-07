@@ -43,6 +43,7 @@ class Cufon {
 		$script->flattenCID();
 		$script->reEncode('unicode');
 		$script->selectNone();
+		$script->selectUnicode(0x20); // space
 
 		if (!empty($options['useGlyphCSSRange']) && !empty($options['customGlyphs']))
 		{
