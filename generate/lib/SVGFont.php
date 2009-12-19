@@ -248,7 +248,7 @@ class SVGFont {
 	 */
 	private static function processFont($data, $options)
 	{
-		$domains = preg_split('/\s*[, ]\s*/', trim($options['domains']), -1, PREG_SPLIT_NO_EMPTY);
+		$domains = preg_split('/\s*[, ]\s*/', trim(implode(', ', $options['domains'])), -1, PREG_SPLIT_NO_EMPTY);
 
 		if (empty($domains))
 		{

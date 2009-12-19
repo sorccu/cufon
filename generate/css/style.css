@@ -102,6 +102,35 @@ input {
 	color: red;
 }
 
+ul.input-list {
+	list-style: none;
+	padding: 0;
+}
+
+.new, .del {
+	background: url(../img/icons.png) 0 0 no-repeat;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 0;
+	overflow: hidden;
+	text-indent: -10000in;
+	padding: 0 0 16px 16px;
+	vertical-align: 3px;
+	width: 0;
+}
+
+html>/**/body .new, html>/**/body .del {
+	vertical-align: text-bottom;
+}
+
+.del {
+	background-position: 0 -16px;
+}
+
+.no-del .del {
+	display: none;
+}
+
 #nav {
 	list-style: none;
 	text-align: center;

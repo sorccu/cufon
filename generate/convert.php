@@ -99,7 +99,7 @@ $filters = array(
 	),
 	'domains' => array(
 		'filter' => FILTER_UNSAFE_RAW,
-		'flags' => FILTER_NULL_ON_FAILURE
+		'flags' => FILTER_FORCE_ARRAY | FILTER_NULL_ON_FAILURE
 	),
 	'callback' => array(
 		'filter' => FILTER_SANITIZE_STRING,

@@ -56,7 +56,7 @@
 
 				<div id="content">
 
-					<form action="convert.php" method="post" enctype="multipart/form-data">
+					<form id="generator" action="convert.php" method="post" enctype="multipart/form-data">
 
 						<div class="section">
 
@@ -140,16 +140,18 @@
 
 						</div>
 
-						<div class="section">
+						<div id="security" class="section">
 
 							<h3>Security</h3>
 
 							<dl>
-								<dt><label for="idomains">Limit usage to the following domain(s)</label></dt>
+								<dt><label for="idomains">Limit usage to the following domains</label></dt>
 								<dd>
-									<input type="text" name="domains" id="idomains" size="70" maxlength="250" value="" /> <span class="example">(example.org, www.example.org)</span>
+									<ul class="input-list no-del">
+										<li><input type="text" name="domains[]" size="50" maxlength="250" value="" /> <a href="#" class="new">[add]</a> <a href="#" class="del">[del]</a> <label><input type="checkbox" class="remember" value="yes" /> Remember this domain</label></li>
+									</ul>
 									<p class="info"><strong><em>Utilizing this feature is highly recommended, and may even be required if you're using commercial fonts.</em></strong></p>
-									<p class="info">Separate multiple domains by either commas or spaces. You can also use wildcards (e.g. *.example.org to cover all subdomains of example.org). Using a font that doesn't match any of the allowed domains results in no text showing up.</p>
+									<p class="info">You can also use wildcards (e.g. *.example.org to cover example.org and all subdomains of example.org). Using a font that doesn't match any of the allowed domains results in only plain text showing up.</p>
 								</dd>
 							</dl>
 
