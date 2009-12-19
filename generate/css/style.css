@@ -157,18 +157,19 @@ button, #nav a:link, #nav a:visited, .actions a:link, .actions a:visited {
 	border: 1px solid #02aae0;
 	color: #fff;
 	font: bold 14pt/1em Arial, Verdana, Helvetica, sans-serif;
-	height: 2em;
 	margin-right: 8px;
 	padding: 0.3em 0;
 	vertical-align: middle;
 }
 
 html>/**/body button {
+	height: 2em;
 	padding: 0.3em 1em;
 }
 
 #nav a:link, #nav a:visited, .actions a:link, .actions a:visited {
-	font: bold 140%/2em Arial, Verdana, Helvetica, sans-serif;
+	display: inline-block;
+	font: bold 140%/1.2em Arial, Verdana, Helvetica, sans-serif;
 	margin: 0 4px;
 	padding: 0.41em 1.5em 0.4em;
 }
