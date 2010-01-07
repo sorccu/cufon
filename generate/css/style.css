@@ -131,6 +131,22 @@ html>/**/body .new, html>/**/body .del {
 	display: none;
 }
 
+.more {
+	background: url(../img/icons.png) 0 -32px no-repeat;
+	display: block;
+	line-height: 16px;
+	margin: 2em 0;
+	padding-left: 20px;
+}
+
+.more:hover {
+	text-decoration: underline;
+}
+
+.hidden {
+	display: none;
+}
+
 #nav {
 	list-style: none;
 	text-align: center;

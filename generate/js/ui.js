@@ -39,7 +39,7 @@
 	}
 
 	function handle(el) {
-		var callback, node, clone, anchor, list, input;
+		var callback, node, clone, anchor, target, list, input;
 		switch (el.nodeName.toLowerCase()) {
 			case '#text':
 				// fall through
@@ -81,13 +81,21 @@
 						return true;
 					}
 				}
+				if (/more/.test(el.className)) {
+					target = byId(el.href.replace(/^.*#/, ''));
+					if (target) {
+						Cufon.CSS.removeClass(target, 'hidden');
+						Cufon.CSS.addClass(el, 'hidden');
+						return true;
+					}
+				}
 				return false;
 		}
 		return false;
 	}
 
 	function fetch() {
-		var list, template, container, el, i, l;
+		var list, template, container, node, el, i, l;
 		list = Cookie.read('cu_dom');
 		if (list) {
 			list = decodeURIComponent(list).split(',');
@@ -106,7 +114,18 @@
 			list = decodeURIComponent(list).split(',');
 			for (i = 0, l = list.length; i < l; ++i) {
 				el = byId(list[i]);
-				if (el) el.checked = true;
+				if (el) {
+					el.checked = true;
+					for (node = el.parentNode; node; node = node.parentNode) {
+						if (node.nodeName.toLowerCase() == 'dl') {
+							if (/hidden/.test(node.className)) {
+								Cufon.CSS.removeClass(node, 'hidden');
+								handle(byId('more-extra-glyphs'));
+							}
+							break;
+						}
+					}
+				}
 			}
 		}
 		el = byId('icustomGlyphs');

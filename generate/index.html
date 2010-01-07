@@ -106,6 +106,23 @@
 							<h3>Include the following glyphs (if available)</h3>
 
 							<dl>
+								<dt><label for="iglyphs_bl"><input type="checkbox" name="glyphs[]" id="iglyphs_bl" value="0x20-0x7E" checked="checked" /> Basic Latin</label></dt>
+								<dd>Usually enough for English-only websites. Contains Basic Latin glyphs within the Unicode range U+0020 to U+007E. (95 glyphs)</dd>
+								<dt><label for="iglyphs_l1s"><input type="checkbox" name="glyphs[]" id="iglyphs_l1s" value="0xA0-0xFF,0x20AC" /> Latin-1 Supplement</label></dt>
+								<dd>Combine with Basic Latin to cover most European languages. Contains Latin glyphs within the Unicode range U+00A0 to U+00FF and the euro sign U+20AC. Includes punctuation, some currency symbols, numerals and common accented characters. (97 glyphs)</dd>
+								<dt><label for="iglyphs_wp"><input type="checkbox" name="glyphs[]" id="iglyphs_wp" value="0xD7,0x2013,0x2014,0x2018,0x2019,0x201C,0x201D,0x2022,0x2026,0x2032,0x2033,0x2122" /> Advanced Punctuation</label></dt>
+								<dd>Some publishing platforms (such as <a href="http://codex.wordpress.org/User:Here/Texturize" class="external">WordPress</a>) turn regular quotes and dashes into better looking ones, in which case you'll also need these glyphs. Includes a subset of <a href="http://en.wikipedia.org/wiki/Template:Unicode_chart_General_Punctuation" class="external">Unicode General Punctuation</a>. Some fonts may not support all of these characters. (13 glyphs)</dd>
+								<dt><label for="iglyphs_cyr"><input type="checkbox" name="glyphs[]" id="iglyphs_cyr" value="0x400-0x4FF,0x500-0x52F,0x2DE0-0x2DFF,0xA640-0xA69F" /> Cyrillic Alphabet</label></dt>
+								<dd>For a complete list, see <a href="http://en.wikipedia.org/wiki/Cyrillic_characters_in_Unicode" class="external">Cyrillic characters in Unicode</a>. (up to 432 glyphs)</dd>
+								<dt><label for="iglyphs_rus"><input type="checkbox" name="glyphs[]" id="iglyphs_rus" value="0x410-0x44F,0x401,0x451" /> Russian Alphabet</label></dt>
+								<dd>A refined selection of Cyrillic characters commonly used in the Russian language. (66 glyphs)</dd>
+								<dt><label for="iglyphs_greek"><input type="checkbox" name="glyphs[]" id="iglyphs_greek" value="0x370-0x3FF" /> Greek and Coptic</label></dt>
+								<dd>The whole Greek and Coptic Unicode block. For more information, see <a href="http://en.wikipedia.org/wiki/Greek_alphabet#Greek_in_Unicode" class="external">Greek in Unicode</a>. (up to 144 glyphs)</dd>
+							</dl>
+
+							<a href="#extra-glyphs" id="more-extra-glyphs" class="more">Show all options</a>
+
+							<dl id="extra-glyphs" class="hidden">
 								<dt><label for="iglyphs_all"><input type="checkbox" name="glyphs[]" id="iglyphs_all" value="0x0-0xFFFF" /> All</label></dt>
 								<dd>Includes all available glyphs. Highly unrecommended.</dd>
 								<dt><label for="iglyphs_uc"><input type="checkbox" name="glyphs[]" id="iglyphs_uc" value="0x41-0x5A" /> Uppercase</label></dt>
@@ -114,27 +131,18 @@
 								<dd>Basic Latin lowercase letters (a-z). (26 glyphs)</dd>
 								<dt><label for="iglyphs_n"><input type="checkbox" name="glyphs[]" id="iglyphs_n" value="0x30-0x39" /> Numerals</label></dt>
 								<dd>Basic Latin digits (0-9). (10 glyphs)</dd>
-								<dt><label for="iglyphs_p"><input type="checkbox" name="glyphs[]" id="iglyphs_p" value="0x20-0x2F,0x3A-0x40,0x5B-0x60,0x7B-0x7E" /> Punctuation</label></dt>
+								<dt><label for="iglyphs_p"><input type="checkbox" name="glyphs[]" id="iglyphs_p" value="0x20-0x2F,0x3A-0x40,0x5B-0x60,0x7B-0x7E" /> Basic Punctuation</label></dt>
 								<dd>Basic Latin punctuation (!@#%...). (33 glyphs)</dd>
-								<dt><label for="iglyphs_wp"><input type="checkbox" name="glyphs[]" id="iglyphs_wp" value="0xD7,0x2013,0x2014,0x2018,0x2019,0x2026,0x2032,0x2033,0x201C,0x201D,0x2122" /> WordPress punctuation</label></dt>
-								<dd><a href="http://codex.wordpress.org/User:Here/Texturize" class="external">Texturized</a> WordPress punctuation. Some fonts may not support all of these characters. (12 glyphs)</dd>
-								<dt><label for="iglyphs_bl"><input type="checkbox" name="glyphs[]" id="iglyphs_bl" value="0x20-0x7E" checked="checked" /> Basic Latin</label></dt>
-								<dd>Basic Latin glyphs within the Unicode range U+0020 to U+007E. (95 glyphs)</dd>
-								<dt><label for="iglyphs_l1s"><input type="checkbox" name="glyphs[]" id="iglyphs_l1s" value="0xA0-0xFF,0x20AC" /> Latin-1 Supplement</label></dt>
-								<dd>Latin glyphs within the Unicode range U+00A0 to U+00FF and the euro sign U+20AC. Includes punctuation, some currency symbols, numerals and common accented characters. (97 glyphs)</dd>
 								<dt><label for="iglyphs_cur"><input type="checkbox" name="glyphs[]" id="iglyphs_cur" value="0x0024,0x00A2-0x00A5,0x20A0-0x20CF" /> Currency Symbols</label></dt>
 								<dd>Currency symbols within the Unicode range U+20A0 to U+20CF. The dollar sign from Basic Latin and the cent, pound and yen signs from Latin-1 Supplement are also included. (about 22 glyphs)</dd>
 								<dt><label for="iglyphs_l1ea"><input type="checkbox" name="glyphs[]" id="iglyphs_l1ea" value="0x100-0x17F" /> Latin Extended-A</label></dt>
 								<dd>Extended Latin glyphs within the Unicode range U+0100 to U+017F. (128 glyphs)</dd>
 								<dt><label for="iglyphs_l1eb"><input type="checkbox" name="glyphs[]" id="iglyphs_l1eb" value="0x180-0x24F" /> Latin Extended-B</label></dt>
 								<dd>Extended Latin glyphs within the Unicode range U+0180 to U+024F. (208 glyphs)</dd>
-								<dt><label for="iglyphs_cyr"><input type="checkbox" name="glyphs[]" id="iglyphs_cyr" value="0x400-0x4FF,0x500-0x52F,0x2DE0-0x2DFF,0xA640-0xA69F" /> Cyrillic Alphabet</label></dt>
-								<dd>For a complete list, see <a href="http://en.wikipedia.org/wiki/Cyrillic_characters_in_Unicode" class="external">Cyrillic characters in Unicode</a>. (up to 432 glyphs)</dd>
-								<dt><label for="iglyphs_rus"><input type="checkbox" name="glyphs[]" id="iglyphs_rus" value="0x410-0x44F,0x401,0x451" /> Russian Alphabet</label></dt>
-								<dd>A refined selection of Cyrillic characters commonly used in the Russian language. (66 glyphs)</dd>
-								<dt><label for="iglyphs_greek"><input type="checkbox" name="glyphs[]" id="iglyphs_greek" value="0x370-0x3FF" /> Greek and Coptic</label></dt>
-								<dd>The whole Greek and Coptic Unicode block. For more information, see <a href="http://en.wikipedia.org/wiki/Greek_alphabet#Greek_in_Unicode" class="external">Greek in Unicode</a>. (up to 144 glyphs)</dd>
-								<dt><label for="icustomGlyphs"> .. and also these single characters</label></dt>
+							</dl>
+
+							<dl>
+								<dt><label for="icustomGlyphs">Also include these single characters</label></dt>
 								<dd><input type="text" name="customGlyphs" id="icustomGlyphs" size="70" maxlength="250" /> <label for="iuseGlyphCSSRange"><input type="checkbox" name="useGlyphCSSRange" id="iuseGlyphCSSRange" value="yes" /> Use <a href="http://www.w3.org/TR/css3-fonts/#character-range-the-unicode-range-descri" class="external">CSS3 ranges</a> instead of single characters</label></dd>
 							</dl>
 
