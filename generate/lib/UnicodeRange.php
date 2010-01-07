@@ -137,7 +137,7 @@ class UnicodeRange {
 			return array($from, $from, false);
 		}
 
-		$to = hexdec(substr(end($stops), 2));
+		$to = hexdec(end($stops));
 
 		return array($from, $to);
 	}
