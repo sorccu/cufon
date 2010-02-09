@@ -634,9 +634,11 @@ var Cufon = (function() {
 				if (next) continue;
 			}
 			if (anchor) {
-				el.replaceChild(process(font,
-					CSS.whiteSpace(anchor.data, style, anchor, lastElement),
-					style, options, node, el), anchor);
+				if (parseFloat(style.get('fontSize')) > 0) {
+					el.replaceChild(process(font,
+						CSS.whiteSpace(anchor.data, style, anchor, lastElement),
+						style, options, node, el), anchor);
+				}
 				anchor = null;
 			}
 			if (type == 1) {
