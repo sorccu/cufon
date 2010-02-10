@@ -619,6 +619,10 @@ var Cufon = (function() {
 		if (options.ignore[name]) return;
 		var replace = !options.textless[name];
 		var style = CSS.getStyle(attach(el, options)).extend(options);
+		// may cause issues if the element contains other elements
+		// with larger fontSize, however such cases are rare and can
+		// be fixed by using a more specific selector
+		if (parseFloat(style.get('fontSize')) === 0) return;
 		var font = getFont(el, style), node, type, next, anchor, text, lastElement;
 		if (!font) return;
 		for (node = el.firstChild; node; node = next) {
@@ -634,11 +638,9 @@ var Cufon = (function() {
 				if (next) continue;
 			}
 			if (anchor) {
-				if (parseFloat(style.get('fontSize')) > 0) {
-					el.replaceChild(process(font,
-						CSS.whiteSpace(anchor.data, style, anchor, lastElement),
-						style, options, node, el), anchor);
-				}
+				el.replaceChild(process(font,
+					CSS.whiteSpace(anchor.data, style, anchor, lastElement),
+					style, options, node, el), anchor);
 				anchor = null;
 			}
 			if (type == 1) {
