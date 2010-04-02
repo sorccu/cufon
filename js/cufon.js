@@ -228,7 +228,8 @@ var Cufon = (function() {
 				'run-in': 1
 			};
 			var wsStart = /^\s+/, wsEnd = /\s+$/;
-			return function(text, style, node, previousElement) {
+			return function(text, style, node, previousElement, simple) {
+				if (simple) return text.replace(wsStart, '').replace(wsEnd, '');
 				if (previousElement) {
 					if (previousElement.nodeName.toLowerCase() == 'br') {
 						text = text.replace(wsStart, '');
@@ -617,7 +618,7 @@ var Cufon = (function() {
 	function replaceElement(el, options) {
 		var name = el.nodeName.toLowerCase();
 		if (options.ignore[name]) return;
-		var replace = !options.textless[name];
+		var replace = !options.textless[name], simple = (options.trim === 'simple');
 		var style = CSS.getStyle(attach(el, options)).extend(options);
 		// may cause issues if the element contains other elements
 		// with larger fontSize, however such cases are rare and can
@@ -639,7 +640,7 @@ var Cufon = (function() {
 			}
 			if (anchor) {
 				el.replaceChild(process(font,
-					CSS.whiteSpace(anchor.data, style, anchor, lastElement),
+					CSS.whiteSpace(anchor.data, style, anchor, lastElement, simple),
 					style, options, node, el), anchor);
 				anchor = null;
 			}
@@ -717,7 +718,8 @@ var Cufon = (function() {
 			tr: 1,
 			ul: 1
 		},
-		textShadow: 'none'
+		textShadow: 'none',
+		trim: 'simple'
 	};
 
 	var separators = {
