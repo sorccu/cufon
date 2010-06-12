@@ -721,7 +721,6 @@ var Cufon = (function() {
 			next = glue.nextSibling || parent.nextSibling;
 			// make sure we're comparing same types
 			prev = (next.nodeName.toLowerCase() == TAG_GLUE) ? glue : shy.previousSibling;
-			if (next.offsetTop == 0) debugger;
 			if (prev.offsetTop >= next.offsetTop) {
 				shy.className = C_SHY_DISABLED;
 				if (prev.offsetTop < next.offsetTop) {
