@@ -2,29 +2,17 @@
 
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SVGFont.php';
 
-class SVGFontContainer implements IteratorAggregate {
+class SVGFontContainer implements Iterator {
 
 	/**
-	 * @param string $file
-	 * @return SVGFont
+	 * @var string
 	 */
-	public static function fromFile($file, array $options)
-	{
-		$xml = file_get_contents($file);
-
-		// Get rid of unwanted control characters
-		// (only allow Tab, LF and CR)
-		$xml = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $xml);
-
-		$params = defined('LIBXML_COMPACT') ? constant('LIBXML_COMPACT') : 0;
-
-		return new SVGFontContainer(simplexml_load_string($xml, 'SimpleXMLElement', $params), $options);
-	}
+	private $file;
 
 	/**
-	 * @var SimpleXMLElement
+	 * @var XMLReader
 	 */
-	private $document;
+	private $reader;
 
 	/**
 	 * @var array
@@ -32,46 +20,84 @@ class SVGFontContainer implements IteratorAggregate {
 	private $options;
 
 	/**
-	 * @param SimpleXMLElement $document
+	 * @var SVGFont
+	 */
+	private $currentFont;
+
+	/**
+	 * @param string $file
 	 * @return void
 	 */
-	public function __construct(SimpleXMLElement $document, array $options)
+	public function __construct($file, array $options)
 	{
-		$this->document = $document;
+		$this->file = $file;
+
+		$this->reader = new XMLReader();
 
 		$this->options = $options;
 	}
 
 	/**
-	 * @return array of SVGFont
+	 * @return SVGFont
 	 */
-	public function getFonts()
+	public function current()
 	{
-		$fonts = array();
+		$this->currentFont = new SVGFont($this->options);
 
-		foreach ($this->document->xpath('//font') as $font)
+		$this->currentFont->readFrom($this->reader);
+
+		return $this->currentFont;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function key()
+	{
+		return $this->currentFont->getFaceBasedId();
+	}
+
+	/**
+	 * @return void
+	 */
+	public function next()
+	{
+		do
 		{
-			$fonts[] = new SVGFont($font, $this);
+			if ($this->valid())
+			{
+				break;
+			}
 		}
-
-		return $fonts;
+		while ($this->reader->read());
 	}
 
 	/**
-	 * @see IteratorAggregate::getIterator()
-	 * @return ArrayIterator
+	 * @return void
 	 */
-	public function getIterator()
+	public function rewind()
 	{
-		return new ArrayIterator($this->getFonts());
+		$this->reader->open($this->file, 'utf-8',
+			defined('LIBXML_COMPACT')
+				? constant('LIBXML_COMPACT')
+				: 0);
+
+		while ($this->reader->read())
+		{
+			if ($this->valid())
+			{
+				break;
+			}
+		}
 	}
 
 	/**
-	 * @return array
+	 * @return boolean
 	 */
-	public function getOptions()
+	public function valid()
 	{
-		return $this->options;
+		return $this->reader->nodeType == XMLReader::ELEMENT
+			&& $this->reader->name == 'font';
 	}
 
 }

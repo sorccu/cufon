@@ -8,73 +8,67 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'VMLPath.php';
 class SVGFont {
 
 	/**
-	 * @var SimpleXMLElement
+	 * @var array
 	 */
-	private $document;
+	private $options;
 
 	/**
-	 * @var SVGFontContainer
+	 * @var string
 	 */
-	private $container;
+	private $id;
+
+	/**
+	 * @var int
+	 */
+	private $horizAdvX = 0;
+
+	/**
+	 * @var array
+	 */
+	private $face = array();
+
+	/**
+	 * @var array
+	 */
+	private $glyphs = array();
 
 	/**
 	 * @param string $file
 	 */
-	public function __construct(SimpleXMLElement $document, SVGFontContainer $container)
+	public function __construct(array $options)
 	{
-		$this->document = $document;
-
-		$this->container = $container;
+		$this->options = $options;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function __toString()
+	public function getFaceBasedId()
 	{
-		return $this->document->asXML();
-	}
+		$parts = array();
 
-	/**
-	 * @return string
-	 */
-	public function getId()
-	{
-		$faces = $this->document->xpath('//font-face');
-
-		if (!empty($faces))
+		foreach (array('font-family', 'font-style', 'font-weight') as $attribute)
 		{
-			$face = $faces[0];
-
-			$parts = array();
-
-			foreach (array('font-family', 'font-style', 'font-weight') as $attribute)
+			if ($this->face[$attribute] !== '')
 			{
-				if (isset($face[$attribute]))
-				{
-					$parts[] = $this->getSanitizedFaceValue($attribute, (string) $face[$attribute]);
-				}
+				$parts[] = $this->face[$attribute];
 			}
-
-			return implode('_', $parts);
 		}
 
-		return null;
+		return implode('_', $parts);
 	}
 
 	/**
 	 * @param string $key
 	 * @param string $value
 	 */
-	private function getSanitizedFaceValue($key, $value)
+	private function sanitizeFaceValue($key, $value)
 	{
 		switch ($key)
 		{
 			case 'font-family':
 
-				$options = $this->container->getOptions();
-
-				$family = $options['family'];
+				$family = $this->options['family'];
 
 				if (!is_null($family) && $family !== '')
 				{
@@ -93,9 +87,207 @@ class SVGFont {
 				}
 
 				return max(100, min($weight, 900));
+
+			case 'ascent':
+			case 'descent':
+			case 'units-per-em':
+
+				return intval($value);
 		}
 
 		return trim($value);
+	}
+
+	/**
+	 * @param XMLReader $reader
+	 * @return SVGFont
+	 */
+	public function readFrom(XMLReader $reader)
+	{
+		$currentGlyphs = array(
+			' ' => new stdClass() // some fonts do not contain a glyph for space
+		);
+
+		$currentFace = array(
+			'font-family' => '',
+			'font-weight' => '',
+			'font-stretch' => '',
+			'font-style' => 'normal',
+			'units-per-em' => '',
+			'panose-1' => '',
+			'ascent' => '',
+			'descent' => '',
+			'bbox' => '',
+			'underline-thickness' => '',
+			'underline-position' => '',
+			'unicode-range' => ''
+		);
+
+		$nameIndex = array();
+		$charIndex = array();
+
+		do
+		{
+			if ($reader->nodeType == XMLReader::END_ELEMENT)
+			{
+				if ($reader->name === 'font')
+				{
+					break;
+				}
+
+				continue;
+			}
+
+			if ($reader->nodeType != XMLReader::ELEMENT)
+			{
+				continue;
+			}
+
+			switch ($reader->name)
+			{
+				case 'font':
+
+					if (isset($this->id))
+					{
+						// shouldn't happen but hey, who knows
+
+						break 2;
+					}
+
+					$this->id = $reader->getAttribute('id');
+					$this->horizAdvX = (int) $reader->getAttribute('horiz-adv-x');
+
+					break;
+
+				case 'font-face':
+
+					foreach ($currentFace as $key => $defaultValue)
+					{
+						$actualValue = $this->sanitizeFaceValue($key,
+							$reader->getAttribute($key));
+
+						$currentFace[$key] = ($actualValue == null)
+							? $defaultValue
+							: $actualValue;
+					}
+
+					break;
+
+				case 'glyph':
+
+					$glyphChar = $reader->getAttribute('unicode');
+
+					if (empty($glyphChar) && $glyphChar !== '0')
+					{
+						break;
+					}
+
+					if (mb_strlen($glyphChar, 'utf-8') > 1)
+					{
+						// it's a ligature, for now we'll just ignore it
+
+						break;
+					}
+
+					$glyphData = new stdClass();
+
+					$glyphName = $reader->getAttribute('glyph-name');
+					$glyphPath = $reader->getAttribute('d');
+					$glyphHorizAdvX = $reader->getAttribute('horiz-adv-x');
+
+					if ($glyphPath != null)
+					{
+						$glyphData->d = substr(VMLPath::fromSVG($glyphPath), 1, -2); // skip m and xe
+					}
+
+					if ($glyphHorizAdvX != null)
+					{
+						$glyphData->w = (int) $glyphHorizAdvX;
+					}
+
+					if ($glyphName != null)
+					{
+						foreach (explode(',', $glyphName) as $glyphNameAlt)
+						{
+							$nameIndex[$glyphNameAlt] = $glyphChar;
+							$charIndex[$glyphChar] = $glyphData;
+						}
+					}
+
+					$currentGlyphs[$glyphChar] = $glyphData;
+
+					break;
+
+				case 'hkern';
+
+					if (empty($this->options['kerning']))
+					{
+						break;
+					}
+
+					$kernK = (int) $reader->getAttribute('k');
+					$kernU1 = $reader->getAttribute('u1');
+					$kernG1 = $reader->getAttribute('g1');
+					$kernU2 = $reader->getAttribute('u2');
+					$kernG2 = $reader->getAttribute('g2');
+
+					$firstSet = array();
+					$secondSet = array();
+
+					if ($kernU1 != null)
+					{
+						$firstSet = self::getMatchingCharsFromUnicodeRange($kernU1, $charIndex);
+					}
+
+					if ($kernG1 != null)
+					{
+						$firstSet = array_merge($firstSet, self::getMatchingCharsFromGlyphNames($kernG1, $nameIndex));
+					}
+
+					if ($kernU2 != null)
+					{
+						$secondSet = self::getMatchingCharsFromUnicodeRange($kernU2, $charIndex);
+					}
+
+					if ($kernG2 != null)
+					{
+						$secondSet = array_merge($secondSet, self::getMatchingCharsFromGlyphNames($kernG2, $nameIndex));
+					}
+
+					if (!empty($secondSet))
+					{
+						foreach ($firstSet as $firstGlyph)
+						{
+							foreach ($secondSet as $secondGlyph)
+							{
+								$glyph = $currentGlyphs[$firstGlyph];
+
+								if (!isset($glyph->k))
+								{
+									$glyph->k = array();
+								}
+
+								$glyph->k[$secondGlyph] = $kernK;
+							}
+						}
+					}
+
+					break;
+			}
+		}
+		while ($reader->read());
+
+		$nbsp = utf8_encode(chr(0xa0));
+
+		if (!isset($currentGlyphs[$nbsp]) && isset($currentGlyphs[' ']))
+		{
+			$currentGlyphs[$nbsp] = $currentGlyphs[' '];
+		}
+
+		$this->face = $currentFace;
+		$this->glyphs = $currentGlyphs;
+
+		return $this;
 	}
 
 	/**
@@ -103,152 +295,13 @@ class SVGFont {
 	 */
 	public function toJavaScript()
 	{
-		$font = $this->document;
-
-		$fontJSON = array(
-			'w' => (int) $font['horiz-adv-x'],
-			'face' => array(),
-			'glyphs' => array(
-				' ' => new stdClass() // some fonts do not contain a glyph for space
-			)
+		$data = array(
+			'w' => $this->horizAdvX,
+			'face' => $this->face,
+			'glyphs' => $this->glyphs
 		);
 
-		$face = $font->xpath('font-face');
-
-		if (empty($face))
-		{
-			return null;
-		}
-
-		foreach ($face[0]->attributes() as $key => $val)
-		{
-			$fontJSON['face'][$key] = $this->getSanitizedFaceValue($key, (string) $val);
-		}
-
-		$nameIndex = array();
-		$charIndex = array();
-
-		foreach ($font->xpath('glyph') as $glyph)
-		{
-			if (!isset($glyph['unicode']))
-			{
-				continue;
-			}
-
-			if (mb_strlen($glyph['unicode'], 'utf-8') > 1)
-			{
-				// it's a ligature, for now we'll just ignore it
-
-				continue;
-			}
-
-			$data = new stdClass();
-
-			if (isset($glyph['d']))
-			{
-				$data->d = substr(VMLPath::fromSVG((string) $glyph['d']), 1, -2); // skip m and xe
-			}
-
-			if (isset($glyph['horiz-adv-x']))
-			{
-				$data->w = (int) $glyph['horiz-adv-x'];
-			}
-
-			$char = (string) $glyph['unicode'];
-
-			if (isset($glyph['glyph-name']))
-			{
-				foreach (explode(',', (string) $glyph['glyph-name']) as $glyphName)
-				{
-					$nameIndex[$glyphName] = $char;
-					$charIndex[$char] = $data;
-				}
-			}
-
-			$fontJSON['glyphs'][$char] = $data;
-		}
-
-		$options = $this->container->getOptions();
-
-		$emSize = (int) $fontJSON['face']['units-per-em'];
-
-		// for some extremely weird reason FontForge sometimes pumps out
-		// astronomical kerning values.
-		// @todo figure out what's really wrong
-		$kerningLimit = $emSize * 2;
-
-		if ($options['kerning'])
-		{
-			foreach ($font->xpath('hkern') as $hkern)
-			{
-				$k = (int) $hkern['k'];
-
-				if (abs($k) > $kerningLimit)
-				{
-					continue;
-				}
-
-				$firstSet = array();
-				$secondSet = array();
-
-				if (isset($hkern['u1']))
-				{
-					$firstSet = self::getMatchingCharsFromUnicodeRange((string) $hkern['u1'], $charIndex);
-				}
-
-				if (isset($hkern['g1']))
-				{
-					$firstSet = array_merge($firstSet, self::getMatchingCharsFromGlyphNames((string) $hkern['g1'], $nameIndex));
-				}
-
-				if (isset($hkern['u2']))
-				{
-					$secondSet = self::getMatchingCharsFromUnicodeRange((string) $hkern['u2'], $charIndex);
-				}
-
-				if (isset($hkern['g2']))
-				{
-					$secondSet = array_merge($secondSet, self::getMatchingCharsFromGlyphNames((string) $hkern['g2'], $nameIndex));
-				}
-
-				if (!empty($secondSet))
-				{
-					foreach ($firstSet as $firstGlyph)
-					{
-						foreach ($secondSet as $secondGlyph)
-						{
-							$glyph = $fontJSON['glyphs'][$firstGlyph];
-
-							if (!isset($glyph->k))
-							{
-								$glyph->k = array();
-							}
-
-							$glyph->k[$secondGlyph] = $k;
-						}
-					}
-				}
-			}
-		}
-
-		$nbsp = utf8_encode(chr(0xa0));
-
-		if (!isset($fontJSON['glyphs'][$nbsp]) && isset($fontJSON['glyphs'][' ']))
-		{
-			$fontJSON['glyphs'][$nbsp] = $fontJSON['glyphs'][' '];
-		}
-
-		return self::processFont($fontJSON, $options);
-	}
-
-	/**
-	 * @param array $data
-	 * @param array $options
-	 * @return string
-	 */
-	private static function processFont($data, $options)
-	{
-		$domains = preg_split('/\s*[, ]\s*/', trim(implode(', ', $options['domains'])), -1, PREG_SPLIT_NO_EMPTY);
+		$domains = preg_split('/\s*[, ]\s*/', trim(implode(', ', $this->options['domains'])), -1, PREG_SPLIT_NO_EMPTY);
 
 		if (empty($domains))
 		{
@@ -332,7 +385,7 @@ class SVGFont {
 
 		if ($range->isSimple())
 		{
-			if ($charIndex[$unicodeRange])
+			if (isset($charIndex[$unicodeRange]))
 			{
 				$matches[] = $unicodeRange;
 			}

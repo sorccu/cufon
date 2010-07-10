@@ -127,9 +127,9 @@ class Cufon {
 				"any circumstances.\n\n${output}");
 		}
 
-		foreach (SVGFontContainer::fromFile($svgFile, $options) as $font)
+		foreach (new SVGFontContainer($svgFile, $options) as $font)
 		{
-			$fonts[$font->getId()] = sprintf("%s%s(%s);\n",
+			$fonts[$font->getFaceBasedId()] = sprintf("%s%s(%s);\n",
 				$copyright,
 				isset($options['callback']) ? $options['callback'] : '',
 				$font->toJavaScript()
