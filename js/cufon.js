@@ -210,7 +210,7 @@ var Cufon = (function() {
 					return s.toLowerCase();
 				},
 				capitalize: function(s) {
-					return s.replace(/\b./g, function($0) {
+					return s.replace(/(?:^|\s)./g, function($0) {
 						return $0.toUpperCase();
 					});
 				}
