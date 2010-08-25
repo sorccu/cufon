@@ -229,7 +229,7 @@ var Cufon = (function() {
 			};
 			var wsStart = /^\s+/, wsEnd = /\s+$/;
 			return function(text, style, node, previousElement, simple) {
-				if (simple) return text.replace(wsStart, '').replace(wsEnd, '');
+				if (simple) return text.replace(wsStart, '').replace(wsEnd, ''); // @fixme too simple
 				if (previousElement) {
 					if (previousElement.nodeName.toLowerCase() == 'br') {
 						text = text.replace(wsStart, '');
@@ -817,7 +817,7 @@ var Cufon = (function() {
 			ul: 1
 		},
 		textShadow: 'none',
-		trim: 'simple'
+		trim: 'advanced'
 	};
 
 	var separators = {
