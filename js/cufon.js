@@ -629,6 +629,7 @@ var Cufon = (function() {
 	function replaceElement(el, options) {
 		var name = el.nodeName.toLowerCase();
 		if (options.ignore[name]) return;
+		if (options.onBeforeReplace) options.onBeforeReplace(el, options);
 		var replace = !options.textless[name], simple = (options.trim === 'simple');
 		var style = CSS.getStyle(attach(el, options)).extend(options);
 		// may cause issues if the element contains other elements
@@ -637,6 +638,7 @@ var Cufon = (function() {
 		if (parseFloat(style.get('fontSize')) === 0) return;
 		var font = getFont(el, style), node, type, next, anchor, text, lastElement;
 		var isShy = options.softHyphens, anyShy = false, pos, shy, reShy = /\u00ad/g;
+		var modifyText = options.modifyText;
 		if (!font) return;
 		for (node = el.firstChild; node; node = next) {
 			type = node.nodeType;
@@ -666,9 +668,10 @@ var Cufon = (function() {
 			if (anchor) {
 				text = anchor.data;
 				if (!isShy) text = text.replace(reShy, '');
-				el.replaceChild(process(font,
-					CSS.whiteSpace(text, style, anchor, lastElement, simple),
-					style, options, node, el), anchor);
+				text = CSS.whiteSpace(text, style, anchor, lastElement, simple);
+				// modify text only on the first replace
+				if (modifyText) text = modifyText(text, anchor, el, options);
+				el.replaceChild(process(font, text, style, options, node, el), anchor);
 				anchor = null;
 			}
 			if (type == 1) {
@@ -686,6 +689,7 @@ var Cufon = (function() {
 			if (!trackingShy) addEvent(window, 'resize', updateShyOnResize);
 			trackingShy = true;
 		}
+		if (options.onAfterReplace) options.onAfterReplace(el, options);
 	}
 
 	function updateShy(context) {
@@ -788,6 +792,9 @@ var Cufon = (function() {
 			title: 1,
 			pre: 1
 		},
+		modifyText: null,
+		onAfterReplace: null,
+		onBeforeReplace: null,
 		printable: true,
 		//rotation: 0,
 		//selectable: false,
