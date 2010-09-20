@@ -926,7 +926,7 @@ Cufon.registerEngine('vml', (function() {
 				? 'middle'
 				: 'text-bottom') +
 			';}' +
-			'cufon cufontext{position:absolute;left:-10000in;font-size:1px;}' +
+			'cufon cufontext{position:absolute;left:-10000in;font-size:1px;text-align:left;}' +
 			'cufonshy.cufon-shy-disabled,.cufon-viewport-resizing cufonshy{display:none;}' +
 			'cufonglue{white-space:nowrap;display:inline-block;}' +
 			'.cufon-viewport-resizing cufonglue{white-space:normal;}' +
@@ -1181,7 +1181,7 @@ Cufon.registerEngine('canvas', (function() {
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
 				: 'font-size:1px;line-height:1px;') +
-			'}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;text-indent:-10000in;}' +
+			'}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;text-align:left;text-indent:-10000in;}' +
 			(HAS_INLINE_BLOCK
 				? 'cufon canvas{position:relative;}'
 				: 'cufon canvas{position:absolute;}') +
