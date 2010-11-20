@@ -629,6 +629,7 @@ var Cufon = (function() {
 	function replaceElement(el, options) {
 		var name = el.nodeName.toLowerCase();
 		if (options.ignore[name]) return;
+		if (options.ignoreClass && options.ignoreClass.test(el.className)) return;
 		if (options.onBeforeReplace) options.onBeforeReplace(el, options);
 		var replace = !options.textless[name], simple = (options.trim === 'simple');
 		var style = CSS.getStyle(attach(el, options)).extend(options);
@@ -792,6 +793,7 @@ var Cufon = (function() {
 			title: 1,
 			pre: 1
 		},
+		ignoreClass: null,
 		modifyText: null,
 		onAfterReplace: null,
 		onBeforeReplace: null,
@@ -874,6 +876,9 @@ var Cufon = (function() {
 		}
 		if (options.hover) options.forceHitArea = true;
 		if (options.autoDetect) delete options.fontFamily;
+		if (typeof options.ignoreClass == 'string') {
+			options.ignoreClass = new RegExp('(?:^|\\s)(?:' + options.ignoreClass.replace(/\s+/, '|') + ')(?:\\s|$)');
+		}
 		if (typeof options.textShadow == 'string') {
 			options.textShadow = CSS.textShadow(options.textShadow);
 		}
