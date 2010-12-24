@@ -256,7 +256,13 @@ var Cufon = (function() {
 
 		var links = elementsByTagName('link'), styles = elementsByTagName('style');
 
+		var checkTypes = {
+			'': 1,
+			'text/css': 1
+		};
+
 		function isContainerReady(el) {
+			if (!checkTypes[el.type.toLowerCase()]) return true;
 			return el.disabled || isSheetReady(el.sheet, el.media || 'screen');
 		}
 
