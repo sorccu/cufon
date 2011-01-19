@@ -883,7 +883,7 @@ var Cufon = (function() {
 		if (options.hover) options.forceHitArea = true;
 		if (options.autoDetect) delete options.fontFamily;
 		if (typeof options.ignoreClass == 'string') {
-			options.ignoreClass = new RegExp('(?:^|\\s)(?:' + options.ignoreClass.replace(/\s+/, '|') + ')(?:\\s|$)');
+			options.ignoreClass = new RegExp('(?:^|\\s)(?:' + options.ignoreClass.replace(/\s+/g, '|') + ')(?:\\s|$)');
 		}
 		if (typeof options.textShadow == 'string') {
 			options.textShadow = CSS.textShadow(options.textShadow);
