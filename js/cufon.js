@@ -774,8 +774,6 @@ var Cufon = (function() {
 	var engines = {}, fonts = {}, defaultOptions = {
 		autoDetect: false,
 		engine: null,
-		//fontScale: 1,
-		//fontScaling: false,
 		forceHitArea: false,
 		hover: false,
 		hoverables: {
@@ -804,8 +802,6 @@ var Cufon = (function() {
 		onAfterReplace: null,
 		onBeforeReplace: null,
 		printable: true,
-		//rotation: 0,
-		//selectable: false,
 		selector: (
 				window.Sizzle
 			||	(window.jQuery && function(query) { return jQuery(query); }) // avoid noConflict issues
