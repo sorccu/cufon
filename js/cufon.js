@@ -59,7 +59,24 @@ var Cufon = (function() {
 
 		root: function() {
 			return document.documentElement || document.body;
-		}
+		},
+
+		strict: (function() {
+			var doctype;
+			// no doctype (doesn't always catch it though.. IE I'm looking at you)
+			if (document.compatMode == 'BackCompat') return false;
+			// WebKit, Gecko, Opera, IE9+
+			doctype = document.doctype;
+			if (doctype) {
+				return !/frameset|transitional/i.test(doctype.publicId);
+			}
+			// IE<9, firstChild is the doctype even if there's an XML declaration
+			doctype = document.firstChild;
+			if (doctype.nodeType != 8 || /^DOCTYPE.+(transitional|frameset)/i.test(doctype.data)) {
+				return false;
+			}
+			return true;
+		})()
 
 	};
 
