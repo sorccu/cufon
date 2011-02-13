@@ -479,6 +479,7 @@ var Cufon = (function() {
 			return false;
 		}
 
+		// mouseover/mouseout (standards) mode
 		function onOverOut(e) {
 			var related = e.relatedTarget;
 			// there might be no relatedTarget if the element is right next
@@ -487,8 +488,12 @@ var Cufon = (function() {
 			trigger(this, e.type == 'mouseover');
 		}
 
+		// mouseenter/mouseleave (probably ie) mode
 		function onEnterLeave(e) {
-			trigger(this, e.type == 'mouseenter');
+			if (!e) e = window.event;
+			// ie model, we don't have access to "this", but
+			// mouseenter/leave doesn't bubble so it's fine.
+			trigger(e.target || e.srcElement, e.type == 'mouseenter');
 		}
 
 		function trigger(el, hoverState) {
@@ -497,7 +502,11 @@ var Cufon = (function() {
 			// to date.
 			setTimeout(function() {
 				var options = sharedStorage.get(el).options;
-				api.replace(el, hoverState ? merge(options, options.hover) : options, true);
+				if (hoverState) {
+					options = merge(options, options.hover);
+					options._mediatorMode = 1;
+				}
+				api.replace(el, options, true);
 			}, 10);
 		}
 
@@ -509,6 +518,17 @@ var Cufon = (function() {
 			else {
 				addEvent(el, 'mouseenter', onEnterLeave);
 				addEvent(el, 'mouseleave', onEnterLeave);
+			}
+		};
+
+		this.detach = function(el) {
+			if (el.onmouseenter === undefined) {
+				removeEvent(el, 'mouseover', onOverOut);
+				removeEvent(el, 'mouseout', onOverOut);
+			}
+			else {
+				removeEvent(el, 'mouseenter', onEnterLeave);
+				removeEvent(el, 'mouseleave', onEnterLeave);
 			}
 		};
 
@@ -580,15 +600,19 @@ var Cufon = (function() {
 			el.addEventListener(type, listener, false);
 		}
 		else if (el.attachEvent) {
-			el.attachEvent('on' + type, function() {
-				return listener.call(el, window.event);
-			});
+			// we don't really need "this" right now, saves code
+			el.attachEvent('on' + type, listener);
 		}
 	}
 
 	function attach(el, options) {
+		if (options._mediatorMode) return el;
 		var storage = sharedStorage.get(el);
-		if (storage.options) return el;
+		var oldOptions = storage.options;
+		if (oldOptions) {
+			if (oldOptions === options) return el;
+			if (oldOptions.hover) hoverHandler.detach(el);
+		}
 		if (options.hover && options.hoverables[el.nodeName.toLowerCase()]) {
 			hoverHandler.attach(el);
 		}
@@ -647,6 +671,15 @@ var Cufon = (function() {
 			if (processed) fragment.appendChild(processed);
 		}
 		return fragment;
+	}
+
+	function removeEvent(el, type, listener) {
+		if (el.removeEventListener) {
+			el.removeEventListener(type, listener, false);
+		}
+		else if (el.detachEvent) {
+			el.detachEvent('on' + type, listener);
+		}
 	}
 
 	function replaceElement(el, options) {
