@@ -1191,30 +1191,45 @@ Cufon.registerEngine('canvas', (function() {
 	if (!check || !check.getContext || !check.getContext.apply) return;
 	check = null;
 
-	var HAS_INLINE_BLOCK = Cufon.CSS.supports('display', 'inline-block');
-
-	// Firefox 2 w/ non-strict doctype (almost standards mode)
-	var HAS_BROKEN_LINEHEIGHT = !HAS_INLINE_BLOCK && (document.compatMode == 'BackCompat' || /frameset|transitional/i.test(document.doctype.publicId));
-
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode((
 		'cufon{text-indent:0;}' +
 		'@media screen,projection{' +
-			'cufon{display:inline;display:inline-block;position:relative;vertical-align:middle;' +
-			(HAS_BROKEN_LINEHEIGHT
+			// @todo improve before release
+			'cufon cufontext{display:none;}' +
+			// display:
+			//   stops Opera from throwing every word on its own
+			//   line. because canvas is special it'll still use all
+			//   the space it needs. might also help screenreaders.
+			'cufon canvas{display:inline;}' +
+			// let's take care of line-height
+			(Cufon.DOM.strict
+				// standards mode? we're good to go
 				? ''
-				: 'font-size:1px;line-height:1px;') +
-			'}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;text-align:left;text-indent:-10000in;}' +
-			(HAS_INLINE_BLOCK
-				? 'cufon canvas{position:relative;}'
-				: 'cufon canvas{position:absolute;}') +
-			'cufonshy.cufon-shy-disabled,.cufon-viewport-resizing cufonshy{display:none;}' +
-			'cufonglue{white-space:nowrap;display:inline-block;}' +
-			'.cufon-viewport-resizing cufonglue{white-space:normal;}' +
+				// almost-standards and quirks mode! oh joy.
+				//
+				// content:
+				//   \u200c is a zero-width non-joiner. we use it to
+				//   fool the browser into thinking that there is
+				//   "real" text in the element, giving us proper
+				//   line-height for free. \u202a\u202c keeps Opera
+				//   from losing horizontal spacing caused by \u200c,
+				//   caused by a bug in Opera. overall, these
+				//   characters have no effect on layout. zero-width
+				//   space cannot be used because it is not always
+				//   zero-width in Opera, and when it is, it doesn't
+				//   behave as desired.
+				// border-right:
+				//   needed for FF 2.0 and Opera 9.6-10. kind of
+				//   forces layout.
+				// margin-left:
+				//   needed to negate the border. cannot be on the
+				//   same side as the border or Opera will once again
+				//   throw a fit.
+				: 'cufon:after{content:"\u202a\u202c\u200c";border-right:1px solid transparent;margin-left:-1px;}') +
 		'}' +
 		'@media print{' +
-			'cufon{padding:0;}' + // Firefox 2
 			'cufon canvas{display:none;}' +
 		'}'
 	).replace(/;/g, '!important;')));
@@ -1260,37 +1275,47 @@ Cufon.registerEngine('canvas', (function() {
 		if (redraw) text = node.getAttribute('alt');
 
 		var viewBox = font.viewBox;
+		var fontSize = Math.round(parseFloat(style.get('fontSize')));
+		var ascentSize = Math.round(font.ascent / font.height * fontSize);
+		var unitsPerPixel = font.ascent / ascentSize;
 
-		var size = style.getSize('fontSize', font.baseSize);
-
+		// the expanded area does not scale
 		var expandTop = 0, expandRight = 0, expandBottom = 0, expandLeft = 0;
 		var shadows = options.textShadow, shadowOffsets = [];
 		if (shadows) {
 			for (var i = shadows.length; i--;) {
 				var shadow = shadows[i];
-				var x = size.convertFrom(parseFloat(shadow.offX));
-				var y = size.convertFrom(parseFloat(shadow.offY));
+				var x = parseFloat(shadow.offX) * unitsPerPixel;
+				var y = parseFloat(shadow.offY) * unitsPerPixel;
 				shadowOffsets[i] = [ x, y ];
-				if (y < expandTop) expandTop = y;
+				if (y < expandTop) expandTop = -y;
 				if (x > expandRight) expandRight = x;
 				if (y > expandBottom) expandBottom = y;
-				if (x < expandLeft) expandLeft = x;
+				if (x < expandLeft) expandLeft = -x;
 			}
 		}
 
 		var chars = Cufon.CSS.textTransform(text, style).split('');
 
 		var jumps = font.spacing(chars,
-			~~size.convertFrom(parseFloat(style.get('letterSpacing')) || 0),
-			~~size.convertFrom(parseFloat(style.get('wordSpacing')) || 0)
+			~~((parseFloat(style.get('letterSpacing')) || 0) * unitsPerPixel),
+			~~((parseFloat(style.get('wordSpacing')) || 0) * unitsPerPixel)
 		);
 
 		if (!jumps.length) return null; // there's nothing to render
 
 		var width = jumps.total;
 
-		expandRight += viewBox.width - jumps[jumps.length - 1];
-		expandLeft += viewBox.minX;
+		var overBottom = viewBox.height + viewBox.minY + expandBottom;
+		var overTop = -viewBox.minY - font.ascent + expandTop;
+		var overRight = viewBox.width - jumps[jumps.length - 1] + expandRight;
+		var overLeft = -viewBox.minX + expandLeft;
+
+		overTop = Math.ceil(overTop / unitsPerPixel) * unitsPerPixel;
+		overBottom = Math.ceil(overBottom / unitsPerPixel) * unitsPerPixel;
+
+		width += overLeft;
+		width += overRight;
 
 		var wrapper, canvas;
 
@@ -1316,14 +1341,11 @@ Cufon.registerEngine('canvas', (function() {
 		var wStyle = wrapper.style;
 		var cStyle = canvas.style;
 
-		var height = size.convert(viewBox.height);
-		var roundedHeight = Math.ceil(height);
-		var roundingFactor = roundedHeight / height;
-		var stretchFactor = roundingFactor * Cufon.CSS.fontStretch(style.get('fontStretch'));
+		var stretchFactor = Cufon.CSS.fontStretch(style.get('fontStretch'));
 		var stretchedWidth = width * stretchFactor;
 
-		var canvasWidth = Math.ceil(size.convert(stretchedWidth + expandRight - expandLeft));
-		var canvasHeight = Math.ceil(size.convert(viewBox.height - expandTop + expandBottom));
+		var canvasWidth = Math.ceil(stretchedWidth / unitsPerPixel);
+		var canvasHeight = Math.ceil((font.ascent + overTop + overBottom) / unitsPerPixel);
 
 		canvas.width = canvasWidth;
 		canvas.height = canvasHeight;
@@ -1332,28 +1354,19 @@ Cufon.registerEngine('canvas', (function() {
 		cStyle.width = canvasWidth + 'px';
 		cStyle.height = canvasHeight + 'px';
 
-		// minY has no part in canvas.height
-		expandTop += viewBox.minY;
+		// for line-height purposes, marginTop needs to negate canvasHeight
+		cStyle.marginTop = -(overTop / unitsPerPixel + canvasHeight) + 'px';
+		cStyle.marginRight = -(overRight / unitsPerPixel) + 'px';
+		cStyle.marginBottom = -(overBottom / unitsPerPixel) + 'px';
+		cStyle.marginLeft = -(overLeft / unitsPerPixel) + 'px';
 
-		cStyle.top = Math.round(size.convert(expandTop - font.ascent)) + 'px';
-		cStyle.left = Math.round(size.convert(expandLeft)) + 'px';
-
-		var wrapperWidth = Math.max(Math.ceil(size.convert(stretchedWidth)), 0) + 'px';
-
-		if (HAS_INLINE_BLOCK) {
-			wStyle.width = wrapperWidth;
-			wStyle.height = size.convert(font.height) + 'px';
-		}
-		else {
-			wStyle.paddingLeft = wrapperWidth;
-			wStyle.paddingBottom = (size.convert(font.height) - 1) + 'px';
-		}
-
-		var g = canvas.getContext('2d'), scale = height / viewBox.height;
+		var g = canvas.getContext('2d');
+		var scale = ascentSize / font.ascent;
 
 		// proper horizontal scaling is performed later
-		g.scale(scale, scale * roundingFactor);
-		g.translate(-expandLeft, -expandTop);
+		// @todo investigate whether ^ still holds true
+		g.scale(scale, scale);
+		g.translate(overLeft, overTop + font.ascent);
 		g.save();
 
 		function renderText() {
