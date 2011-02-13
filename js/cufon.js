@@ -1228,6 +1228,9 @@ Cufon.registerEngine('canvas', (function() {
 				//   same side as the border or Opera will once again
 				//   throw a fit.
 				: 'cufon:after{content:"\u202a\u202c\u200c";border-right:1px solid transparent;margin-left:-1px;}') +
+			'cufonshy.cufon-shy-disabled,.cufon-viewport-resizing cufonshy{display:none;}' +
+			'cufonglue{white-space:nowrap;display:inline-block;}' +
+			'.cufon-viewport-resizing cufonglue{white-space:normal;}' +
 		'}' +
 		'@media print{' +
 			'cufon canvas{display:none;}' +
