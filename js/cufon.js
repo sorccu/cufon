@@ -938,8 +938,11 @@ var Cufon = (function() {
 			options.textGradient = CSS.gradient(options.color);
 		}
 		else delete options.textGradient;
-		if (!ignoreHistory) replaceHistory.add(elements, arguments);
-		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
+		if (typeof elements == 'string') {
+			if (!ignoreHistory) replaceHistory.add(elements, arguments);
+			elements = [ elements ];
+		}
+		else if (elements.nodeType) elements = [ elements ];
 		CSS.ready(function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
 				var el = elements[i];
