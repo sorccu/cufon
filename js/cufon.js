@@ -1388,7 +1388,15 @@ Cufon.registerEngine('canvas', (function() {
 		var g = canvas.getContext('2d'), scale = height / viewBox.height;
 
 		// proper horizontal scaling is performed later
-		g.scale(scale, scale * roundingFactor);
+		if (window.devicePixelRatio) {
+			pixelScale = window.devicePixelRatio * scale;
+			canvas.setAttribute('height', canvas.getAttribute('height') * window.devicePixelRatio);
+			canvas.setAttribute('width', canvas.getAttribute('width') * window.devicePixelRatio);
+			g.scale(pixelScale, pixelScale * roundingFactor);
+		} else {
+			g.scale(scale, scale * roundingFactor);			
+			console.log(canvas.getAttribute('width'));
+		}
 		g.translate(-expandLeft, -expandTop);
 		g.save();
 
