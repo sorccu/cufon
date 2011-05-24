@@ -1386,6 +1386,12 @@ Cufon.registerEngine('canvas', (function() {
 		}
 
 		var g = canvas.getContext('2d'), scale = height / viewBox.height;
+		var pixelRatio = window.devicePixelRatio || 1;
+		if (pixelRatio != 1) {
+			canvas.width = canvasWidth * pixelRatio;
+			canvas.height = canvasHeight * pixelRatio;
+			g.scale(pixelRatio, pixelRatio);
+		}
 
 		// proper horizontal scaling is performed later
 		g.scale(scale, scale * roundingFactor);
