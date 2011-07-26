@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2010 Simo Kinnunen.
+ * Copyright (c) 2011 Simo Kinnunen.
  * Licensed under the MIT license.
  *
  * @version ${Version}
@@ -59,7 +59,24 @@ var Cufon = (function() {
 
 		root: function() {
 			return document.documentElement || document.body;
-		}
+		},
+
+		strict: (function() {
+			var doctype;
+			// no doctype (doesn't always catch it though.. IE I'm looking at you)
+			if (document.compatMode == 'BackCompat') return false;
+			// WebKit, Gecko, Opera, IE9+
+			doctype = document.doctype;
+			if (doctype) {
+				return !/frameset|transitional/i.test(doctype.publicId);
+			}
+			// IE<9, firstChild is the doctype even if there's an XML declaration
+			doctype = document.firstChild;
+			if (doctype.nodeType != 8 || /^DOCTYPE.+(transitional|frameset)/i.test(doctype.data)) {
+				return false;
+			}
+			return true;
+		})()
 
 	};
 
@@ -256,7 +273,13 @@ var Cufon = (function() {
 
 		var links = elementsByTagName('link'), styles = elementsByTagName('style');
 
+		var checkTypes = {
+			'': 1,
+			'text/css': 1
+		};
+
 		function isContainerReady(el) {
+			if (!checkTypes[el.type.toLowerCase()]) return true;
 			return el.disabled || isSheetReady(el.sheet, el.media || 'screen');
 		}
 
@@ -462,6 +485,7 @@ var Cufon = (function() {
 			return false;
 		}
 
+		// mouseover/mouseout (standards) mode
 		function onOverOut(e) {
 			var related = e.relatedTarget;
 			// there might be no relatedTarget if the element is right next
@@ -470,8 +494,12 @@ var Cufon = (function() {
 			trigger(this, e.type == 'mouseover');
 		}
 
+		// mouseenter/mouseleave (probably ie) mode
 		function onEnterLeave(e) {
-			trigger(this, e.type == 'mouseenter');
+			if (!e) e = window.event;
+			// ie model, we don't have access to "this", but
+			// mouseenter/leave doesn't bubble so it's fine.
+			trigger(e.target || e.srcElement, e.type == 'mouseenter');
 		}
 
 		function trigger(el, hoverState) {
@@ -480,7 +508,11 @@ var Cufon = (function() {
 			// to date.
 			setTimeout(function() {
 				var options = sharedStorage.get(el).options;
-				api.replace(el, hoverState ? merge(options, options.hover) : options, true);
+				if (hoverState) {
+					options = merge(options, options.hover);
+					options._mediatorMode = 1;
+				}
+				api.replace(el, options, true);
 			}, 10);
 		}
 
@@ -492,6 +524,17 @@ var Cufon = (function() {
 			else {
 				addEvent(el, 'mouseenter', onEnterLeave);
 				addEvent(el, 'mouseleave', onEnterLeave);
+			}
+		};
+
+		this.detach = function(el) {
+			if (el.onmouseenter === undefined) {
+				removeEvent(el, 'mouseover', onOverOut);
+				removeEvent(el, 'mouseout', onOverOut);
+			}
+			else {
+				removeEvent(el, 'mouseenter', onEnterLeave);
+				removeEvent(el, 'mouseleave', onEnterLeave);
 			}
 		};
 
@@ -563,15 +606,19 @@ var Cufon = (function() {
 			el.addEventListener(type, listener, false);
 		}
 		else if (el.attachEvent) {
-			el.attachEvent('on' + type, function() {
-				return listener.call(el, window.event);
-			});
+			// we don't really need "this" right now, saves code
+			el.attachEvent('on' + type, listener);
 		}
 	}
 
 	function attach(el, options) {
+		if (options._mediatorMode) return el;
 		var storage = sharedStorage.get(el);
-		if (storage.options) return el;
+		var oldOptions = storage.options;
+		if (oldOptions) {
+			if (oldOptions === options) return el;
+			if (oldOptions.hover) hoverHandler.detach(el);
+		}
 		if (options.hover && options.hoverables[el.nodeName.toLowerCase()]) {
 			hoverHandler.attach(el);
 		}
@@ -636,9 +683,19 @@ var Cufon = (function() {
 		return fragment;
 	}
 
+	function removeEvent(el, type, listener) {
+		if (el.removeEventListener) {
+			el.removeEventListener(type, listener, false);
+		}
+		else if (el.detachEvent) {
+			el.detachEvent('on' + type, listener);
+		}
+	}
+
 	function replaceElement(el, options) {
 		var name = el.nodeName.toLowerCase();
 		if (options.ignore[name]) return;
+		if (options.ignoreClass && options.ignoreClass.test(el.className)) return;
 		if (options.onBeforeReplace) options.onBeforeReplace(el, options);
 		var replace = !options.textless[name], simple = (options.trim === 'simple');
 		var style = CSS.getStyle(attach(el, options)).extend(options);
@@ -777,8 +834,6 @@ var Cufon = (function() {
 	var engines = {}, fonts = {}, defaultOptions = {
 		autoDetect: false,
 		engine: null,
-		//fontScale: 1,
-		//fontScaling: false,
 		forceHitArea: false,
 		hover: false,
 		hoverables: {
@@ -802,12 +857,11 @@ var Cufon = (function() {
 			title: 1,
 			pre: 1
 		},
+		ignoreClass: null,
 		modifyText: null,
 		onAfterReplace: null,
 		onBeforeReplace: null,
 		printable: true,
-		//rotation: 0,
-		//selectable: false,
 		selector: (
 				window.Sizzle
 			||	(window.jQuery && function(query) { return jQuery(query); }) // avoid noConflict issues
@@ -884,6 +938,9 @@ var Cufon = (function() {
 		}
 		if (options.hover) options.forceHitArea = true;
 		if (options.autoDetect) delete options.fontFamily;
+		if (typeof options.ignoreClass == 'string') {
+			options.ignoreClass = new RegExp('(?:^|\\s)(?:' + options.ignoreClass.replace(/\s+/g, '|') + ')(?:\\s|$)');
+		}
 		if (typeof options.textShadow == 'string') {
 			options.textShadow = CSS.textShadow(options.textShadow);
 		}
@@ -891,8 +948,11 @@ var Cufon = (function() {
 			options.textGradient = CSS.gradient(options.color);
 		}
 		else delete options.textGradient;
-		if (!ignoreHistory) replaceHistory.add(elements, arguments);
-		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
+		if (typeof elements == 'string') {
+			if (!ignoreHistory) replaceHistory.add(elements, arguments);
+			elements = [ elements ];
+		}
+		else if (elements.nodeType) elements = [ elements ];
 		CSS.ready(function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
 				var el = elements[i];
@@ -1336,6 +1396,12 @@ Cufon.registerEngine('canvas', (function() {
 		}
 
 		var g = canvas.getContext('2d'), scale = height / viewBox.height;
+		var pixelRatio = window.devicePixelRatio || 1;
+		if (pixelRatio != 1) {
+			canvas.width = canvasWidth * pixelRatio;
+			canvas.height = canvasHeight * pixelRatio;
+			g.scale(pixelRatio, pixelRatio);
+		}
 
 		// proper horizontal scaling is performed later
 		g.scale(scale, scale * roundingFactor);
