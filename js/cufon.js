@@ -1406,6 +1406,10 @@ Cufon.registerEngine('canvas', (function() {
 				if (!glyph) continue;
 				if (glyph.d) {
 					g.beginPath();
+					// the following moveTo is for Opera 9.2. if we don't
+					// do this, it won't forget the previous path which
+					// results in garbled text.
+					g.moveTo(0, 0);
 					if (glyph.code) interpret(glyph.code, g);
 					else glyph.code = generateFromVML('m' + glyph.d, g);
 					g.fill();
