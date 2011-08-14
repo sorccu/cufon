@@ -1116,10 +1116,12 @@ Cufon.registerEngine('vml', (function() {
 
 		var glyphs = font.glyphs, offsetX = 0;
 		var shadows = options.textShadow;
+		var shadowTags = [];
 		
 		if(shadows) {
 			// Preprocessing
 			for(var i = 0; i < shadows.length; i++) {
+				shadowTags.push([]);
 				if(shadows[i].processed) continue;
 				
 				shadows[i].color = Cufon.CSS.color(shadows[i].color);
@@ -1130,7 +1132,7 @@ Cufon.registerEngine('vml', (function() {
 			}
 		}
 		
-		var i = -1, j = 0, k = (shadows ? 0 : -1), chr;
+		var i = -1, j = 0, k = (shadows ? jumps.length * shadows.length : 0), chr;
 
 		while (chr = chars[++i]) {
 
@@ -1139,7 +1141,7 @@ Cufon.registerEngine('vml', (function() {
 
 			if (redraw) {
 				// some glyphs may be missing so we can't use i
-				shape = canvas.childNodes[++k];
+				shape = canvas.childNodes[j + k];
 				while (shape.firstChild) shape.removeChild(shape.firstChild); // shadow, fill
 			}
 			else {
@@ -1163,24 +1165,39 @@ Cufon.registerEngine('vml', (function() {
 			if (shadows) {
 				for(var z = shadows.length; z--;) {
 					if(redraw) {
-						var shadow = canvas.childNodes[k - 1];
-						k++;
+						var shadow = canvas.childNodes[j + (jumps.length * z)];
 					} else {
 						var shadow = shape.cloneNode(true);
-						canvas.insertBefore(shadow, shape);
+						shadowTags[z].push(shadow);
 					}
 					var shad = shadows[z];
 					
 					shadow.fillcolor = shad.color.color;
-					shadow.style.filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity='+(shad.color.opacity * 100)+')';
+					shadow.style.filter = '';
+					if(shad.color.opacity < 1) {
+						// only apply the filter if neccessary.
+						shadow.style.filter += ' progid:DXImageTransform.Microsoft.Alpha(opacity='+(shad.color.opacity * 100)+')';
+					}
 					shadow.coordorigin = (minX - offsetX - shad.offX) + ',' + (minY - shad.offY);
-					if(shad.blur > 0) shadow.style.filter += ' progid:DXImageTransform.Microsoft.Blur(pixelRadius='+shad.blur+',makeShadow=false,shadowOpacity=0)';
+					if(shad.blur > 0) {
+						shadow.style.antialias = false;
+						shadow.style.filter += ' progid:DXImageTransform.Microsoft.Blur(pixelRadius='+shad.blur+',makeShadow=false,shadowOpacity=0)';
+					}
 					shadow.className = 'cufon-shadow';
 				}
 			}
 
 			offsetX += jumps[j++];
 		}
+		
+		// Insert the shadow tags before the actual text to get the right rendering order.
+		var firstShape = canvas.firstChild;
+		for(var z = 0; z < shadowTags.length; z++) {
+			for(var i = 0; i < shadowTags[z].length; i++) {
+				canvas.insertBefore(shadowTags[z][i], firstShape);
+			}
+		}
+			
 
 		// addresses flickering issues on :hover
 
