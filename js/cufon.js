@@ -1176,11 +1176,12 @@ Cufon.registerEngine('vml', (function() {
 					shadow.style.filter = '';
 					if(shad.color.opacity < 1) {
 						// only apply the filter if neccessary.
+						shadow.style.antialias = false; // Antialising causes a black outline around the text when used with filters so we have to disable it.
 						shadow.style.filter += ' progid:DXImageTransform.Microsoft.Alpha(opacity='+(shad.color.opacity * 100)+')';
 					}
 					shadow.coordorigin = (minX - offsetX - shad.offX) + ',' + (minY - shad.offY);
 					if(shad.blur > 0) {
-						shadow.style.antialias = false;
+						shadow.style.antialias = false; // see above
 						shadow.style.filter += ' progid:DXImageTransform.Microsoft.Blur(pixelRadius='+shad.blur+',makeShadow=false,shadowOpacity=0)';
 					}
 					shadow.className = 'cufon-shadow';
@@ -1192,7 +1193,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		// Insert the shadow tags before the actual text to get the right rendering order.
 		var firstShape = canvas.firstChild;
-		for(var z = 0; z < shadowTags.length; z++) {
+		for(var z = shadowTags.length; z--;) {
 			for(var i = 0; i < shadowTags[z].length; i++) {
 				canvas.insertBefore(shadowTags[z][i], firstShape);
 			}
