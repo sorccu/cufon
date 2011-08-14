@@ -1116,7 +1116,21 @@ Cufon.registerEngine('vml', (function() {
 
 		var glyphs = font.glyphs, offsetX = 0;
 		var shadows = options.textShadow;
-		var i = -1, j = 0, chr;
+		
+		if(shadows) {
+			// Preprocessing
+			for(var i = 0; i < shadows.length; i++) {
+				if(shadows[i].processed) continue;
+				
+				shadows[i].color = Cufon.CSS.color(shadows[i].color);
+				shadows[i].blur = parseFloat(shadows[i].blur);
+				shadows[i].offX = size.convertFrom(parseFloat(shadows[i].offX) - shadows[i].blur);
+				shadows[i].offY = size.convertFrom(parseFloat(shadows[i].offY) - shadows[i].blur);
+				shadows[i].processed = true;
+			}
+		}
+		
+		var i = -1, j = 0, k = (shadows ? 0 : -1), chr;
 
 		while (chr = chars[++i]) {
 
@@ -1125,7 +1139,7 @@ Cufon.registerEngine('vml', (function() {
 
 			if (redraw) {
 				// some glyphs may be missing so we can't use i
-				shape = canvas.childNodes[j];
+				shape = canvas.childNodes[++k];
 				while (shape.firstChild) shape.removeChild(shape.firstChild); // shadow, fill
 			}
 			else {
@@ -1147,23 +1161,22 @@ Cufon.registerEngine('vml', (function() {
 			sStyle.height = roundedHeight;
 
 			if (shadows) {
-				// due to the limitations of the VML shadow element there
-				// can only be two visible shadows. opacity is shared
-				// for all shadows.
-				var shadow1 = shadows[0], shadow2 = shadows[1];
-				var color1 = Cufon.CSS.color(shadow1.color), color2;
-				var shadow = document.createElement('cvml:shadow');
-				shadow.on = 't';
-				shadow.color = color1.color;
-				shadow.offset = shadow1.offX + ',' + shadow1.offY;
-				if (shadow2) {
-					color2 = Cufon.CSS.color(shadow2.color);
-					shadow.type = 'double';
-					shadow.color2 = color2.color;
-					shadow.offset2 = shadow2.offX + ',' + shadow2.offY;
+				for(var z = shadows.length; z--;) {
+					if(redraw) {
+						var shadow = canvas.childNodes[k - 1];
+						k++;
+					} else {
+						var shadow = shape.cloneNode(true);
+						canvas.insertBefore(shadow, shape);
+					}
+					var shad = shadows[z];
+					
+					shadow.fillcolor = shad.color.color;
+					shadow.style.filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity='+(shad.color.opacity * 100)+')';
+					shadow.coordorigin = (minX - offsetX - shad.offX) + ',' + (minY - shad.offY);
+					if(shad.blur > 0) shadow.style.filter += ' progid:DXImageTransform.Microsoft.Blur(pixelRadius='+shad.blur+',makeShadow=false,shadowOpacity=0)';
+					shadow.className = 'cufon-shadow';
 				}
-				shadow.opacity = color1.opacity || (color2 && color2.opacity) || 1;
-				shape.appendChild(shadow);
 			}
 
 			offsetX += jumps[j++];
@@ -1306,11 +1319,12 @@ Cufon.registerEngine('canvas', (function() {
 				var shadow = shadows[i];
 				var x = size.convertFrom(parseFloat(shadow.offX));
 				var y = size.convertFrom(parseFloat(shadow.offY));
+				var blur = size.convertFrom(parseFloat(shadow.blur));
 				shadowOffsets[i] = [ x, y ];
-				if (y < expandTop) expandTop = y;
-				if (x > expandRight) expandRight = x;
-				if (y > expandBottom) expandBottom = y;
-				if (x < expandLeft) expandLeft = x;
+				if (y - blur < expandTop) expandTop = y - blur;
+				if (x + blur > expandRight) expandRight = x + blur;
+				if (y + blur > expandBottom) expandBottom = y + blur;
+				if (x - blur < expandLeft) expandLeft = x - blur;
 			}
 		}
 
@@ -1420,12 +1434,28 @@ Cufon.registerEngine('canvas', (function() {
 		}
 
 		if (shadows) {
+			var coff = size.convertFrom(canvas.height);
+			
 			for (var i = shadows.length; i--;) {
 				var shadow = shadows[i];
 				g.save();
-				g.fillStyle = shadow.color;
-				g.translate.apply(g, shadowOffsets[i]);
-				renderText();
+				g.shadowColor = shadow.color;
+				g.shadowOffsetX = parseFloat(shadow.offX);
+				g.shadowOffsetY = parseFloat(shadow.offY);
+				g.shadowBlur = parseFloat(shadow.blur);
+				
+				if(i > 0) {
+					// We have to do a little trick here because every object in a canvas can have only one shadow.
+					// The last shadow (i = 0) is drawn by the text itself, we just set the properties.
+					// All other shadows are drawn by our little trick (we draw the text for each shadow but draw the text
+					// off-screen and thus hiding it! Only the shadow which is on-screen is seen afterwards.
+					
+					g.translate(0, -coff);
+					g.shadowOffsetY = parseInt(shadow.offY) + canvas.height;
+					g.save();
+					renderText();
+					g.translate(0, coff);
+				}
 			}
 		}
 
