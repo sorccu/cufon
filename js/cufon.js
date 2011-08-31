@@ -1221,7 +1221,7 @@ Cufon.registerEngine('vml', (function() {
 				canvas.insertBefore(shadowTags[z][i], firstShape);
 			}
 		}
-		
+
 
 		// addresses flickering issues on :hover
 
@@ -1340,6 +1340,58 @@ Cufon.registerEngine('canvas', (function() {
 		for (var i = 0, l = code.length; i < l; ++i) {
 			var line = code[i];
 			context[line.m].apply(context, line.a);
+		}
+	}
+	
+	function getImage(text, options) {
+		// This function returns the given text rendered by Cufon as a link.
+		var el = document.createElement('div');
+		el.innerHTML = text;
+		
+		// Some browsers require that the <div> is in the document.
+		el.style.display = 'none';
+		document.body.appendChild(el);
+		Cufon.replace(el, options, true);
+		document.body.removeChild(el);
+		
+		var canvas = el.getElementsByTagName('canvas');
+		if (!canvas || canvas.length == 0) {
+			return null;
+		}
+		
+		canvas = canvas[0];
+		if (!canvas) {
+			return null;
+		}
+		else {
+			return canvas.toDataURL();
+		}
+	}
+	
+	var blurShadow = null;
+	function testBlurShadow() {
+		if (blurShadow != null) return blurShadow;
+		
+		// Pretend the browser supports blur shadows.
+		blurShadow = true;
+		
+		try {
+			// Note: In both images is a white shadow. This way we can discover a weird bug in older Chrome versions
+			// which only draws the first shadow and skips the rest.
+			var redS = getImage('Test', {color: '#000000', textShadow: '0px 0px 0px #ffffff, 0px 0px 10px #ff0000'});
+			var blackS = getImage('Test', {color: '#000000', textShadow: '0px 0px 0px #ffffff, 0px 0px 10px #000000'});
+			if (redS != blackS) {
+				// Good, we got two different images. We just assume this means the shadow is drawn.
+				return blurShadow = true;
+			}
+			else {
+				// Bad! The images are the same which means that no shadow was drawn.
+				return blurShadow = false;
+			}
+		}
+		catch (e) {
+			// An error happened.
+			return blurShadow = false;
 		}
 	}
 
@@ -1475,7 +1527,7 @@ Cufon.registerEngine('canvas', (function() {
 		}
 
 		if (shadows) {
-			if ("shadowBlur" in g) {
+			if (testBlurShadow()) {
 				// ieFactor: For some reason IE needs twice as much blur as all the other browsers to get the same shadow.
 				var coff = size.convertFrom(canvas.height), ieFactor = (document.namespaces ? 2 : 1);
 				g.translate(0, -coff);
