@@ -1344,7 +1344,7 @@ Cufon.registerEngine('canvas', (function() {
 	}
 	
 	function getImage(text, options) {
-		// This function returns the given text rendered by Cufon as a link.
+		// This function returns the given text rendered by Cufon as a data-link.
 		var el = document.createElement('div');
 		el.innerHTML = text;
 		
@@ -1368,7 +1368,7 @@ Cufon.registerEngine('canvas', (function() {
 		}
 	}
 	
-	var blurShadow = null;
+	var blurShadow = null, multipleBShadows = true;
 	function testBlurShadow() {
 		if (blurShadow != null) return blurShadow;
 		
@@ -1386,6 +1386,16 @@ Cufon.registerEngine('canvas', (function() {
 			}
 			else {
 				// Bad! The images are the same which means that no shadow was drawn.
+				// Well, let's check if we can draw at least one shadow.
+				
+				redS = getImage('Test', {color: '#000000', textShadow: '0px 0px 10px #ff0000'});
+				blackS = getImage('Test', {color: '#000000', textShadow: '0px 0px 10px #000000'});
+				if (redS != blackS) {
+					// OK, we can only draw one shadow per text.
+					multipleBShadows = false;
+					return blurShadow = true;
+				}
+				
 				return blurShadow = false;
 			}
 		}
@@ -1527,11 +1537,10 @@ Cufon.registerEngine('canvas', (function() {
 		}
 
 		if (shadows) {
-			if (testBlurShadow()) {
-				// ieFactor: For some reason IE needs twice as much blur as all the other browsers to get the same shadow.
-				var coff = size.convertFrom(canvas.height), ieFactor = (document.namespaces ? 2 : 1);
+			if (testBlurShadow() && multipleBShadows) {
+				// blurFactor: For some reason IE needs twice as much blur as all the other browsers to get the same shadow.
+				var coff = size.convertFrom(canvas.height), blurFactor = (document.namespaces ? 2 : 1);
 				g.translate(0, -coff);
-				g.save();
 				
 				for (var i = shadows.length; i--;) {
 					var shadow = shadows[i];
@@ -1539,7 +1548,7 @@ Cufon.registerEngine('canvas', (function() {
 					g.shadowColor = shadow.color;
 					g.shadowOffsetX = parseFloat(shadow.offX);
 					g.shadowOffsetY = parseFloat(shadow.offY);
-					g.shadowBlur = parseFloat(shadow.blur) * ieFactor;
+					g.shadowBlur = parseFloat(shadow.blur) * blurFactor;
 					
 					if (i > 0) {
 						// We have to do a little trick here because every object in a canvas can have only one shadow.
@@ -1554,11 +1563,26 @@ Cufon.registerEngine('canvas', (function() {
 				g.translate(0, coff);
 				g.save();
 			}
+			else if (testBlurShadow()) {
+				for (var i = shadows.length - 1; i > 0; i--) {
+					g.save();
+					g.fillStyle = shadows[i].color;
+					g.translate.apply(g, shadowOffsets[i]);
+					renderText();
+				}
+				
+				// We blur the last shadow. (about blurFactor: see above)
+				var shadow = shadows[0], iPhone = (navigator.userAgent.indexOf('iPhone') > -1), blurFactor = (document.namespaces || iPhone ? 2 : 1), offFactor = (iPhone ? 2 : 1);
+				g.save();
+				g.shadowColor = shadow.color;
+				g.shadowOffsetX = parseFloat(shadow.offX) * offFactor;
+				g.shadowOffsetY = parseFloat(shadow.offY) * offFactor;
+				g.shadowBlur = parseFloat(shadow.blur) * blurFactor;
+			}
 			else {
 				for (var i = shadows.length; i--;) {
-					var shadow = shadows[i];
 					g.save();
-					g.fillStyle = shadow.color;
+					g.fillStyle = shadows[i].color;
 					g.translate.apply(g, shadowOffsets[i]);
 					renderText();
 				}
