@@ -975,8 +975,10 @@ Cufon.registerEngine('vml', (function() {
 	check = null;
 
 	var HAS_BROKEN_LINEHEIGHT = (document.documentMode || 0) < 8;
-
-	document.write(('<style type="text/css">' +
+	
+	var styleSheet = document.createElement('style');
+	styleSheet.type = 'text/css';
+	styleSheet.styleSheet.cssText = (
 		'cufoncanvas{text-indent:0;}' +
 		'@media screen{' +
 			'cvml\\:shape,cvml\\:rect,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
@@ -994,8 +996,9 @@ Cufon.registerEngine('vml', (function() {
 		'}' +
 		'@media print{' +
 			'cufon cufoncanvas{display:none;}' +
-		'}' +
-	'</style>').replace(/;/g, '!important;'));
+		'}'
+	).replace(/;/g, '!important;');
+	document.getElementsByTagName('head')[0].appendChild(styleSheet);
 
 	function getFontSizeInPixels(el, value) {
 		return getSizeInPixels(el, /(?:em|ex|%)$|^[a-z-]+$/i.test(value) ? '1em' : value);
