@@ -11,6 +11,17 @@ var Cufon = (function() {
 		return api.replace.apply(null, arguments);
 	};
 
+	// Basic Latin ligatures, http://www.unicode.org/charts/PDF/UFB00.pdf
+	var latinLigatures = {
+			'ff': '\ufb00',
+			'fi': '\ufb01',
+			'fl': '\ufb02',
+			'ffi': '\ufb03',
+			'ffl': '\ufb04',
+			'\u017ft': '\ufb05',
+			'st': '\ufb06'
+		};
+
 	var DOM = api.DOM = {
 
 		ready: (function() {
@@ -343,13 +354,12 @@ var Cufon = (function() {
 	})();
 
 	function Font(data) {
-
 		var face = this.face = data.face, wordSeparators = {
 			'\u0020': 1,
 			'\u00a0': 1,
 			'\u3000': 1
 		};
-
+		
 		this.glyphs = (function(glyphs) {
 			var key, fallbacks = {
 				'\u2011': '\u002d',
@@ -416,6 +426,31 @@ var Cufon = (function() {
 			return jumps;
 		};
 
+		this.applyLigatures = (function (font) {
+			// identify ligature glyphs that are defined in the font
+			var ligatures = {},
+				letterGroups = [];
+				
+			for (var letterGroup in latinLigatures)
+				if (font.glyphs[latinLigatures[letterGroup]]) {
+					ligatures[letterGroup] = latinLigatures[letterGroup];
+					letterGroups.push(letterGroup);
+				};
+			
+			// prepare expression that matches defined letter groups (longer groups first)
+			var letterGroupsRegexp = new RegExp(letterGroups.sort(function (a, b) { 
+					return b.length - a.length;
+				}).join('|'), 'g');
+			
+			return letterGroups.length
+					? function (text) {
+						// substitute letter groups with ligature glyphs
+						return text.replace(letterGroupsRegexp, function (match) {
+								return ligatures[match] || match;
+							});
+					}
+					: function (text) { return text }
+		})(this);
 	}
 
 	function FontFamily() {
@@ -653,10 +688,11 @@ var Cufon = (function() {
 		}
 		return merged;
 	}
-
+	
 	function process(font, text, style, options, node, el) {
 		var fragment = document.createDocumentFragment(), processed;
 		if (text === '') return fragment;
+		
 		var separate = options.separate;
 		var parts = text.split(separators[separate]), needsAligning = (separate == 'words');
 		if (needsAligning && HAS_BROKEN_REGEXP) {
@@ -1098,7 +1134,7 @@ Cufon.registerEngine('vml', (function() {
 		wStyle.height = size.convert(font.height) + 'px';
 
 		var color = style.get('color');
-		var chars = Cufon.CSS.textTransform(text, style).split('');
+		var chars = Cufon.CSS.textTransform(font.applyLigatures(text), style).split('');
 
 		var jumps = font.spacing(chars,
 			getSpacingValue(el, style, size, 'letterSpacing'),
@@ -1317,7 +1353,7 @@ Cufon.registerEngine('canvas', (function() {
 			}
 		}
 
-		var chars = Cufon.CSS.textTransform(text, style).split('');
+		var chars = Cufon.CSS.textTransform(font.applyLigatures(text), style).split('');
 
 		var jumps = font.spacing(chars,
 			~~size.convertFrom(parseFloat(style.get('letterSpacing')) || 0),
