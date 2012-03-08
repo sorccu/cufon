@@ -11,17 +11,6 @@ var Cufon = (function() {
 		return api.replace.apply(null, arguments);
 	};
 
-	// Basic Latin ligatures, http://www.unicode.org/charts/PDF/UFB00.pdf
-	var latinLigatures = {
-			'ff': '\ufb00',
-			'fi': '\ufb01',
-			'fl': '\ufb02',
-			'ffi': '\ufb03',
-			'ffl': '\ufb04',
-			'\u017ft': '\ufb05',
-			'st': '\ufb06'
-		};
-
 	var DOM = api.DOM = {
 
 		ready: (function() {
@@ -354,12 +343,13 @@ var Cufon = (function() {
 	})();
 
 	function Font(data) {
-		var face = this.face = data.face, wordSeparators = {
+
+		var face = this.face = data.face, ligatureCache = [], wordSeparators = {
 			'\u0020': 1,
 			'\u00a0': 1,
 			'\u3000': 1
 		};
-		
+
 		this.glyphs = (function(glyphs) {
 			var key, fallbacks = {
 				'\u2011': '\u002d',
@@ -426,31 +416,43 @@ var Cufon = (function() {
 			return jumps;
 		};
 
-		this.applyLigatures = (function (font) {
-			// identify ligature glyphs that are defined in the font
-			var ligatures = {},
-				letterGroups = [];
-				
-			for (var letterGroup in latinLigatures)
-				if (font.glyphs[latinLigatures[letterGroup]]) {
-					ligatures[letterGroup] = latinLigatures[letterGroup];
-					letterGroups.push(letterGroup);
-				};
-			
-			// prepare expression that matches defined letter groups (longer groups first)
-			var letterGroupsRegexp = new RegExp(letterGroups.sort(function (a, b) { 
-					return b.length - a.length;
-				}).join('|'), 'g');
-			
-			return letterGroups.length
-					? function (text) {
-						// substitute letter groups with ligature glyphs
-						return text.replace(letterGroupsRegexp, function (match) {
-								return ligatures[match] || match;
-							});
+		this.applyLigatures = function(text, ligatures) {
+			// find cached ligature configuration for this font
+			for (var i=0, ligatureConfig; i<ligatureCache.length && !ligatureConfig; i++)
+				if (ligatureCache[i].ligatures === ligatures)
+					ligatureConfig = ligatureCache[i];
+
+			// if there is none, it needs to be created and cached
+			if (!ligatureConfig) {
+				// identify letter groups to prepare regular expression that matches these
+				var letterGroups = [];
+				for (var letterGroup in ligatures) {
+					if (this.glyphs[ligatures[letterGroup]]) {
+						letterGroups.push(letterGroup);
 					}
-					: function (text) { return text }
-		})(this);
+				}
+
+				// sort by longer groups first, then alphabetically (to aid caching by this key)
+				var regexpText = letterGroups.sort(function(a, b) {
+					return b.length - a.length || a > b;
+				}).join('|');
+
+				ligatureCache.push(ligatureConfig = {
+					ligatures: ligatures,
+					// create regular expression for matching desired ligatures that are present in the font
+					regexp: regexpText.length > 0 
+						? regexpCache[regexpText] || (regexpCache[regexpText] = new RegExp(regexpText, 'g'))
+						: null
+				});
+			}
+
+			// return applied ligatures or original text if none exist for given configuration
+			return ligatureConfig.regexp
+				? text.replace(ligatureConfig.regexp, function(match) {
+					return ligatures[match] || match;
+				})
+				: text;
+		};
 	}
 
 	function FontFamily() {
@@ -688,11 +690,10 @@ var Cufon = (function() {
 		}
 		return merged;
 	}
-	
+
 	function process(font, text, style, options, node, el) {
 		var fragment = document.createDocumentFragment(), processed;
 		if (text === '') return fragment;
-		
 		var separate = options.separate;
 		var parts = text.split(separators[separate]), needsAligning = (separate == 'words');
 		if (needsAligning && HAS_BROKEN_REGEXP) {
@@ -849,6 +850,7 @@ var Cufon = (function() {
 	var C_SHY_DISABLED = 'cufon-shy-disabled';
 	var C_VIEWPORT_RESIZING = 'cufon-viewport-resizing';
 
+	var regexpCache = {};
 	var sharedStorage = new Storage();
 	var hoverHandler = new HoverHandler();
 	var replaceHistory = new ReplaceHistory();
@@ -914,7 +916,16 @@ var Cufon = (function() {
 			ul: 1
 		},
 		textShadow: 'none',
-		trim: 'advanced'
+		trim: 'advanced',
+		ligatures: {
+			'ff': '\ufb00',
+			'fi': '\ufb01',
+			'fl': '\ufb02',
+			'ffi': '\ufb03',
+			'ffl': '\ufb04',
+			'\u017ft': '\ufb05',
+			'st': '\ufb06'
+		}
 	};
 
 	var separators = {
@@ -1134,7 +1145,7 @@ Cufon.registerEngine('vml', (function() {
 		wStyle.height = size.convert(font.height) + 'px';
 
 		var color = style.get('color');
-		var chars = Cufon.CSS.textTransform(font.applyLigatures(text), style).split('');
+		var chars = Cufon.CSS.textTransform(options.ligatures ? font.applyLigatures(text, options.ligatures) : text, style).split('');
 
 		var jumps = font.spacing(chars,
 			getSpacingValue(el, style, size, 'letterSpacing'),
@@ -1353,7 +1364,7 @@ Cufon.registerEngine('canvas', (function() {
 			}
 		}
 
-		var chars = Cufon.CSS.textTransform(font.applyLigatures(text), style).split('');
+		var chars = Cufon.CSS.textTransform(options.ligatures ? font.applyLigatures(text, options.ligatures) : text, style).split('');
 
 		var jumps = font.spacing(chars,
 			~~size.convertFrom(parseFloat(style.get('letterSpacing')) || 0),
