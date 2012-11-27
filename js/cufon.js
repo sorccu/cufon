@@ -1358,10 +1358,10 @@ Cufon.registerEngine('canvas', (function() {
 				var y = size.convertFrom(parseFloat(shadow.offY));
 				var b = size.convertFrom(parseFloat(shadow.blur))||0;
 				shadowOffsets[i] = [ x, y ];
-				if (y < expandTop) expandTop = y+b;
-				if (x > expandRight) expandRight = x+b;
-				if (y > expandBottom) expandBottom = y+b;
-				if (x < expandLeft) expandLeft = x+b;
+				if( y - b < expandTop) expandTop =  y - b ;
+				if (x + b > expandRight) expandRight = x + b;
+				if (y + b > expandBottom) expandBottom = y + b;
+				if (x - b < expandLeft) expandLeft = x - b;
 			}
 		}
 
