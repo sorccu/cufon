@@ -1356,11 +1356,12 @@ Cufon.registerEngine('canvas', (function() {
 				var shadow = shadows[i];
 				var x = size.convertFrom(parseFloat(shadow.offX));
 				var y = size.convertFrom(parseFloat(shadow.offY));
+				var b = size.convertFrom(parseFloat(shadow.blur))||0;
 				shadowOffsets[i] = [ x, y ];
-				if (y < expandTop) expandTop = y;
-				if (x > expandRight) expandRight = x;
-				if (y > expandBottom) expandBottom = y;
-				if (x < expandLeft) expandLeft = x;
+				if( y - b < expandTop) expandTop =  y - b ;
+				if (x + b > expandRight) expandRight = x + b;
+				if (y + b > expandBottom) expandBottom = y + b;
+				if (x - b < expandLeft) expandLeft = x - b;
 			}
 		}
 
@@ -1472,9 +1473,10 @@ Cufon.registerEngine('canvas', (function() {
 		if (shadows) {
 			for (var i = shadows.length; i--;) {
 				var shadow = shadows[i];
-				g.save();
-				g.fillStyle = shadow.color;
-				g.translate.apply(g, shadowOffsets[i]);
+				g.shadowColor = shadow.color;
+				g.shadowBlur = parseFloat(shadow.blur);
+				g.shadowOffsetX = parseFloat(shadow.offX);
+				g.shadowOffsetY = parseFloat(shadow.offY);
 				renderText();
 			}
 		}
