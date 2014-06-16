@@ -1014,6 +1014,7 @@ Cufon.registerEngine('vml', (function() {
 	var ns = document.namespaces;
 	if (!ns) return;
 	ns.add('cvml', 'urn:schemas-microsoft-com:vml');
+	ns.add('cf');
 	ns = null;
 
 	var check = document.createElement('cvml:shape');
@@ -1026,23 +1027,23 @@ Cufon.registerEngine('vml', (function() {
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.styleSheet.cssText = (
-		'cufoncanvas{text-indent:0;}' +
-		'@media screen{' +
+		'cf:\\cufoncanvas{text-indent:0;}' +
+		'@media all,screen,projection{' +
 			'cvml\\:shape,cvml\\:rect,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
-			'cufoncanvas{position:absolute;text-align:left;}' +
-			'cufon{display:inline-block;position:relative;vertical-align:' +
+			'cf\\:cufoncanvas{position:absolute;text-align:left;}' +
+			'cf\\:cufon{display:inline-block;position:relative;vertical-align:' +
 			(HAS_BROKEN_LINEHEIGHT
 				? 'middle'
 				: 'text-bottom') +
 			';}' +
-			'cufon cufontext{position:absolute;left:-10000in;font-size:1px;text-align:left;}' +
-			'cufonshy.cufon-shy-disabled,.cufon-viewport-resizing cufonshy{display:none;}' +
-			'cufonglue{white-space:nowrap;display:inline-block;}' +
-			'.cufon-viewport-resizing cufonglue{white-space:normal;}' +
-			'a cufon{cursor:pointer}' + // ignore !important here
+			'cf\\:cufon cf\\:cufontext{position:absolute;left:-10000in;font-size:1px;text-align:left;}' +
+			'cf\\:cufonshy.cufon-shy-disabled,.cufon-viewport-resizing cf\\:cufonshy{display:none;}' +
+			'cf\\:cufonglue{white-space:nowrap;display:inline-block;}' +
+			'.cufon-viewport-resizing cf\\:cufonglue{white-space:normal;}' +
+			'a cf\\:cufon{cursor:pointer}' + // ignore !important here
 		'}' +
 		'@media print{' +
-			'cufon cufoncanvas{display:none;}' +
+			'cf\\:cufontext{display:none;}' +
 		'}'
 	).replace(/;/g, '!important;');
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
@@ -1111,15 +1112,15 @@ Cufon.registerEngine('vml', (function() {
 			canvas = node.firstChild;
 		}
 		else {
-			wrapper = document.createElement('cufon');
+			wrapper = document.createElement('cf:cufon');
 			wrapper.className = 'cufon cufon-vml';
 			wrapper.alt = text;
 
-			canvas = document.createElement('cufoncanvas');
+			canvas = document.createElement('cf:cufoncanvas');
 			wrapper.appendChild(canvas);
 
 			if (options.printable) {
-				var print = document.createElement('cufontext');
+				var print = document.createElement('cf:cufontext');
 				print.appendChild(document.createTextNode(text));
 				wrapper.appendChild(print);
 			}
@@ -1176,6 +1177,11 @@ Cufon.registerEngine('vml', (function() {
 			if (redraw) {
 				// some glyphs may be missing so we can't use i
 				shape = canvas.childNodes[j];
+				// Grab glyphs from child nodes.
+				if (typeof shape == 'undefined') {
+					shape = canvas.childNodes[j-1];
+					continue;
+				}
 				while (shape.firstChild) shape.removeChild(shape.firstChild); // shadow, fill
 			}
 			else {
@@ -1286,7 +1292,7 @@ Cufon.registerEngine('canvas', (function() {
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode((
 		'cufon{text-indent:0;}' +
-		'@media screen,projection{' +
+		'@media all,screen,projection{' +
 			'cufon{display:inline;display:inline-block;position:relative;vertical-align:middle;' +
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
@@ -1301,7 +1307,7 @@ Cufon.registerEngine('canvas', (function() {
 		'}' +
 		'@media print{' +
 			'cufon{padding:0;}' + // Firefox 2
-			'cufon canvas{display:none;}' +
+			'cufontext{display:none;}' +
 		'}'
 	).replace(/;/g, '!important;')));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
