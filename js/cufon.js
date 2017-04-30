@@ -362,6 +362,12 @@ var Cufon = (function() {
 			return glyphs;
 		})(data.glyphs);
 
+		this.missingGlyphs = '';
+		for (var i in this.glyphs) {
+			this.missingGlyphs += i;
+		}
+		this.missingGlyphsRegexp = new RegExp("[^" + this.missingGlyphs.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") + "]");
+
 		this.w = data.w;
 		this.baseSize = parseInt(face['units-per-em'], 10);
 
@@ -702,6 +708,10 @@ var Cufon = (function() {
 			if (/\s$/.test(text)) parts.push('');
 		}
 		for (var i = 0, l = parts.length; i < l; ++i) {
+			if (font.missingGlyphsRegexp.test(parts[i])) {
+				fragment.appendChild(document.createTextNode(parts[i]));
+				continue;
+			}
 			processed = engines[options.engine](font,
 				needsAligning ? CSS.textAlign(parts[i], style, i, l) : parts[i],
 				style, options, node, el, i < l - 1);
