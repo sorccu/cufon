@@ -134,10 +134,12 @@ var Cufon = (function() {
 		}),
 
 		getStyle: function(el) {
-			var view = document.defaultView;
-			if (view && view.getComputedStyle) return new Style(view.getComputedStyle(el, null));
-			if (el.currentStyle) return new Style(el.currentStyle);
-			return new Style(el.style);
+			if (el != null) {
+				var view = document.defaultView;
+				if (view && view.getComputedStyle) return new Style(view.getComputedStyle(el, null));
+				if (el.currentStyle) return new Style(el.currentStyle);
+				return new Style(el.style);
+			} else return new Style();
 		},
 
 		gradient: cached(function(value) {
