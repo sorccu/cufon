@@ -1456,10 +1456,13 @@ Cufon.registerEngine('canvas', (function() {
 				if (!glyph) continue;
 				if (glyph.d) {
 					g.beginPath();
-					// the following moveTo is for Opera 9.2. if we don't
-					// do this, it won't forget the previous path which
-					// results in garbled text.
-					g.moveTo(0, 0);
+					// the following moveTo was for Opera 9.2. if we didn't
+					// do this, it wouldn't forget the previous path which
+					// resulted in garbled text. this had to be removed in
+					// 2017 due to WebKit-based browsers stretching certain
+					// fully rectangular characters when this line is present.
+					// presumably this breaks compatibility with Opera 9.2.
+					// g.moveTo(0, 0);
 					if (glyph.code) interpret(glyph.code, g);
 					else glyph.code = generateFromVML('m' + glyph.d, g);
 					g.fill();
