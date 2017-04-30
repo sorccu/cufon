@@ -1441,6 +1441,7 @@ Cufon.registerEngine('canvas', (function() {
 			canvas.width = canvasWidth * pixelRatio;
 			canvas.height = canvasHeight * pixelRatio;
 			g.scale(pixelRatio, pixelRatio);
+			cStyle.top = Math.round((size.convert(expandTop - font.ascent)) / pixelRatio) + 'px';
 		}
 
 		// proper horizontal scaling is performed later
