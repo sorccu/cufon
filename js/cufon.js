@@ -1166,7 +1166,45 @@ Cufon.registerEngine('vml', (function() {
 
 		var glyphs = font.glyphs, offsetX = 0;
 		var shadows = options.textShadow;
-		var i = -1, j = 0, chr;
+		var shadowTags = [];
+		
+		if(shadows) {
+			// Preprocessing
+			if (options != options.hover) {
+				// We can access the normal and hover options. Let's make the shadow count equal so we don't have to add or remove tags on hover.
+				var normCount = options.textShadow.length, hoverCount = options.hover.textShadow.length;
+				if (normCount == hoverCount) {
+					// Everything's fine, do nothing.
+				}
+				else if (normCount > hoverCount) {
+					// We have to add invisible hover shadows.
+					for (var i = 0, diff = normCount - hoverCount; i < diff; i++) {
+						options.hover.textShadow.push({ color: 'rgba(0, 0, 0, 0)', blur: 0, offX: 0, offY: 0});
+					}
+				}
+				else if (hoverCount > normCount) {
+					// We have to add invisible normal shadows.
+					for (var i = 0, diff = hoverCount - normCount; i < diff; i++) {
+						options.textShadow.push({ color: 'rgba(0, 0, 0, 0)', blur: 0, offX: 0, offY: 0});
+					}
+				}
+				
+				delete normCount, hoverCount;
+			}
+			
+			for (var i = 0; i < shadows.length; i++) {
+				shadowTags.push([]);
+				if (shadows[i].processed) continue;
+				
+				shadows[i].color = Cufon.CSS.color(shadows[i].color);
+				shadows[i].blur = parseFloat(shadows[i].blur);
+				shadows[i].offX = size.convertFrom(parseFloat(shadows[i].offX) - shadows[i].blur);
+				shadows[i].offY = size.convertFrom(parseFloat(shadows[i].offY) - shadows[i].blur);
+				shadows[i].processed = true;
+			}
+		}
+		
+		var i = -1, j = 0, k = (shadows ? jumps.length * shadows.length : 0), chr;
 
 		while (chr = chars[++i]) {
 
@@ -1175,7 +1213,7 @@ Cufon.registerEngine('vml', (function() {
 
 			if (redraw) {
 				// some glyphs may be missing so we can't use i
-				shape = canvas.childNodes[j];
+				shape = canvas.childNodes[j + k];
 				while (shape.firstChild) shape.removeChild(shape.firstChild); // shadow, fill
 			}
 			else {
@@ -1197,27 +1235,43 @@ Cufon.registerEngine('vml', (function() {
 			sStyle.height = roundedHeight;
 
 			if (shadows) {
-				// due to the limitations of the VML shadow element there
-				// can only be two visible shadows. opacity is shared
-				// for all shadows.
-				var shadow1 = shadows[0], shadow2 = shadows[1];
-				var color1 = Cufon.CSS.color(shadow1.color), color2;
-				var shadow = document.createElement('cvml:shadow');
-				shadow.on = 't';
-				shadow.color = color1.color;
-				shadow.offset = shadow1.offX + ',' + shadow1.offY;
-				if (shadow2) {
-					color2 = Cufon.CSS.color(shadow2.color);
-					shadow.type = 'double';
-					shadow.color2 = color2.color;
-					shadow.offset2 = shadow2.offX + ',' + shadow2.offY;
+				for (var z = shadows.length; z--;) {
+					if (redraw) {
+						var shadow = canvas.childNodes[j + (jumps.length * z)];
+					}
+					else {
+						var shadow = shape.cloneNode(true);
+						shadowTags[z].push(shadow);
+					}
+					var shad = shadows[z];
+					
+					shadow.coordorigin = (minX - offsetX - shad.offX) + ',' + (minY - shad.offY);
+					shadow.fillcolor = shad.color.color;
+					shadow.style.filter = '';
+					if (shad.color.opacity < 1) {
+						// only apply the filter if neccessary.
+						shadow.style.antialias = false; // Antialising causes a black outline around the text when used with filters so we have to disable it.
+						shadow.style.filter += ' progid:DXImageTransform.Microsoft.Alpha(opacity=' + (shad.color.opacity * 100) + ')';
+					}
+					
+					if (shad.blur > 0) {
+						shadow.style.antialias = false; // see above
+						shadow.style.filter += ' progid:DXImageTransform.Microsoft.Blur(pixelRadius=' + shad.blur + ',makeShadow=false,shadowOpacity=0)';
+					}
 				}
-				shadow.opacity = color1.opacity || (color2 && color2.opacity) || 1;
-				shape.appendChild(shadow);
 			}
 
 			offsetX += jumps[j++];
 		}
+		
+		// Insert the shadow tags before the actual text to get the right rendering order.
+		var firstShape = canvas.firstChild;
+		for(var z = shadowTags.length; z--;) {
+			for(var i = 0; i < shadowTags[z].length; i++) {
+				canvas.insertBefore(shadowTags[z][i], firstShape);
+			}
+		}
+
 
 		// addresses flickering issues on :hover
 
@@ -1338,6 +1392,68 @@ Cufon.registerEngine('canvas', (function() {
 			context[line.m].apply(context, line.a);
 		}
 	}
+	
+	function getImage(text, options) {
+		// This function returns the given text rendered by Cufon as a data-link.
+		var el = document.createElement('div');
+		el.innerHTML = text;
+		
+		// Some browsers require that the <div> is in the document.
+		el.style.display = 'none';
+		document.body.appendChild(el);
+		Cufon.replace(el, options, true);
+		document.body.removeChild(el);
+		
+		var canvas = el.getElementsByTagName('canvas');
+		if (!canvas || canvas.length == 0) {
+			return null;
+		}
+		
+		canvas = canvas[0];
+		if (!canvas) {
+			return null;
+		}
+		else {
+			return canvas.toDataURL();
+		}
+	}
+	
+	var blurShadow = null, multipleBShadows = true;
+	function testBlurShadow() {
+		if (blurShadow != null) return blurShadow;
+		
+		// Pretend the browser supports blur shadows.
+		blurShadow = true;
+		
+		try {
+			// Note: In both images is a white shadow. This way we can discover a weird bug in older Chrome versions
+			// which only draws the first shadow and skips the rest.
+			var redS = getImage('Test', {color: '#000000', textShadow: '0px 0px 0px #ffffff, 0px 0px 10px #ff0000'});
+			var blackS = getImage('Test', {color: '#000000', textShadow: '0px 0px 0px #ffffff, 0px 0px 10px #000000'});
+			if (redS != blackS) {
+				// Good, we got two different images. We just assume this means the shadow is drawn.
+				return blurShadow = true;
+			}
+			else {
+				// Bad! The images are the same which means that no shadow was drawn.
+				// Well, let's check if we can draw at least one shadow.
+				
+				redS = getImage('Test', {color: '#000000', textShadow: '0px 0px 10px #ff0000'});
+				blackS = getImage('Test', {color: '#000000', textShadow: '0px 0px 10px #000000'});
+				if (redS != blackS) {
+					// OK, we can only draw one shadow per text.
+					multipleBShadows = false;
+					return blurShadow = true;
+				}
+				
+				return blurShadow = false;
+			}
+		}
+		catch (e) {
+			// An error happened.
+			return blurShadow = false;
+		}
+	}
 
 	return function(font, text, style, options, node, el) {
 
@@ -1356,11 +1472,12 @@ Cufon.registerEngine('canvas', (function() {
 				var shadow = shadows[i];
 				var x = size.convertFrom(parseFloat(shadow.offX));
 				var y = size.convertFrom(parseFloat(shadow.offY));
+				var blur = size.convertFrom(parseFloat(shadow.blur));
 				shadowOffsets[i] = [ x, y ];
-				if (y < expandTop) expandTop = y;
-				if (x > expandRight) expandRight = x;
-				if (y > expandBottom) expandBottom = y;
-				if (x < expandLeft) expandLeft = x;
+				if (y - blur < expandTop) expandTop = y - blur;
+				if (x + blur > expandRight) expandRight = x + blur;
+				if (y + blur > expandBottom) expandBottom = y + blur;
+				if (x - blur < expandLeft) expandLeft = x - blur;
 			}
 		}
 
@@ -1473,12 +1590,55 @@ Cufon.registerEngine('canvas', (function() {
 		}
 
 		if (shadows) {
-			for (var i = shadows.length; i--;) {
-				var shadow = shadows[i];
+			if (testBlurShadow() && multipleBShadows) {
+				// blurFactor: For some reason IE needs twice as much blur as all the other browsers to get the same shadow.
+				var coff = size.convertFrom(canvas.height), blurFactor = (document.namespaces ? 2 : 1);
+				g.translate(0, -coff);
+				
+				for (var i = shadows.length; i--;) {
+					var shadow = shadows[i];
+					g.save();
+					g.shadowColor = shadow.color;
+					g.shadowOffsetX = parseFloat(shadow.offX);
+					g.shadowOffsetY = parseFloat(shadow.offY);
+					g.shadowBlur = parseFloat(shadow.blur) * blurFactor;
+					
+					if (i > 0) {
+						// We have to do a little trick here because every object in a canvas can have only one shadow.
+						// The last shadow (i = 0) is drawn by the text itself, we just set the properties.
+						// All other shadows are drawn by our little trick (we draw the text for each shadow but draw the text
+						// off-screen and thus hiding it! Only the shadow which is on-screen is seen afterwards.
+						
+						g.shadowOffsetY += canvas.height;
+						renderText();
+					}
+				}
+				g.translate(0, coff);
 				g.save();
-				g.fillStyle = shadow.color;
-				g.translate.apply(g, shadowOffsets[i]);
-				renderText();
+			}
+			else if (testBlurShadow()) {
+				for (var i = shadows.length - 1; i > 0; i--) {
+					g.save();
+					g.fillStyle = shadows[i].color;
+					g.translate.apply(g, shadowOffsets[i]);
+					renderText();
+				}
+				
+				// We blur the last shadow. (about blurFactor: see above)
+				var shadow = shadows[0], iPhone = (navigator.userAgent.indexOf('iPhone') > -1), blurFactor = (document.namespaces || iPhone ? 2 : 1), offFactor = (iPhone ? 2 : 1);
+				g.save();
+				g.shadowColor = shadow.color;
+				g.shadowOffsetX = parseFloat(shadow.offX) * offFactor;
+				g.shadowOffsetY = parseFloat(shadow.offY) * offFactor;
+				g.shadowBlur = parseFloat(shadow.blur) * blurFactor;
+			}
+			else {
+				for (var i = shadows.length; i--;) {
+					g.save();
+					g.fillStyle = shadows[i].color;
+					g.translate.apply(g, shadowOffsets[i]);
+					renderText();
+				}
 			}
 		}
 
